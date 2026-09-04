@@ -63,10 +63,15 @@ Static `index.html` + Vercel serverless functions. No build step for the front e
 | `POST /api/tasks/sweep` | QStash-scheduled maintenance, signature-verified. |
 | `GET /api/hof` | Hall of fame — biggest single-round scores across finished games. |
 | `GET /api/flags` | Paywall feature flags — see **Pro / paywall** below. |
-| `POST /api/billing/checkout` | Creates a Stripe Checkout Session for the one-time Pro unlock. |
+| `POST /api/billing { op: "checkout" }` | Creates a Stripe Checkout Session for the one-time Pro unlock. |
 | `POST /api/billing/webhook` | Stripe webhook — mints a Pro code on `checkout.session.completed`. |
-| `GET /api/billing/session` | Post-checkout: looks up the code just minted for a `session_id`. |
-| `POST /api/billing/redeem` | Validates a Pro code so it can be entered on another device. |
+| `GET /api/billing?op=session` | Post-checkout: looks up the code just minted for a `session_id`. |
+| `POST /api/billing { op: "redeem" }` | Validates a Pro code so it can be entered on another device. |
+
+`checkout`/`session`/`redeem` share one function (`api/billing.js`, dispatched
+by `op`) rather than three separate files — the Vercel Hobby plan caps a
+deployment at 12 Serverless Functions. `webhook` stays standalone since it
+needs the raw request body for Stripe signature verification.
 
 ## Pro / paywall
 
@@ -93,7 +98,7 @@ explicitly turned on, so this ships inert.
   `STRIPE_PRICE_ID` (a one-time Price created in the Stripe dashboard),
   `STRIPE_WEBHOOK_SECRET` (from the webhook endpoint's settings in Stripe,
   pointed at `/api/billing/webhook`), and optionally `RESEND_API_KEY` /
-  `RESEND_FROM` for the confirmation email. Without these, `/api/billing/checkout`
+  `RESEND_FROM` for the confirmation email. Without these, `POST /api/billing { op: "checkout" }`
   and the webhook report `billing_unconfigured` rather than failing silently.
 
 ## Deploying

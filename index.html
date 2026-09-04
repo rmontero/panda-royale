@@ -1794,9 +1794,9 @@ function bind(){
     else if(a === 'checkout'){
       const email = (document.getElementById('upgradeEmail')?.value || '').trim();
       try {
-        const r = await fetch('/api/billing/checkout', {
+        const r = await fetch('/api/billing', {
           method:'POST', headers:{ 'content-type':'application/json' },
-          body: JSON.stringify({ email: email || undefined }),
+          body: JSON.stringify({ op: 'checkout', email: email || undefined }),
         });
         const data = await r.json().catch(() => ({}));
         if(r.status === 503){ toast(t('upgrade.billingOff')); return; }
@@ -1809,9 +1809,9 @@ function bind(){
       const code = (inp?.value || '').trim().toUpperCase();
       if(!code) return;
       try {
-        const r = await fetch('/api/billing/redeem', {
+        const r = await fetch('/api/billing', {
           method:'POST', headers:{ 'content-type':'application/json' },
-          body: JSON.stringify({ code }),
+          body: JSON.stringify({ op: 'redeem', code }),
         });
         const data = await r.json().catch(() => ({}));
         if(r.ok && data.ok){
@@ -1932,7 +1932,7 @@ function updateEntryTotals(){
 async function handleCheckoutReturn(sessionId){
   for(let i = 0; i < 6; i++){
     try {
-      const r = await fetch(`/api/billing/session?session_id=${encodeURIComponent(sessionId)}`);
+      const r = await fetch(`/api/billing?op=session&session_id=${encodeURIComponent(sessionId)}`);
       if(r.ok){
         const d = await r.json();
         if(d && d.code){

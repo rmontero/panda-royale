@@ -34,10 +34,11 @@ if (!items.length) {
 }
 
 const base = (args.base || 'http://localhost:3000').replace(/\/$/, '');
-const res = await fetch(`${base}/api/talacha/invoice`, {
+const res = await fetch(`${base}/api/talacha`, {
   method: 'POST',
   headers: { 'content-type': 'application/json' },
   body: JSON.stringify({
+    op: 'invoice',
     email: args.email,
     name: args.name,
     items,

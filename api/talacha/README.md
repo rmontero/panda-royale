@@ -9,12 +9,18 @@ different money. Kept deliberately separate — see the top of
 
 ## What's here
 
+`invoice`, `checkout`, and `payments` are consolidated into one function,
+[`../talacha.js`](../talacha.js), dispatched by an `op` field — the Vercel
+Hobby plan caps a deployment at 12 Serverless Functions, so every extra route
+file counts. `webhook` stays its own file (it needs the raw, unparsed request
+body for Stripe signature verification).
+
 | Route | Purpose |
 |---|---|
-| `POST /api/talacha/invoice` | Create/reuse a Customer, add line items, finalize + send a Stripe Invoice (Stripe hosts the payment page). |
-| `POST /api/talacha/checkout` | A hosted Checkout Session for a one-off charge — a deposit, a fixed-fee project — without a formal invoice. |
+| `POST /api/talacha { op: "invoice", ... }` | Create/reuse a Customer, add line items, finalize + send a Stripe Invoice (Stripe hosts the payment page). |
+| `POST /api/talacha { op: "checkout", ... }` | A hosted Checkout Session for a one-off charge — a deposit, a fixed-fee project — without a formal invoice. |
 | `POST /api/talacha/webhook` | Stripe webhook (own signing secret). Logs `invoice.paid`, `invoice.payment_failed`, `checkout.session.completed` to Redis (`talacha:payments`, best-effort — a missing Redis never breaks a webhook). |
-| `GET /api/talacha/payments` | Read the payment log. Gated by an `x-admin-token` header — locked by default. |
+| `GET /api/talacha?op=payments` | Read the payment log. Gated by an `x-admin-token` header — locked by default. |
 
 Both `invoice` and `checkout` pass `automatic_tax: { enabled: true }` and tag
 line items with the generic "General - Services" tax code
@@ -35,7 +41,7 @@ if a more specific one fits, e.g. packaged software vs. custom dev work).
    (`emailWarning` in the response tells you to share the link yourself
    meanwhile).
 3. **Register the webhook**: Dashboard → **Developers → Webhooks** → add endpoint
-   `https://pnd.ad/api/talacha/webhook`, subscribe to `invoice.paid`,
+   `https://www.pnd.ad/api/talacha/webhook`, subscribe to `invoice.paid`,
    `invoice.payment_failed`, `checkout.session.completed`. Copy the signing
    secret into `TALACHA_STRIPE_WEBHOOK_SECRET`.
 
@@ -46,7 +52,7 @@ if a more specific one fits, e.g. packaged software vs. custom dev work).
 | `TALACHA_STRIPE_SECRET_KEY` | Everything — without it, `invoice`/`checkout` return `503 billing_unconfigured`. |
 | `TALACHA_STRIPE_WEBHOOK_SECRET` | The webhook to accept events — without it, it also 503s (fails closed, never accepts an unsigned request). |
 | `TALACHA_STRIPE_PUBLISHABLE_KEY` | Only needed if you later build a client-side Elements form; unused by the current server-only flows. |
-| `TALACHA_ADMIN_TOKEN` | Reading `/api/talacha/payments`. Pick any random string; without it the endpoint stays locked. |
+| `TALACHA_ADMIN_TOKEN` | Reading `/api/talacha?op=payments`. Pick any random string; without it the endpoint stays locked. |
 
 ## CLI usage
 

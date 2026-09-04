@@ -19,10 +19,11 @@ if (!args.desc || !args.amount) {
 }
 
 const base = (args.base || 'http://localhost:3000').replace(/\/$/, '');
-const res = await fetch(`${base}/api/talacha/checkout`, {
+const res = await fetch(`${base}/api/talacha`, {
   method: 'POST',
   headers: { 'content-type': 'application/json' },
   body: JSON.stringify({
+    op: 'checkout',
     description: args.desc,
     amount: Number(args.amount),
     email: args.email,
