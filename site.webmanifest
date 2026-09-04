@@ -1,0 +1,18 @@
+{
+  "name": "Panda Royale Scorekeeper",
+  "short_name": "Panda Score",
+  "description": "Keep score for the dice game Panda Royale — one shared phone or everyone on their own.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#171224",
+  "theme_color": "#171224",
+  "lang": "en",
+  "categories": ["games", "utilities"],
+  "icons": [
+    { "src": "/favicon.svg", "type": "image/svg+xml", "sizes": "any", "purpose": "any" },
+    { "src": "/apple-touch-icon.png", "type": "image/png", "sizes": "180x180" },
+    { "src": "/icon-512.png", "type": "image/png", "sizes": "512x512", "purpose": "any maskable" }
+  ]
+}

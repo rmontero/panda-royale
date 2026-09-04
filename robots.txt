@@ -1,0 +1,135 @@
+# pnd.ad — Panda Royale Scorekeeper
+#
+# Open to search engines and to answer engines / assistants that fetch a page
+# to cite it for a user. Closed to AI training crawlers and to commercial SEO
+# scrapers that add load without sending visitors. If a bot ignores this,
+# escalate at the edge (Vercel Firewall / Cloudflare WAF).
+
+# ---- Answer engines / assistants: allowed (this is the "GEO" audience) ----
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Perplexity-User
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Claude-User
+Allow: /
+
+User-agent: Applebot
+Allow: /
+
+# ---- AI training crawlers: blocked ----
+User-agent: GPTBot
+Disallow: /
+
+User-agent: CCBot
+Disallow: /
+
+User-agent: Google-Extended
+Disallow: /
+
+User-agent: Applebot-Extended
+Disallow: /
+
+User-agent: anthropic-ai
+Disallow: /
+
+User-agent: Claude-Web
+Disallow: /
+
+User-agent: cohere-ai
+Disallow: /
+
+User-agent: Bytespider
+Disallow: /
+
+User-agent: Meta-ExternalAgent
+Disallow: /
+
+User-agent: Meta-ExternalFetcher
+Disallow: /
+
+User-agent: FacebookBot
+Disallow: /
+
+User-agent: Diffbot
+Disallow: /
+
+User-agent: Omgilibot
+Disallow: /
+
+User-agent: Omgili
+Disallow: /
+
+User-agent: ImagesiftBot
+Disallow: /
+
+User-agent: Timpibot
+Disallow: /
+
+User-agent: AI2Bot
+Disallow: /
+
+User-agent: PanguBot
+Disallow: /
+
+User-agent: Amazonbot
+Disallow: /
+
+User-agent: Kangaroo Bot
+Disallow: /
+
+# ---- Commercial SEO / data scrapers: blocked ----
+User-agent: AhrefsBot
+Disallow: /
+
+User-agent: SemrushBot
+Disallow: /
+
+User-agent: MJ12bot
+Disallow: /
+
+User-agent: DotBot
+Disallow: /
+
+User-agent: DataForSeoBot
+Disallow: /
+
+User-agent: BLEXBot
+Disallow: /
+
+User-agent: PetalBot
+Disallow: /
+
+User-agent: MegaIndex
+Disallow: /
+
+User-agent: serpstatbot
+Disallow: /
+
+User-agent: ZoominfoBot
+Disallow: /
+
+User-agent: Barkrowler
+Disallow: /
+
+User-agent: magpie-crawler
+Disallow: /
+
+User-agent: SeekportBot
+Disallow: /
+
+# ---- Everyone else (search engines included): allowed ----
+User-agent: *
+Allow: /
+
+Sitemap: https://pnd.ad/sitemap.xml

@@ -4,7 +4,81 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
 <meta name="theme-color" content="#171224" />
-<title>Panda Royale Scorekeeper</title>
+
+<title>Panda Royale Scorekeeper — dice scoring for game night</title>
+<meta name="description" content="A free companion app for the dice game Panda Royale. Score all ten rounds for every player — pass one phone around the table or have everyone join from their own device. Type your dice or snap a photo. English, Spanish, German, French, Portuguese." />
+<link rel="canonical" href="https://pnd.ad/" />
+<meta name="author" content="Rob Montero" />
+<meta name="keywords" content="Panda Royale, scorekeeper, score sheet, dice game, board game, Last Night Games, tabletop, game night, scoring app" />
+<meta name="robots" content="index, follow, max-image-preview:large" />
+
+<!-- Open Graph -->
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="Panda Royale Scorekeeper" />
+<meta property="og:title" content="Panda Royale Scorekeeper" />
+<meta property="og:description" content="Score all ten rounds together — pass one phone around the table, or everyone plays on their own device. Free, no install." />
+<meta property="og:url" content="https://pnd.ad/" />
+<meta property="og:image" content="https://pnd.ad/og.jpg" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content="Panda Royale Scorekeeper — the Panda Royale box, dice bag, a pile of colorful dice and a score sheet" />
+<meta property="og:locale" content="en" />
+<meta property="og:locale:alternate" content="es" />
+<meta property="og:locale:alternate" content="de" />
+<meta property="og:locale:alternate" content="fr" />
+<meta property="og:locale:alternate" content="pt" />
+
+<!-- Twitter / X -->
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Panda Royale Scorekeeper" />
+<meta name="twitter:description" content="Score all ten rounds together — one phone around the table, or everyone on their own device." />
+<meta name="twitter:image" content="https://pnd.ad/og.jpg" />
+
+<!-- Icons -->
+<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+<link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png" />
+<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+<link rel="manifest" href="/site.webmanifest" />
+
+<!-- For LLMs / answer engines: plain-language description at /llms.txt -->
+<link rel="alternate" type="text/markdown" title="llms.txt" href="/llms.txt" />
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebApplication",
+      "@id": "https://pnd.ad/#app",
+      "name": "Panda Royale Scorekeeper",
+      "url": "https://pnd.ad/",
+      "description": "A free companion app that keeps score for the dice-drafting party game Panda Royale. Players join from separate phones with a short code, or share one phone and pass it around. Dice can be entered by hand or read from a photo. The app implements every color's scoring rule across all ten rounds.",
+      "applicationCategory": "GameApplication",
+      "operatingSystem": "Any (web browser)",
+      "browserRequirements": "Requires JavaScript",
+      "inLanguage": ["en", "es", "de", "fr", "pt"],
+      "isAccessibleForFree": true,
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+      "author": {
+        "@type": "Person",
+        "name": "Rob Montero",
+        "url": "https://rob.cr"
+      },
+      "about": { "@id": "https://pnd.ad/#game" },
+      "screenshot": "https://pnd.ad/og.jpg"
+    },
+    {
+      "@type": "Game",
+      "@id": "https://pnd.ad/#game",
+      "name": "Panda Royale",
+      "description": "A dice-drafting roll-and-write party game by Last Night Games for 2–10 players. Over ten rounds each player builds a pool of ten dice; each color scores differently (yellow: sum; purple: sum doubled; blue: sum, doubled by a glitter die; red: signed sum times the red-dice count; green, clear: sum; pink: your pity die).",
+      "numberOfPlayers": { "@type": "QuantitativeValue", "minValue": 2, "maxValue": 10 },
+      "publisher": { "@type": "Organization", "name": "Last Night Games" }
+    }
+  ]
+}
+</script>
+
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap');
 
@@ -377,6 +451,8 @@ const I18N = {
     'confirm.wipe': 'Wipe every round score for all players?',
     'banner.storage': 'Shared storage is not connected yet. Pass-and-play on one phone still works.',
     'lang.label': 'Language',
+    'meta.title': 'Panda Royale Scorekeeper',
+    'meta.desc': 'Keep score for Panda Royale — one shared phone or everyone on their own device.',
     'you': 'you',
   },
   es: {
@@ -469,6 +545,8 @@ const I18N = {
     'confirm.wipe': '¿Borrar los puntos de todas las rondas de todos los jugadores?',
     'banner.storage': 'El almacenamiento compartido aún no está conectado. El modo de un móvil compartido sigue funcionando.',
     'lang.label': 'Idioma',
+    'meta.title': 'Anotador de Panda Royale',
+    'meta.desc': 'Lleva la cuenta de Panda Royale — un móvil compartido o cada quien en el suyo.',
     'you': 'tú',
   },
   de: {
@@ -561,6 +639,8 @@ const I18N = {
     'confirm.wipe': 'Alle Rundenpunkte aller Spieler löschen?',
     'banner.storage': 'Der gemeinsame Speicher ist noch nicht verbunden. Der Modus mit einem gemeinsamen Handy funktioniert weiterhin.',
     'lang.label': 'Sprache',
+    'meta.title': 'Panda Royale Punktezähler',
+    'meta.desc': 'Punkte zählen für Panda Royale — ein gemeinsames Handy oder jeder auf seinem eigenen.',
     'you': 'du',
   },
   fr: {
@@ -653,6 +733,8 @@ const I18N = {
     'confirm.wipe': 'Effacer tous les scores de toutes les manches pour tous les joueurs ?',
     'banner.storage': 'Le stockage partagé n’est pas encore connecté. Le mode téléphone partagé fonctionne toujours.',
     'lang.label': 'Langue',
+    'meta.title': 'Panda Royale — Marqueur de points',
+    'meta.desc': 'Comptez les points de Panda Royale — un téléphone partagé ou chacun sur le sien.',
     'you': 'vous',
   },
   pt: {
@@ -745,6 +827,8 @@ const I18N = {
     'confirm.wipe': 'Apagar os pontos de todas as rodadas de todos os jogadores?',
     'banner.storage': 'O armazenamento compartilhado ainda não está conectado. O modo de um celular compartilhado continua funcionando.',
     'lang.label': 'Idioma',
+    'meta.title': 'Marcador de Panda Royale',
+    'meta.desc': 'Marque os pontos de Panda Royale — um celular compartilhado ou cada um no seu.',
     'you': 'você',
   },
 };
@@ -771,7 +855,16 @@ function setLang(l){
   if(!I18N[l]) return;
   try { localStorage.setItem('pr.lang', l); } catch {}
   document.documentElement.lang = l;
+  applyMeta(l);
   setState({ lang: l });
+}
+// Translate the document <title> and description for human visitors. The static
+// tags in the HTML stay English so non-JS crawlers and link scrapers see them.
+function applyMeta(l){
+  const dict = I18N[l] || I18N.en;
+  if(dict['meta.title']) document.title = dict['meta.title'];
+  const d = document.querySelector('meta[name="description"]');
+  if(d && dict['meta.desc']) d.setAttribute('content', dict['meta.desc']);
 }
 
 const COLOR_HEX = {
@@ -1549,6 +1642,7 @@ async function boot(){
   // language: saved choice, else the browser's preferred, else English
   state.lang = detectLang();
   document.documentElement.lang = state.lang;
+  if(state.lang !== 'en') applyMeta(state.lang);
 
   // probe AI availability quietly
   fetch('/api/analyze', { method:'GET' }).then(r => { if(r.status === 503) aiAvailable = false; }).catch(() => {});
