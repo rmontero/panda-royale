@@ -6,7 +6,9 @@
   "description": "Multiplayer scorekeeper for Panda Royale — deployed on Vercel.",
   "scripts": {
     "setup:upstash": "node scripts/setup-upstash.mjs",
-    "flags": "node scripts/set-flags.mjs"
+    "flags": "node scripts/set-flags.mjs",
+    "talacha:invoice": "node scripts/talacha-invoice.mjs",
+    "talacha:checkout": "node scripts/talacha-checkout.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.123.0",

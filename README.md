@@ -135,6 +135,17 @@ Set **one** of:
 `pnd.ad` is configured on the Vercel project. If DNS needs pointing: add the `A` / `CNAME`
 records Vercel shows under **Settings → Domains**.
 
+### Optional: Talacha client billing (unrelated to the game)
+
+`api/talacha/*` is a separate integration for **Talacha's own client billing**
+(software engineering services) — invoicing and one-off payments for
+consulting clients, piggybacking on this repo's Vercel project. It shares
+nothing with the Panda Royale Pro paywall above: different env var prefix
+(`TALACHA_*` vs `STRIPE_*`), different webhook endpoint, different Stripe
+Customers. See [`api/talacha/README.md`](api/talacha/README.md) for env vars,
+required Stripe Dashboard setup (Tax, Business profile), and the two CLI
+scripts (`npm run talacha:invoice`, `npm run talacha:checkout`).
+
 ## Local development
 
 ```bash
