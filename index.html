@@ -379,13 +379,17 @@
 
   /* roomy layout: tablets in portrait or landscape, and phones turned
      landscape (often wider than 680px, or wide-but-short below it) —
-     fluid widths (min(vw, cap)) so the container uses whatever extra
-     space the device has instead of jumping straight to a fixed size */
+     fluid width (min(vw, cap)) so the container uses whatever extra
+     space the device has. ONE shell width for every screen — not a
+     different max-width per screen — so switching tabs doesn't visibly
+     resize the app; screens that are just a form or a page of text
+     (home/lobby/credits) get a centered reading column inside that
+     shell instead, rather than a narrower outer shell of their own. */
   @media (min-width: 680px),
          (min-width: 560px) and (max-height: 500px) and (orientation: landscape){
     body{ background-attachment: fixed; }
     #app{
-      max-width: min(94vw, 640px);
+      max-width: min(95vw, 900px);
       padding-bottom: 0;
       border-inline: 1px solid var(--panel-line);
       box-shadow: 0 0 90px rgba(0,0,0,0.4);
@@ -393,11 +397,6 @@
     }
     .screen{ padding: 26px 32px 22px; }
     .topbar{ padding: 16px 32px; }
-
-    /* dice entry and the scoreboard have the most content per screen —
-       give them the most extra width, so a tablet needs less scrolling */
-    #app[data-screen="entry"]{ max-width: min(94vw, 760px); }
-    #app[data-screen="board"]{ max-width: min(96vw, 900px); }
 
     /* tab bar joins the app pane instead of floating over the viewport */
     .tabbar{
@@ -410,6 +409,15 @@
 
     .hero h1{ font-size: 2.2rem; }
     .btn{ padding: 14px 16px; }
+
+    /* home/lobby/credits are just a form or a page of text — a
+       comfortable centered column, not stretched edge to edge of the
+       wider shell (which stays the same width as every other screen) */
+    #app[data-screen="home"] .screen > *,
+    #app[data-screen="lobby"] .screen > *,
+    #app[data-screen="credits"] .screen > *{
+      max-width: 520px; margin-left: auto; margin-right: auto;
+    }
 
     /* dice entry: two columns as soon as there's room, so all 7 colors
        don't have to be scrolled through one at a time */
@@ -425,7 +433,7 @@
     #app[data-screen="entry"] .entry-hint,
     #app[data-screen="entry"] .photo-section,
     #app[data-screen="entry"] .screen > .btn{
-      max-width: 480px; margin-left: auto; margin-right: auto;
+      max-width: 520px; margin-left: auto; margin-right: auto;
     }
 
     /* scoreboard: no horizontal scroll, roomier cells, full names */
@@ -436,18 +444,12 @@
     #app[data-screen="board"] table.board th.name-cell{ max-width: none; }
   }
 
-  /* desktop: fixed, consistent per-screen widths — stop scaling with the
-     viewport so the layout doesn't keep stretching as the window widens */
+  /* desktop: the shell stops scaling with the viewport — one fixed
+     width shared by every screen, same rationale as the tablet block */
   @media (min-width: 1040px){
     .screen{ padding: 34px 40px 26px; }
     .topbar{ padding: 18px 40px; }
-
-    /* forms stay tight and readable; the scoreboard breathes */
-    #app[data-screen="home"]{ max-width: 460px; }
-    #app[data-screen="lobby"]{ max-width: 560px; }
-    #app[data-screen="credits"]{ max-width: 660px; }
-    #app[data-screen="entry"]{ max-width: min(720px, 100%); }
-    #app[data-screen="board"]{ max-width: min(980px, 100%); }
+    #app{ max-width: 960px; }
 
     .hero h1{ font-size: 2.4rem; }
   }
