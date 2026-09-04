@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+<title>Panda Royale Scorekeeper</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap');
+
+  :root{
+    --night: #211a35;
+    --night-deep: #171224;
+    --panel: #2a2242;
+    --panel-line: rgba(246,197,103,0.14);
+    --paper: #f6f1e4;
+    --lantern: #e8a13a;
+    --lantern-bright: #f6c567;
+    --ink: #f6f1e4;
+    --ink-dim: #b7aed0;
+    --muted: #8a80ab;
+    --good: #7cc98a;
+    --bad: #e07a72;
+    --radius: 16px;
+
+    --c-yellow: #f2c94c;
+    --c-purple: #a37bff;
+    --c-blue: #57a9e8;
+    --c-blue-glitter: #d9b8ff;
+    --c-red: #e6675f;
+    --c-green: #59b980;
+    --c-clear: #e9e6da;
+    --c-pink: #f28fc7;
+  }
+
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; }
+  body{
+    font-family:'Inter', system-ui, sans-serif;
+    background:
+      radial-gradient(ellipse at 20% -10%, rgba(246,197,103,0.13), transparent 55%),
+      radial-gradient(ellipse at 100% 0%, rgba(163,123,255,0.10), transparent 45%),
+      var(--night-deep);
+    color:var(--ink);
+    min-height:100vh;
+  }
+  #app{
+    max-width:480px;
+    margin:0 auto;
+    min-height:100vh;
+    padding-bottom:84px;
+    position:relative;
+  }
+  h1,h2,h3,.display{
+    font-family:'Baloo 2', system-ui, sans-serif;
+    font-weight:700;
+    margin:0;
+  }
+  p{ margin:0; }
+  button{ font-family:inherit; }
+  input{ font-family:inherit; }
+
+  .screen{ padding:20px 20px 12px; }
+
+  .topbar{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:14px 20px; border-bottom:1px solid var(--panel-line);
+  }
+  .topbar .code{
+    font-family:'Baloo 2', monospace;
+    letter-spacing:0.12em;
+    font-size:1.05rem;
+    color:var(--lantern-bright);
+  }
+  .topbar .round{
+    font-size:0.85rem;
+    color:var(--ink-dim);
+  }
+  .link-btn{
+    background:none; border:none; color:var(--ink-dim);
+    font-size:0.85rem; padding:6px 4px; cursor:pointer;
+  }
+
+  .hero{ text-align:left; padding-top:14px; margin-bottom:8px; }
+  .hero h1{ font-size:2rem; line-height:1.1; color:var(--ink); }
+  .hero .sub{ color:var(--ink-dim); margin-top:8px; font-size:0.95rem; line-height:1.5; }
+  .lanterns{ display:flex; gap:8px; margin-bottom:18px; }
+  .lanterns span{
+    width:10px; height:10px; border-radius:50%; display:inline-block;
+  }
+
+  label.field-label{
+    display:block; font-size:0.8rem; color:var(--ink-dim);
+    margin-bottom:6px; margin-top:18px;
+  }
+  input.text-input{
+    width:100%; padding:13px 14px; border-radius:12px;
+    border:1px solid var(--panel-line); background:var(--panel);
+    color:var(--ink); font-size:1rem;
+  }
+  input.text-input:focus{ outline:2px solid var(--lantern); outline-offset:1px; }
+  input.code-input{
+    text-transform:uppercase; letter-spacing:0.18em; font-family:'Baloo 2',monospace;
+    font-size:1.2rem; text-align:center;
+  }
+
+  .btn{
+    display:flex; align-items:center; justify-content:center; gap:8px;
+    width:100%; padding:15px 16px; border-radius:12px; border:none;
+    font-size:1rem; font-weight:600; cursor:pointer; margin-top:14px;
+  }
+  .btn-primary{ background:var(--lantern); color:#241a06; }
+  .btn-primary:active{ background:var(--lantern-bright); }
+  .btn-secondary{ background:var(--panel); color:var(--ink); border:1px solid var(--panel-line); }
+  .btn-ghost{ background:none; color:var(--lantern-bright); border:1px dashed var(--panel-line); }
+  .btn:disabled{ opacity:0.5; }
+
+  .divider{
+    display:flex; align-items:center; gap:10px; margin:22px 0 6px;
+    color:var(--muted); font-size:0.8rem;
+  }
+  .divider::before,.divider::after{ content:''; flex:1; height:1px; background:var(--panel-line); }
+
+  .card{
+    background:var(--panel); border:1px solid var(--panel-line);
+    border-radius:var(--radius); padding:16px; margin-top:14px;
+  }
+  .code-display{
+    text-align:center; padding:22px 16px;
+    border-radius:var(--radius);
+    background:linear-gradient(180deg, rgba(246,197,103,0.14), rgba(246,197,103,0.03));
+    border:1px solid var(--panel-line);
+    margin-top:16px;
+  }
+  .code-display .label{ color:var(--ink-dim); font-size:0.82rem; }
+  .code-display .code-big{
+    font-family:'Baloo 2', monospace; font-size:2.4rem; letter-spacing:0.16em;
+    color:var(--lantern-bright); margin-top:4px;
+  }
+
+  .section-title{
+    font-size:0.78rem; color:var(--ink-dim); margin:22px 0 10px;
+  }
+
+  .player-row{
+    display:flex; align-items:center; gap:10px; padding:10px 2px;
+    border-bottom:1px solid var(--panel-line);
+  }
+  .player-row:last-child{ border-bottom:none; }
+  .avatar{
+    width:34px; height:34px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    font-weight:700; font-size:0.85rem; color:#241a06; flex-shrink:0;
+  }
+  .player-row .name{ font-size:0.95rem; }
+  .player-row .you-tag{ font-size:0.72rem; color:var(--lantern-bright); margin-left:4px; }
+
+  .round-picker{
+    display:flex; align-items:center; justify-content:space-between;
+    gap:10px; margin-top:14px;
+  }
+  .round-picker button{
+    width:40px; height:40px; border-radius:10px; border:1px solid var(--panel-line);
+    background:var(--panel); color:var(--ink); font-size:1.1rem; cursor:pointer;
+  }
+  .round-picker .round-label{
+    flex:1; text-align:center; font-family:'Baloo 2'; font-size:1.05rem;
+  }
+
+  .capture-zone{
+    margin-top:18px; border:1.5px dashed var(--panel-line); border-radius:var(--radius);
+    padding:34px 16px; text-align:center; cursor:pointer; background:var(--panel);
+  }
+  .capture-zone .icon{ font-size:2.2rem; }
+  .capture-zone .cta{ margin-top:10px; font-weight:600; }
+  .capture-zone .hint{ margin-top:4px; color:var(--ink-dim); font-size:0.82rem; }
+
+  .thumb-row{ display:flex; align-items:center; gap:12px; margin-top:14px; }
+  .thumb-row img{ width:64px; height:64px; object-fit:cover; border-radius:10px; border:1px solid var(--panel-line); }
+  .thumb-row .status{ font-size:0.9rem; color:var(--ink-dim); }
+
+  .spinner{
+    width:16px; height:16px; border-radius:50%;
+    border:2px solid var(--panel-line); border-top-color:var(--lantern);
+    display:inline-block; animation:spin 0.8s linear infinite; vertical-align:-3px;
+  }
+  @keyframes spin{ to{ transform:rotate(360deg); } }
+
+  .die-row{
+    display:flex; align-items:center; gap:8px; padding:10px 0;
+    border-bottom:1px solid var(--panel-line);
+  }
+  .die-row:last-child{ border-bottom:none; }
+  .die-dot{ width:16px; height:16px; border-radius:5px; flex-shrink:0; border:1px solid rgba(0,0,0,0.2); }
+  select.die-color{
+    background:var(--night); color:var(--ink); border:1px solid var(--panel-line);
+    border-radius:8px; padding:7px 6px; font-size:0.86rem;
+  }
+  .stepper{ display:flex; align-items:center; gap:6px; margin-left:auto; }
+  .stepper button{
+    width:30px; height:30px; border-radius:8px; border:1px solid var(--panel-line);
+    background:var(--night); color:var(--ink); font-size:1rem; cursor:pointer;
+  }
+  .stepper .val{ min-width:26px; text-align:center; font-family:'Baloo 2'; font-size:1rem; }
+  .mini-toggle{
+    font-size:0.72rem; padding:5px 8px; border-radius:20px; border:1px solid var(--panel-line);
+    background:var(--night); color:var(--ink-dim); cursor:pointer; white-space:nowrap;
+  }
+  .mini-toggle.on{ background:var(--lantern); color:#241a06; border-color:var(--lantern); }
+  .die-remove{
+    background:none; border:none; color:var(--muted); font-size:1.1rem; cursor:pointer; padding:4px 2px;
+  }
+
+  .total-banner{
+    margin-top:18px; padding:18px; border-radius:var(--radius);
+    background:linear-gradient(180deg, rgba(246,197,103,0.16), rgba(246,197,103,0.03));
+    border:1px solid var(--panel-line); text-align:center;
+  }
+  .total-banner .n{ font-family:'Baloo 2'; font-size:2.6rem; color:var(--lantern-bright); }
+  .total-banner .l{ color:var(--ink-dim); font-size:0.82rem; margin-top:2px; }
+  .breakdown{ margin-top:12px; font-size:0.85rem; color:var(--ink-dim); }
+  .breakdown .row{ display:flex; justify-content:space-between; padding:3px 0; }
+
+  table.board{ width:100%; border-collapse:collapse; margin-top:14px; font-size:0.85rem; }
+  table.board th, table.board td{
+    padding:9px 6px; text-align:center; border-bottom:1px solid var(--panel-line);
+  }
+  table.board th{ color:var(--ink-dim); font-weight:600; font-size:0.75rem; }
+  table.board td.name-cell, table.board th.name-cell{
+    text-align:left; position:sticky; left:0; background:var(--night-deep);
+    padding-left:2px; max-width:84px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  }
+  table.board td.total-cell{ font-family:'Baloo 2'; color:var(--lantern-bright); }
+  table.board tr.leader td.name-cell{ color:var(--lantern-bright); }
+
+  .empty-state{ text-align:center; padding:32px 12px; color:var(--ink-dim); }
+  .empty-state .icon{ font-size:1.8rem; margin-bottom:6px; }
+
+  .toast{
+    position:fixed; left:50%; bottom:96px; transform:translateX(-50%);
+    background:var(--lantern); color:#241a06; padding:10px 18px; border-radius:30px;
+    font-size:0.85rem; font-weight:600; box-shadow:0 6px 20px rgba(0,0,0,0.35);
+    z-index:50;
+  }
+
+  .tabbar{
+    position:fixed; bottom:0; left:0; right:0;
+    max-width:480px; margin:0 auto;
+    display:flex; background:var(--night-deep); border-top:1px solid var(--panel-line);
+    z-index:40;
+  }
+  .tabbar button{
+    flex:1; background:none; border:none; padding:12px 4px 14px;
+    color:var(--muted); font-size:0.78rem; cursor:pointer;
+    display:flex; flex-direction:column; align-items:center; gap:3px;
+  }
+  .tabbar button.active{ color:var(--lantern-bright); }
+  .tabbar .ic{ font-size:1.15rem; }
+
+  .error-msg{
+    margin-top:12px; padding:10px 12px; border-radius:10px;
+    background:rgba(224,122,114,0.14); border:1px solid rgba(224,122,114,0.35);
+    color:#f2b3ae; font-size:0.85rem;
+  }
+
+  .small-note{ font-size:0.78rem; color:var(--muted); margin-top:10px; line-height:1.5; }
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+/* ---------- storage helpers ---------- */
+async function storGet(key, shared){
+  try{ const r = await window.storage.get(key, shared); return r ? JSON.parse(r.value) : null; }
+  catch(e){ return null; }
+}
+async function storSet(key, value, shared){
+  try{ const r = await window.storage.set(key, JSON.stringify(value), shared); return !!r; }
+  catch(e){ return false; }
+}
+async function storListKeys(prefix, shared){
+  try{ const r = await window.storage.list(prefix, shared); return (r && r.keys) ? r.keys : []; }
+  catch(e){ return []; }
+}
+
+/* ---------- dice config ---------- */
+const DICE_COLORS = [
+  {id:'yellow', label:'Yellow', hex:'var(--c-yellow)'},
+  {id:'purple', label:'Purple', hex:'var(--c-purple)'},
+  {id:'blue',   label:'Blue',   hex:'var(--c-blue)'},
+  {id:'red',    label:'Red',    hex:'var(--c-red)'},
+  {id:'green',  label:'Green',  hex:'var(--c-green)'},
+  {id:'clear',  label:'Clear',  hex:'var(--c-clear)'},
+  {id:'pink',   label:'Pink',   hex:'var(--c-pink)'},
+];
+function colorHex(id){
+  const c = DICE_COLORS.find(c=>c.id===id);
+  return c ? c.hex : '#888';
+}
+function colorLabel(id){
+  const c = DICE_COLORS.find(c=>c.id===id);
+  return c ? c.label : id;
+}
+
+/* ---------- scoring ---------- */
+function scoreRound(dice){
+  const by = c => dice.filter(d=>d.color===c);
+  const sum = arr => arr.reduce((s,d)=>s+(Number(d.value)||0),0);
+
+  const yellowSum = sum(by('yellow'));
+
+  const purpleSum = sum(by('purple')) * 2;
+
+  const blueDice = by('blue');
+  const blueRaw = sum(blueDice);
+  const hasGlitter = blueDice.some(d=>d.glitter);
+  const blueScore = hasGlitter ? blueRaw*2 : blueRaw;
+
+  const redDice = by('red');
+  const redSigned = redDice.reduce((s,d)=> s + ((d.sign==='negative') ? -(Number(d.value)||0) : (Number(d.value)||0)), 0);
+  const redScore = redSigned * redDice.length;
+
+  const greenSum = sum(by('green'));
+  const clearSum = sum(by('clear'));
+  const pinkSum = sum(by('pink'));
+
+  const total = yellowSum + purpleSum + blueScore + redScore + greenSum + clearSum + pinkSum;
+
+  return {
+    total,
+    breakdown:{ yellowSum, purpleSum, blueScore, redScore, greenSum, clearSum, pinkSum },
+    counts:{
+      yellow:by('yellow').length, purple:by('purple').length, blue:blueDice.length,
+      red:redDice.length, green:by('green').length, clear:by('clear').length, pink:by('pink').length
+    }
+  };
+}
+
+/* ---------- vision analysis ---------- */
+const SYSTEM_PROMPT = `You are reading a photo of dice from the board game Panda Royale for score tracking.
+Dice come in exactly these colors, each with a specific meaning:
+- yellow: standard die
+- purple: standard die
+- blue: standard die; a small number of blue dice are a "glitter" variant with metallic/sparkly gold-colored numerals instead of plain white numerals
+- red: has some numerals printed in black ink and some in white ink on the same die; report the ink color of the numeral shown face-up as "white" or "black"
+- green: standard die, often a large many-sided die with high numbers
+- clear (translucent/frosted white plastic): standard die
+- pink: standard die, usually just one
+
+For every individual die visible in the photo, report: color (one of yellow, purple, blue, red, green, clear, pink), the face-up numeric value, and for blue dice a boolean "glitter" (true if it is the sparkly gold-numeral variant), and for red dice a "numeralColor" of "white" or "black".
+
+Respond with ONLY a raw JSON array, no markdown fences, no other text. Example:
+[{"color":"yellow","value":4},{"color":"blue","value":2,"glitter":false},{"color":"red","value":5,"numeralColor":"white"}]
+
+If you are unsure about a die, still include your best guess - the person reviews and corrects everything before it's used.`;
+
+function resizeImageFile(file){
+  return new Promise((resolve, reject)=>{
+    const reader = new FileReader();
+    reader.onload = () => {
+      const img = new Image();
+      img.onload = () => {
+        const maxDim = 1000;
+        let w = img.width, h = img.height;
+        if(w > h && w > maxDim){ h = Math.round(h * maxDim/w); w = maxDim; }
+        else if(h > maxDim){ w = Math.round(w * maxDim/h); h = maxDim; }
+        const canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        resolve(canvas.toDataURL('image/jpeg', 0.82));
+      };
+      img.onerror = reject;
+      img.src = reader.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+async function analyzeDiceImage(dataUrl){
+  const base64 = dataUrl.split(',')[1];
+  const body = {
+    model: 'claude-sonnet-4-6',
+    max_tokens: 1000,
+    system: SYSTEM_PROMPT,
+    messages: [{
+      role:'user',
+      content:[
+        { type:'image', source:{ type:'base64', media_type:'image/jpeg', data: base64 } },
+        { type:'text', text:'List every die in this photo per your instructions. Respond with only the JSON array.' }
+      ]
+    }]
+  };
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method:'POST',
+    headers:{ 'Content-Type':'application/json' },
+    body: JSON.stringify(body)
+  });
+  const data = await res.json();
+  const textBlock = (data.content||[]).find(b=>b.type==='text');
+  if(!textBlock) throw new Error('No text in response');
+  const clean = textBlock.text.replace(/```json|```/g,'').trim();
+  const parsed = JSON.parse(clean);
+  if(!Array.isArray(parsed)) throw new Error('Bad shape');
+  return parsed.map(d=>({
+    color: DICE_COLORS.some(c=>c.id===d.color) ? d.color : 'yellow',
+    value: Math.max(1, Math.round(Number(d.value)||1)),
+    glitter: !!d.glitter,
+    sign: d.numeralColor === 'black' ? 'negative' : 'positive'
+  }));
+}
+
+/* ---------- ids / codes ---------- */
+function genId(){ return 'p_' + Math.random().toString(36).slice(2,10); }
+function genCode(){
+  const letters = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
+  let c=''; for(let i=0;i<4;i++) c += letters[Math.floor(Math.random()*letters.length)];
+  return c;
+}
+const AVATAR_COLORS = ['var(--c-yellow)','var(--c-purple)','var(--c-blue)','var(--c-red)','var(--c-green)','var(--c-pink)','var(--c-clear)'];
+function avatarColor(id){
+  let h=0; for(const ch of id) h += ch.charCodeAt(0);
+  return AVATAR_COLORS[h % AVATAR_COLORS.length];
+}
+
+/* ---------- state ---------- */
+let state = {
+  view: 'home',
+  me: null,
+  code: null,
+  players: [],
+  round: 1,
+  draftDice: [],
+  draftPhoto: null,
+  analyzing: false,
+  analyzeError: null,
+  scoreboard: null,
+  loadingScoreboard: false,
+  toast: null,
+  homeMode: 'start',
+};
+let scoreboardTimer = null;
+
+function setState(patch){ state = {...state, ...patch}; render(); }
+function showToast(msg){
+  setState({toast: msg});
+  setTimeout(()=>{ if(state.toast===msg) setState({toast:null}); }, 2400);
+}
+
+/* ---------- data ops ---------- */
+async function initMe(){
+  const saved = await storGet('me', false);
+  if(saved && saved.id){ state.me = saved; }
+  else { state.me = { id: genId(), name: '' }; }
+}
+
+async function refreshPlayers(){
+  if(!state.code) return;
+  const list = await storGet(`pr:${state.code}:players`, true);
+  setState({ players: list || [] });
+}
+
+async function joinOrCreate(code, name){
+  const cleanName = (name||'').trim() || 'Player';
+  const me = { id: state.me.id, name: cleanName };
+  await storSet('me', me, false);
+
+  let list = await storGet(`pr:${code}:players`, true) || [];
+  const exists = list.find(p=>p.id===me.id);
+  if(exists){ exists.name = cleanName; }
+  else { list.push(me); }
+  await storSet(`pr:${code}:players`, list, true);
+
+  setState({ me, code, players: list, view:'lobby', round: 1 });
+}
+
+async function submitRound(round, dice){
+  const scored = scoreRound(dice);
+  const entry = { name: state.me.name, dice, total: scored.total, breakdown: scored.breakdown, submittedAt: Date.now() };
+  await storSet(`pr:${state.code}:r${round}:${state.me.id}`, entry, true);
+  return scored;
+}
+
+async function loadScoreboard(){
+  if(!state.code) return;
+  setState({ loadingScoreboard: true });
+  const players = await storGet(`pr:${state.code}:players`, true) || state.players;
+  const keys = await storListKeys(`pr:${state.code}:r`, true);
+  const rounds = {};
+  await Promise.all(keys.map(async key => {
+    const parts = key.split(':'); // pr, code, r{n}, playerId
+    const roundPart = parts[2] || '';
+    const roundNum = parseInt(roundPart.replace('r',''), 10);
+    const playerId = parts.slice(3).join(':');
+    if(!roundNum || !playerId) return;
+    const val = await storGet(key, true);
+    if(!val) return;
+    rounds[roundNum] = rounds[roundNum] || {};
+    rounds[roundNum][playerId] = val;
+  }));
+  setState({ scoreboard: { players, rounds }, players, loadingScoreboard:false });
+}
+
+function startScoreboardPolling(){
+  stopScoreboardPolling();
+  loadScoreboard();
+  scoreboardTimer = setInterval(loadScoreboard, 6000);
+}
+function stopScoreboardPolling(){
+  if(scoreboardTimer){ clearInterval(scoreboardTimer); scoreboardTimer = null; }
+}
+
+/* ---------- render ---------- */
+function render(){
+  const app = document.getElementById('app');
+  let html = '';
+  if(state.view==='home') html = renderHome();
+  else if(state.view==='lobby') html = renderLobby();
+  else if(state.view==='capture') html = renderCapture();
+  else if(state.view==='review') html = renderReview();
+  else if(state.view==='scoreboard') html = renderScoreboard();
+
+  const showTabs = state.view!=='home';
+  app.innerHTML = `
+    ${showTabs ? renderTopbar() : ''}
+    <div class="screen">${html}</div>
+    ${state.toast ? `<div class="toast">${escapeHtml(state.toast)}</div>` : ''}
+    ${showTabs ? renderTabbar() : ''}
+  `;
+  bindEvents();
+
+  if(state.view==='scoreboard') startScoreboardPolling();
+  else stopScoreboardPolling();
+}
+
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function renderTopbar(){
+  return `
+    <div class="topbar">
+      <div>
+        <div class="code">${state.code||''}</div>
+        <div class="round">Round ${state.round} of 10</div>
+      </div>
+      <button class="link-btn" data-action="leave">Leave game</button>
+    </div>
+  `;
+}
+
+function renderTabbar(){
+  return `
+    <div class="tabbar">
+      <button class="${['lobby','capture','review'].includes(state.view)?'active':''}" data-action="go-lobby">
+        <span class="ic">🐼</span><span>Play</span>
+      </button>
+      <button class="${state.view==='scoreboard'?'active':''}" data-action="go-scoreboard">
+        <span class="ic">🏮</span><span>Scoreboard</span>
+      </button>
+    </div>
+  `;
+}
+
+function renderHome(){
+  return `
+    <div class="lanterns">
+      <span style="background:var(--c-yellow)"></span>
+      <span style="background:var(--c-purple)"></span>
+      <span style="background:var(--c-blue)"></span>
+      <span style="background:var(--c-red)"></span>
+      <span style="background:var(--c-green)"></span>
+      <span style="background:var(--c-pink)"></span>
+    </div>
+    <div class="hero">
+      <h1>Panda Royale<br/>Scorekeeper</h1>
+      <p class="sub">Photograph your dice pool each round. The app reads the colors and does the math — you confirm before it counts.</p>
+    </div>
+
+    <label class="field-label" for="nameInput">Your name</label>
+    <input class="text-input" id="nameInput" placeholder="e.g. Rob" value="${escapeHtml(state.me?.name||'')}" />
+
+    <button class="btn btn-primary" data-action="create-game">Start a new game</button>
+
+    <div class="divider">or join with a code</div>
+    <input class="text-input code-input" id="codeInput" placeholder="CODE" maxlength="6" />
+    <button class="btn btn-secondary" data-action="join-game">Join game</button>
+  `;
+}
+
+function renderLobby(){
+  const players = state.players || [];
+  return `
+    <div class="code-display">
+      <div class="label">Share this code with your table</div>
+      <div class="code-big">${state.code}</div>
+    </div>
+
+    <div class="section-title">Players in this game</div>
+    <div class="card" style="padding:6px 14px;">
+      ${players.length ? players.map(p=>`
+        <div class="player-row">
+          <div class="avatar" style="background:${avatarColor(p.id)}">${escapeHtml((p.name||'?')[0].toUpperCase())}</div>
+          <div class="name">${escapeHtml(p.name)} ${p.id===state.me.id?'<span class="you-tag">you</span>':''}</div>
+        </div>
+      `).join('') : `<div class="player-row"><span class="small-note">No one here yet.</span></div>`}
+    </div>
+    <button class="btn btn-ghost" data-action="refresh-players">Refresh players</button>
+
+    <div class="section-title">Score a round</div>
+    <div class="round-picker">
+      <button data-action="round-prev">−</button>
+      <div class="round-label">Round ${state.round}</div>
+      <button data-action="round-next">+</button>
+    </div>
+    <button class="btn btn-primary" data-action="go-capture">Take dice photo</button>
+    <p class="small-note">Roll, then photograph your whole dice pool for this round before you trade or draft a new die.</p>
+  `;
+}
+
+function renderCapture(){
+  return `
+    <h2 style="font-size:1.2rem;">Round ${state.round}: your dice</h2>
+    <p class="small-note">Lay your dice out so each one is visible, then take a photo.</p>
+
+    <label class="capture-zone" for="photoInput">
+      <div class="icon">📷</div>
+      <div class="cta">${state.draftPhoto? 'Retake photo' : 'Take or choose a photo'}</div>
+      <div class="hint">Good light and dice spread apart works best</div>
+    </label>
+    <input type="file" id="photoInput" accept="image/*" capture="environment" style="display:none" />
+
+    ${state.draftPhoto ? `
+      <div class="thumb-row">
+        <img src="${state.draftPhoto}" />
+        <div class="status">
+          ${state.analyzing ? `<span class="spinner"></span> Reading your dice…` : 'Photo ready'}
+        </div>
+      </div>
+    ` : ''}
+
+    ${state.analyzeError ? `<div class="error-msg">${escapeHtml(state.analyzeError)} You can still add dice by hand on the next screen.</div>` : ''}
+
+    <button class="btn btn-secondary" data-action="skip-to-manual">Skip photo, enter dice manually</button>
+  `;
+}
+
+function renderReview(){
+  const scored = scoreRound(state.draftDice);
+  const b = scored.breakdown;
+  const c = scored.counts;
+  const rows = [
+    c.yellow ? ['Yellow', b.yellowSum] : null,
+    c.purple ? ['Purple (×2)', b.purpleSum] : null,
+    c.blue   ? ['Blue' + (state.draftDice.some(d=>d.color==='blue'&&d.glitter)?' (glitter ×2)':''), b.blueScore] : null,
+    c.red    ? ['Red (signed × count)', b.redScore] : null,
+    c.green  ? ['Green', b.greenSum] : null,
+    c.clear  ? ['Clear', b.clearSum] : null,
+    c.pink   ? ['Pink', b.pinkSum] : null,
+  ].filter(Boolean);
+
+  return `
+    <h2 style="font-size:1.2rem;">Confirm your dice</h2>
+    <p class="small-note">Fix anything the reader got wrong, then submit.</p>
+
+    <div>
+      ${state.draftDice.map((d, i)=> renderDieRow(d, i)).join('')}
+    </div>
+    <button class="btn btn-ghost" data-action="add-die">+ Add a die</button>
+
+    <div class="total-banner">
+      <div class="n">${scored.total}</div>
+      <div class="l">Round ${state.round} score</div>
+    </div>
+    ${rows.length ? `
+      <div class="breakdown">
+        ${rows.map(([label,val])=>`<div class="row"><span>${label}</span><span>${val}</span></div>`).join('')}
+      </div>
+    ` : ''}
+
+    <button class="btn btn-primary" data-action="submit-round">Submit round ${state.round} score</button>
+  `;
+}
+
+function renderDieRow(d, i){
+  const isBlue = d.color==='blue';
+  const isRed = d.color==='red';
+  return `
+    <div class="die-row" data-idx="${i}">
+      <span class="die-dot" style="background:${colorHex(d.color)}"></span>
+      <select class="die-color" data-die-field="color" data-idx="${i}">
+        ${DICE_COLORS.map(c=>`<option value="${c.id}" ${c.id===d.color?'selected':''}>${c.label}</option>`).join('')}
+      </select>
+      ${isBlue ? `<button class="mini-toggle ${d.glitter?'on':''}" data-action="toggle-glitter" data-idx="${i}">✨ glitter</button>` : ''}
+      ${isRed ? `<button class="mini-toggle ${d.sign==='negative'?'on':''}" data-action="toggle-sign" data-idx="${i}">${d.sign==='negative'?'− black':'+ white'}</button>` : ''}
+      <div class="stepper">
+        <button data-action="val-down" data-idx="${i}">−</button>
+        <span class="val">${d.value}</span>
+        <button data-action="val-up" data-idx="${i}">+</button>
+      </div>
+      <button class="die-remove" data-action="remove-die" data-idx="${i}">✕</button>
+    </div>
+  `;
+}
+
+function renderScoreboard(){
+  if(state.loadingScoreboard && !state.scoreboard){
+    return `<div class="empty-state"><div class="icon">🏮</div>Loading scoreboard…</div>`;
+  }
+  const sb = state.scoreboard;
+  if(!sb || !sb.players || !sb.players.length){
+    return `<div class="empty-state"><div class="icon">🏮</div>No players yet — invite your table with the game code.</div>`;
+  }
+  const totals = sb.players.map(p=>{
+    let total = 0;
+    for(let r=1;r<=10;r++){
+      const e = sb.rounds[r] && sb.rounds[r][p.id];
+      if(e) total += e.total;
+    }
+    return {...p, total};
+  }).sort((a,b)=>b.total-a.total);
+  const topTotal = totals.length ? totals[0].total : 0;
+
+  return `
+    <h2 style="font-size:1.2rem;">Scoreboard</h2>
+    <div style="overflow-x:auto;">
+      <table class="board">
+        <thead>
+          <tr>
+            <th class="name-cell">Player</th>
+            ${Array.from({length:10}, (_,i)=>`<th>R${i+1}</th>`).join('')}
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${totals.map(p=>`
+            <tr class="${p.total===topTotal ? 'leader':''}">
+              <td class="name-cell">${escapeHtml(p.name)}</td>
+              ${Array.from({length:10}, (_,i)=>{
+                const e = sb.rounds[i+1] && sb.rounds[i+1][p.id];
+                return `<td>${e ? e.total : '—'}</td>`;
+              }).join('')}
+              <td class="total-cell">${p.total}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>
+    <button class="btn btn-ghost" data-action="refresh-board">Refresh</button>
+    <p class="small-note">Updates automatically every few seconds while this tab is open.</p>
+  `;
+}
+
+/* ---------- events ---------- */
+function bindEvents(){
+  const app = document.getElementById('app');
+
+  app.onclick = async (e) => {
+    const btn = e.target.closest('[data-action]');
+    if(!btn) return;
+    const action = btn.dataset.action;
+    const idx = btn.dataset.idx !== undefined ? parseInt(btn.dataset.idx,10) : null;
+
+    if(action==='create-game'){
+      const name = document.getElementById('nameInput').value;
+      const code = genCode();
+      await joinOrCreate(code, name);
+    }
+    else if(action==='join-game'){
+      const name = document.getElementById('nameInput').value;
+      const code = (document.getElementById('codeInput').value||'').trim().toUpperCase();
+      if(!code){ showToast('Enter a game code'); return; }
+      await joinOrCreate(code, name);
+    }
+    else if(action==='leave'){
+      stopScoreboardPolling();
+      setState({ view:'home', code:null, players:[], scoreboard:null });
+    }
+    else if(action==='go-lobby'){ setState({ view:'lobby' }); refreshPlayers(); }
+    else if(action==='go-scoreboard'){ setState({ view:'scoreboard', scoreboard:null }); }
+    else if(action==='refresh-players'){ await refreshPlayers(); showToast('Player list updated'); }
+    else if(action==='refresh-board'){ loadScoreboard(); }
+    else if(action==='round-prev'){ setState({ round: Math.max(1, state.round-1) }); }
+    else if(action==='round-next'){ setState({ round: Math.min(10, state.round+1) }); }
+    else if(action==='go-capture'){ setState({ view:'capture', draftPhoto:null, analyzeError:null, draftDice:[] }); }
+    else if(action==='skip-to-manual'){ setState({ view:'review', draftDice: state.draftDice.length?state.draftDice:[{color:'yellow',value:1}] }); }
+    else if(action==='add-die'){
+      const dd = state.draftDice.slice(); dd.push({color:'yellow', value:1});
+      setState({ draftDice: dd });
+    }
+    else if(action==='remove-die'){
+      const dd = state.draftDice.slice(); dd.splice(idx,1);
+      setState({ draftDice: dd });
+    }
+    else if(action==='val-up'){
+      const dd = state.draftDice.slice(); dd[idx].value = Math.min(20, (dd[idx].value||1)+1);
+      setState({ draftDice: dd });
+    }
+    else if(action==='val-down'){
+      const dd = state.draftDice.slice(); dd[idx].value = Math.max(0, (dd[idx].value||1)-1);
+      setState({ draftDice: dd });
+    }
+    else if(action==='toggle-glitter'){
+      const dd = state.draftDice.slice(); dd[idx].glitter = !dd[idx].glitter;
+      setState({ draftDice: dd });
+    }
+    else if(action==='toggle-sign'){
+      const dd = state.draftDice.slice(); dd[idx].sign = dd[idx].sign==='negative' ? 'positive' : 'negative';
+      setState({ draftDice: dd });
+    }
+    else if(action==='submit-round'){
+      await submitRound(state.round, state.draftDice);
+      showToast(`Round ${state.round} saved`);
+      const nextRound = Math.min(10, state.round+1);
+      setState({ view:'lobby', round: nextRound, draftDice:[], draftPhoto:null });
+    }
+  };
+
+  app.onchange = async (e) => {
+    if(e.target.id==='photoInput'){
+      const file = e.target.files[0];
+      if(!file) return;
+      const dataUrl = await resizeImageFile(file);
+      setState({ draftPhoto: dataUrl, analyzing:true, analyzeError:null });
+      try{
+        const dice = await analyzeDiceImage(dataUrl);
+        setState({ analyzing:false, view:'review', draftDice: dice.length ? dice : [{color:'yellow',value:1}] });
+      }catch(err){
+        setState({ analyzing:false, analyzeError:"Couldn't read the photo automatically." });
+      }
+    }
+    else if(e.target.dataset && e.target.dataset.dieField==='color'){
+      const idx = parseInt(e.target.dataset.idx,10);
+      const dd = state.draftDice.slice();
+      dd[idx].color = e.target.value;
+      setState({ draftDice: dd });
+    }
+  };
+}
+
+/* ---------- boot ---------- */
+(async function boot(){
+  await initMe();
+  render();
+})();
+</script>
+</body>
+</html>
