@@ -15,6 +15,10 @@ This is a fan-made tool and isn't affiliated with or endorsed by Last Night Game
 
 Live at **https://pnd.ad**.
 
+Localized in English, Spanish, German, French, and Portuguese — auto-detected from the
+browser (`navigator.languages`), with a picker on every screen; the choice is remembered
+in `localStorage` (`pr.lang`). All strings live in the `I18N` table in `index.html`.
+
 ## How scoring works
 
 | Color | Rule |

@@ -241,6 +241,16 @@
   .hof .row:last-child{ border-bottom:none; }
   .hof .row .who{ color:var(--ink-dim); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .hof .row .pts{ font-family:'Baloo 2', monospace; color:var(--lantern-bright); flex-shrink:0; }
+
+  .home-top{ display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:16px; }
+  .lang-select{
+    font-family:inherit; font-size:0.82rem; color:var(--ink-dim);
+    background:var(--panel); border:1px solid var(--panel-line); border-radius:9px;
+    padding:7px 8px; cursor:pointer; -webkit-appearance:none; appearance:none;
+  }
+  .lang-select:focus{ outline:2px solid var(--lantern); outline-offset:1px; }
+  .lang-select option{ color:#111; }
+  .topbar .lang-select{ padding:5px 7px; font-size:0.76rem; }
 </style>
 </head>
 <body>
@@ -342,6 +352,7 @@ const I18N = {
     'confirm.wipe': 'Wipe every round score for all players?',
     'banner.storage': 'Shared storage is not connected yet. Pass-and-play on one phone still works.',
     'lang.label': 'Language',
+    'you': 'you',
   },
   es: {
     'title2': 'Anotador',
@@ -425,6 +436,7 @@ const I18N = {
     'confirm.wipe': '¿Borrar los puntos de todas las rondas de todos los jugadores?',
     'banner.storage': 'El almacenamiento compartido aún no está conectado. El modo de un móvil compartido sigue funcionando.',
     'lang.label': 'Idioma',
+    'you': 'tú',
   },
   de: {
     'title2': 'Punktezähler',
@@ -508,6 +520,7 @@ const I18N = {
     'confirm.wipe': 'Alle Rundenpunkte aller Spieler löschen?',
     'banner.storage': 'Der gemeinsame Speicher ist noch nicht verbunden. Der Modus mit einem gemeinsamen Handy funktioniert weiterhin.',
     'lang.label': 'Sprache',
+    'you': 'du',
   },
   fr: {
     'title2': 'Marqueur',
@@ -591,6 +604,7 @@ const I18N = {
     'confirm.wipe': 'Effacer tous les scores de toutes les manches pour tous les joueurs ?',
     'banner.storage': 'Le stockage partagé n’est pas encore connecté. Le mode téléphone partagé fonctionne toujours.',
     'lang.label': 'Langue',
+    'you': 'vous',
   },
   pt: {
     'title2': 'Marcador',
@@ -674,6 +688,7 @@ const I18N = {
     'confirm.wipe': 'Apagar os pontos de todas as rodadas de todos os jogadores?',
     'banner.storage': 'O armazenamento compartilhado ainda não está conectado. O modo de um celular compartilhado continua funcionando.',
     'lang.label': 'Idioma',
+    'you': 'você',
   },
 };
 
@@ -898,7 +913,7 @@ function totalsFor(v){
  * ------------------------------------------------------------------ */
 async function createOnline(name){
   saveMe(name);
-  if(!state.me.name){ toast('Enter your name first'); return; }
+  if(!state.me.name){ toast(t('t.enterName')); return; }
   try {
     const game = await api('create', { playerId: state.me.id, name: state.me.name });
     LS.set('pr.session', { mode:'online', code: game.code });
@@ -909,15 +924,15 @@ async function createOnline(name){
 async function joinOnline(name, code){
   code = (code || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
   saveMe(name);
-  if(!state.me.name){ toast('Enter your name first'); return; }
-  if(code.length < 3){ toast('Enter the game code'); return; }
+  if(!state.me.name){ toast(t('t.enterName')); return; }
+  if(code.length < 3){ toast(t('t.enterCode')); return; }
   try {
     const game = await api('join', { code, playerId: state.me.id, name: state.me.name });
     LS.set('pr.session', { mode:'online', code: game.code });
     const savedRound = LS.get(roundKey(game.code), 1);
     setState({ mode:'online', code: game.code, game, screen:'lobby', entryRound: savedRound, banner:null });
   } catch(e){
-    if(e.status === 404){ toast('No game with that code'); return; }
+    if(e.status === 404){ toast(t('t.noGame')); return; }
     handleApiError(e);
   }
 }
@@ -927,14 +942,14 @@ async function refreshOnline(){
     const game = await api('get', { code: state.code });
     if(JSON.stringify(game) !== JSON.stringify(state.game)) setState({ game });
   } catch(e){
-    if(e.status === 404){ leaveGame('That game has ended.'); }
+    if(e.status === 404){ leaveGame(t('t.gameEnded'), 'info'); }
   }
 }
 function handleApiError(e){
   if(e.status === 503){
-    setState({ banner:'Shared storage is not connected yet. Ask the site owner to attach an Upstash Redis (Vercel KV) store. Pass-and-play on one phone still works.' });
+    setState({ banner: t('banner.storage'), bannerKind: 'error' });
   } else {
-    toast(e.body && e.body.message ? e.body.message : 'Something went wrong');
+    toast(t('t.wrong'));
   }
 }
 
@@ -945,7 +960,7 @@ function startLocal(){
     : { players: [], scores: {}, createdAt: Date.now() };
   LS.set('pr.local', local);
   LS.set('pr.session', { mode:'local' });
-  setState({ mode:'local', local, screen:'lobby', entryRound:1, code:'PASS & PLAY' });
+  setState({ mode:'local', local, screen:'lobby', entryRound:1, code:'PASS & PLAY', banner:null });
 }
 function persistLocal(){ if(state.local) LS.set('pr.local', state.local); }
 function addLocalPlayer(name){
@@ -963,7 +978,7 @@ function removeLocalPlayer(id){
   setState({ local: { ...state.local, players, scores } }); persistLocal();
 }
 
-function leaveGame(msg){
+function leaveGame(msg, kind){
   stopPoll();
   if(state.mode === 'online' && state.code){
     api('leave', { code: state.code, playerId: state.me.id }).catch(() => {});
@@ -971,7 +986,8 @@ function leaveGame(msg){
   LS.del('pr.session');
   setState({
     screen:'home', mode:null, code:null, game:null, local:null,
-    fields: emptyFields(), photo:null, analyzeError:null, banner: msg || null,
+    fields: emptyFields(), photo:null, analyzeError:null,
+    banner: msg || null, bannerKind: kind || 'info',
   });
 }
 
@@ -999,7 +1015,7 @@ async function saveEntry(){
     setState({ local, screen:'lobby' });
     persistLocal();
     const nextUnscored = local.players.find(p => !(scores[round] && scores[round][p.id]));
-    toast(nextUnscored ? `Saved. Next: ${nextUnscored.name}` : `Round ${round} complete`);
+    toast(nextUnscored ? t('t.savedNext', { name: nextUnscored.name }) : t('t.roundComplete', { n: round }));
     return;
   }
   try {
@@ -1007,7 +1023,7 @@ async function saveEntry(){
     const next = Math.min(ROUNDS, round + 1);
     LS.set(roundKey(state.code), next);
     setState({ game, screen:'lobby', entryRound: next, fields: emptyFields(), photo:null });
-    toast(`Round ${round} saved`);
+    toast(t('t.roundSaved', { n: round }));
   } catch(e){ handleApiError(e); }
 }
 
@@ -1067,7 +1083,10 @@ function renderTopbar(){
           ? esc(t('topbar.players', { n: state.local?.players.length || 0 }))
           : esc(t('topbar.round', { n: state.entryRound, total: ROUNDS }))}</div>
       </div>
-      <button class="link-btn" data-a="leave">${esc(state.mode === 'local' ? t('home') : t('leave'))}</button>
+      <div style="display:flex; align-items:center; gap:6px;">
+        ${langSelect()}
+        <button class="link-btn" data-a="leave">${esc(state.mode === 'local' ? t('home') : t('leave'))}</button>
+      </div>
     </div>`;
 }
 function renderTabbar(){
@@ -1136,49 +1155,51 @@ function renderLobby(){
     return `
       <div class="player-row">
         <div class="avatar" style="background:${avatarColor(p.id)}">${esc((p.name || '?')[0].toUpperCase())}</div>
-        <div class="name">${esc(p.name)}${isMe ? '<span class="you-tag">you</span>' : ''}</div>
+        <div class="name">${esc(p.name)}${isMe ? `<span class="you-tag">${esc(t('you'))}</span>` : ''}</div>
         ${v.isLocal
-          ? `<button class="pill-btn ${done ? 'done' : ''}" data-a="score-player" data-id="${p.id}">${done ? `✓ ${done.total}` : 'Enter dice'}</button>
+          ? `<button class="pill-btn ${done ? 'done' : ''}" data-a="score-player" data-id="${p.id}">${done ? `✓ ${done.total}` : esc(t('enterDice'))}</button>
              <button class="icon-btn" data-a="rm-player" data-id="${p.id}">✕</button>`
-          : `<span class="status ${done ? 'done' : ''}">${done ? `✓ ${done.total}` : 'waiting'}</span>`}
+          : `<span class="status ${done ? 'done' : ''}">${done ? `✓ ${done.total}` : esc(t('waiting'))}</span>`}
       </div>`;
-  }).join('') : `<div class="player-row"><span class="small-note">No players yet.</span></div>`;
+  }).join('') : `<div class="player-row"><span class="small-note">${esc(t('noPlayers'))}</span></div>`;
+
+  const myEntry = v.scores[round] && v.scores[round][me];
 
   return `
-    ${state.banner ? `<div class="banner">${esc(state.banner)}</div>` : ''}
+    ${state.banner ? `<div class="banner ${state.bannerKind === 'info' ? 'info' : ''}">${esc(state.banner)}</div>` : ''}
 
     ${v.isLocal ? '' : `
       <div class="code-display">
-        <div class="label">Share this code with your table</div>
+        <div class="label">${esc(t('shareCode'))}</div>
         <div class="code-big">${esc(v.code)}</div>
       </div>
-      <button class="btn btn-secondary" data-a="copy-link">Copy invite link</button>
+      <button class="btn btn-secondary" data-a="copy-link">${esc(t('copyLink'))}</button>
     `}
 
-    <div class="section-title">Round</div>
+    <div class="section-title">${esc(t('round'))}</div>
     <div class="round-picker">
       <button data-a="round-prev">−</button>
-      <div class="round-label">Round ${round} <span style="color:var(--muted)">of ${ROUNDS}</span></div>
+      <div class="round-label">${t('roundOf', { n: round, total: ROUNDS })}</div>
       <button data-a="round-next">+</button>
     </div>
 
-    <div class="section-title">${v.isLocal ? 'Players — tap to enter dice' : 'Players'}</div>
+    <div class="section-title">${esc(v.isLocal ? t('players.tap') : t('players'))}</div>
     <div class="card" style="padding:4px 14px;">${playerList}</div>
 
     ${v.isLocal ? `
       <div class="add-row">
-        <input class="text-input" id="addPlayer" placeholder="Add a player" autocomplete="off" />
-        <button class="btn btn-secondary" data-a="add-player">Add</button>
+        <input class="text-input" id="addPlayer" placeholder="${esc(t('ph.addPlayer'))}" autocomplete="off" />
+        <button class="btn btn-secondary" data-a="add-player">${esc(t('add'))}</button>
       </div>
     ` : `
       <button class="btn btn-primary" data-a="score-self">
-        ${v.scores[round] && v.scores[round][me] ? `Edit my round ${round}` : `Enter my dice for round ${round}`}
+        ${esc(myEntry ? t('editMyRound', { n: round }) : t('enterMyDice', { n: round }))}
       </button>
-      <button class="btn btn-ghost" data-a="refresh">Refresh players</button>
+      <button class="btn btn-ghost" data-a="refresh">${esc(t('refreshPlayers'))}</button>
     `}
 
-    ${(!v.isLocal && v.hostId === me) ? `<button class="btn btn-ghost" data-a="reset-scores">Reset all scores (host)</button>` : ''}
-    <p class="small-note">Roll and photograph or type your whole dice pool for the round before you trade or draft a new die.</p>
+    ${(!v.isLocal && v.hostId === me) ? `<button class="btn btn-ghost" data-a="reset-scores">${esc(t('resetScores'))}</button>` : ''}
+    <p class="small-note">${esc(t('lobby.note'))}</p>
   `;
 }
 
@@ -1189,37 +1210,26 @@ function renderEntry(){
   const dice = diceForRound(state.fields, state.entryRound);
   const scored = scoreRound(dice);
   const b = scored.breakdown, c = scored.counts;
-  const rows = [
-    c.yellow ? ['Yellow', b.yellowSum] : null,
-    c.purple ? ['Purple ×2', b.purpleSum] : null,
-    c.blue ? ['Blue' + (dice.some(d => d.color === 'blue' && d.glitter) ? ' (glitter ×2)' : ''), b.blueScore] : null,
-    c.red ? [`Red (signed × ${c.red})`, b.redScore] : null,
-    c.green ? ['Green', b.greenSum] : null,
-    c.clear ? ['Clear', b.clearSum] : null,
-    c.pink ? ['Pink', b.pinkSum] : null,
-  ].filter(Boolean);
-
+  const rows = breakdownRows(dice, scored);
   const visibleRows = isR1 ? ENTRY_ROWS.filter(r => r.color === 'yellow') : ENTRY_ROWS;
 
   return `
-    <h2 style="font-size:1.2rem;">Round ${state.entryRound}${p ? ` — ${esc(p.name)}` : ''}</h2>
-    <p class="small-note" style="margin-top:4px;">${isR1
-      ? 'Round 1: everyone rolls just their single starting yellow die.'
-      : 'Type the face values for each color. Totals update as you go.'}</p>
+    <h2 style="font-size:1.2rem;">${esc(p ? t('entry.titleWho', { n: state.entryRound, name: p.name }) : t('entry.title', { n: state.entryRound }))}</h2>
+    <p class="small-note" style="margin-top:4px;">${esc(isR1 ? t('entry.r1note') : t('entry.note'))}</p>
 
     ${(aiAvailable && !isR1) ? `
       <label class="capture-zone" for="photoInput">
         <div class="icon">📷</div>
         <div>
-          <div class="cta">${state.photo ? 'Retake photo' : 'Scan a dice photo'}</div>
-          <div class="hint">Optional — you can just type below</div>
+          <div class="cta">${esc(state.photo ? t('retakePhoto') : t('scanPhoto'))}</div>
+          <div class="hint">${esc(t('photo.optional'))}</div>
         </div>
       </label>
       <input type="file" id="photoInput" accept="image/*" capture="environment" style="display:none" />
       ${state.photo ? `
         <div class="thumb-row">
           <img src="${state.photo}" alt="dice" />
-          <div class="status">${state.analyzing ? '<span class="spinner"></span> Reading dice…' : 'Applied — check the values below'}</div>
+          <div class="status">${state.analyzing ? `<span class="spinner"></span> ${esc(t('photo.reading'))}` : esc(t('photo.applied'))}</div>
         </div>` : ''}
       ${state.analyzeError ? `<div class="banner">${esc(state.analyzeError)}</div>` : ''}
     ` : ''}
@@ -1228,47 +1238,62 @@ function renderEntry(){
       ${visibleRows.map(r => `
         <div class="entry-r">
           <span class="dot" style="background:${COLOR_HEX[r.color]}"></span>
-          <span class="lab">${r.label}${(r.note && !isR1) ? `<small>${r.note}</small>` : ''}</span>
+          <span class="lab">${esc(t('color.' + r.color))}${(r.noteKey && !isR1) ? `<small>${esc(t(r.noteKey))}</small>` : ''}</span>
           <span class="ins">
             ${r.fields.map(f => `
               <input data-field="${f.key}" value="${esc(state.fields[f.key] || '')}"
-                     placeholder="${esc(isR1 ? 'e.g. 4' : f.ph)}" class="${f.accent ? 'accent' : ''}"
+                     placeholder="${esc(isR1 ? t('ph.egN') : t(f.phKey))}" class="${f.accent ? 'accent' : ''}"
                      type="text" pattern="[0-9 ,]*" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />
             `).join('')}
           </span>
         </div>`).join('')}
     </div>
-    ${isR1 ? '' : `<p class="entry-hint">Blue: put sparkly-numeral dice in the glitter box (any there doubles all blue). Red: white numerals add, black subtract; the total is multiplied by how many red dice you rolled.</p>`}
+    ${isR1 ? '' : `<p class="entry-hint">${esc(t('entry.hint'))}</p>`}
 
     <div class="total-banner">
       <div class="n">${scored.total}</div>
-      <div class="l">Round ${state.entryRound} score</div>
-      ${rows.length ? `<div class="breakdown">${rows.map(([l, val]) => `<div class="row"><span>${l}</span><span>${val}</span></div>`).join('')}</div>` : ''}
+      <div class="l">${esc(t('roundScore', { n: state.entryRound }))}</div>
+      ${rows.length ? `<div class="breakdown">${rows.map(([l, val]) => `<div class="row"><span>${esc(l)}</span><span>${val}</span></div>`).join('')}</div>` : ''}
     </div>
 
-    <button class="btn btn-primary" data-a="save-entry">Save round ${state.entryRound}</button>
-    <button class="btn btn-ghost" data-a="tab-play">Back</button>
+    <button class="btn btn-primary" data-a="save-entry">${esc(t('saveRound', { n: state.entryRound }))}</button>
+    <button class="btn btn-ghost" data-a="tab-play">${esc(t('back'))}</button>
   `;
+}
+
+function breakdownRows(dice, scored){
+  const b = scored.breakdown, c = scored.counts;
+  return [
+    c.yellow ? [t('color.yellow'), b.yellowSum] : null,
+    c.purple ? [t('bd.purple'), b.purpleSum] : null,
+    c.blue ? [dice.some(d => d.color === 'blue' && d.glitter) ? t('bd.blueGlitter') : t('color.blue'), b.blueScore] : null,
+    c.red ? [t('bd.red', { n: c.red }), b.redScore] : null,
+    c.green ? [t('color.green'), b.greenSum] : null,
+    c.clear ? [t('color.clear'), b.clearSum] : null,
+    c.pink ? [t('color.pink'), b.pinkSum] : null,
+  ].filter(Boolean);
 }
 
 function renderBoard(){
   const v = view();
   if(!v || !v.players.length){
-    return `<div class="empty-state"><div class="icon">🏮</div>No scores yet — ${v && v.isLocal ? 'add players and enter round 1.' : 'invite your table with the game code.'}</div>`;
+    return `<div class="empty-state"><div class="icon">🏮</div>${esc(v && v.isLocal ? t('board.emptyLocal') : t('board.emptyOnline'))}</div>`;
   }
   const totals = totalsFor(v);
   const top = totals.length ? totals[0].total : 0;
   const now = state.entryRound;
+  const gameOver = !v.isLocal && state.game && state.game.finished && totals.length && top > 0;
 
   return `
-    <h2 style="font-size:1.2rem;">Scoreboard</h2>
+    <h2 style="font-size:1.2rem;">${esc(t('tab.board'))}</h2>
+    ${gameOver ? `<div class="banner info">${esc(t('board.winner', { name: totals[0].name, n: top }))}</div>` : ''}
     <div style="overflow-x:auto; -webkit-overflow-scrolling:touch;">
       <table class="board">
         <thead>
           <tr>
-            <th class="name-cell">Player</th>
+            <th class="name-cell">${esc(t('board.player'))}</th>
             ${Array.from({ length: ROUNDS }, (_, i) => `<th class="${i + 1 === now ? 'now' : ''}">R${i + 1}</th>`).join('')}
-            <th>Total</th>
+            <th>${esc(t('board.total'))}</th>
           </tr>
         </thead>
         <tbody>
@@ -1284,8 +1309,8 @@ function renderBoard(){
         </tbody>
       </table>
     </div>
-    ${v.isLocal ? '' : '<p class="small-note">Updates every few seconds while this tab is open.</p>'}
-    <button class="btn btn-ghost" data-a="${v.isLocal ? 'tab-play' : 'refresh'}">${v.isLocal ? 'Back to players' : 'Refresh now'}</button>
+    ${v.isLocal ? '' : `<p class="small-note">${esc(t('board.updates'))}</p>`}
+    <button class="btn btn-ghost" data-a="${v.isLocal ? 'tab-play' : 'refresh'}">${esc(v.isLocal ? t('board.backPlayers') : t('board.refreshNow'))}</button>
   `;
 }
 
@@ -1301,6 +1326,7 @@ function bind(){
     const a = el.dataset.a;
     const id = el.dataset.id;
 
+    if(a === 'lang'){ return; }
     if(a === 'home-tab') setState({ homeTab: el.dataset.v });
     else if(a === 'create-online') createOnline(document.getElementById('nameInput').value);
     else if(a === 'join-online') joinOnline(document.getElementById('nameInput').value, document.getElementById('codeInput').value);
@@ -1309,7 +1335,7 @@ function bind(){
     else if(a === 'leave') leaveGame();
     else if(a === 'tab-play') setState({ screen:'lobby' });
     else if(a === 'tab-board') setState({ screen:'board' });
-    else if(a === 'refresh'){ await refreshOnline(); toast('Updated'); }
+    else if(a === 'refresh'){ await refreshOnline(); toast(t('t.updated')); }
     else if(a === 'round-prev') setState({ entryRound: Math.max(1, state.entryRound - 1) });
     else if(a === 'round-next') setState({ entryRound: Math.min(ROUNDS, state.entryRound + 1) });
     else if(a === 'add-player'){
@@ -1322,14 +1348,19 @@ function bind(){
     else if(a === 'save-entry') saveEntry();
     else if(a === 'copy-link'){
       const link = `${location.origin}/?code=${view().code}`;
-      try { await navigator.clipboard.writeText(link); toast('Invite link copied'); }
+      try { await navigator.clipboard.writeText(link); toast(t('t.linkCopied')); }
       catch { toast(link); }
     }
     else if(a === 'reset-scores'){
-      if(!confirm('Wipe every round score for all players?')) return;
-      try { const game = await api('reset', { code: state.code, playerId: state.me.id }); setState({ game }); toast('Scores cleared'); }
+      if(!confirm(t('confirm.wipe'))) return;
+      try { const game = await api('reset', { code: state.code, playerId: state.me.id }); setState({ game }); toast(t('t.scoresCleared')); }
       catch(err){ handleApiError(err); }
     }
+  };
+
+  app.onchange = (e) => {
+    const sel = e.target.closest('select[data-a="lang"]');
+    if(sel) setLang(sel.value);
   };
 
   // live recalculation on every keystroke + tidy on blur
@@ -1358,7 +1389,7 @@ function bind(){
       if(!file) return;
       let dataUrl;
       try { dataUrl = await resizeImageFile(file); }
-      catch { toast('Could not read that image'); return; }
+      catch { toast(t('t.badImage')); return; }
       setState({ photo: dataUrl, analyzing: true, analyzeError: null });
       try {
         const dice = await analyzePhoto(dataUrl);
@@ -1366,7 +1397,7 @@ function bind(){
         setState({ analyzing: false, fields: merged });
       } catch(err){
         if(err.soft) setState({ analyzing: false, photo: null });
-        else setState({ analyzing: false, analyzeError: (err.message || 'Could not read the photo') + ' — type the values instead.' });
+        else setState({ analyzing: false, analyzeError: t('t.photoErr') });
       }
     };
   }
@@ -1387,18 +1418,9 @@ function updateEntryTotals(){
   const scored = scoreRound(dice);
   const n = document.querySelector('.total-banner .n');
   if(n) n.textContent = scored.total;
-  const b = scored.breakdown, c = scored.counts;
-  const rows = [
-    c.yellow ? ['Yellow', b.yellowSum] : null,
-    c.purple ? ['Purple ×2', b.purpleSum] : null,
-    c.blue ? ['Blue' + (dice.some(d => d.color === 'blue' && d.glitter) ? ' (glitter ×2)' : ''), b.blueScore] : null,
-    c.red ? [`Red (signed × ${c.red})`, b.redScore] : null,
-    c.green ? ['Green', b.greenSum] : null,
-    c.clear ? ['Clear', b.clearSum] : null,
-    c.pink ? ['Pink', b.pinkSum] : null,
-  ].filter(Boolean);
+  const rows = breakdownRows(dice, scored);
   const wrap = document.querySelector('.total-banner .breakdown');
-  const html = rows.map(([l, val]) => `<div class="row"><span>${l}</span><span>${val}</span></div>`).join('');
+  const html = rows.map(([l, val]) => `<div class="row"><span>${esc(l)}</span><span>${val}</span></div>`).join('');
   if(wrap) wrap.innerHTML = html;
   else if(rows.length){
     const banner = document.querySelector('.total-banner');
@@ -1410,6 +1432,10 @@ function updateEntryTotals(){
  * boot
  * ------------------------------------------------------------------ */
 async function boot(){
+  // language: saved choice, else the browser's preferred, else English
+  state.lang = detectLang();
+  document.documentElement.lang = state.lang;
+
   // probe AI availability quietly
   fetch('/api/analyze', { method:'GET' }).then(r => { if(r.status === 503) aiAvailable = false; }).catch(() => {});
   // hall of fame (empty until a game finishes)
