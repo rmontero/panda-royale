@@ -1,15 +1,19 @@
 # Panda Royale Scorekeeper
 
-A companion scorekeeping app for [Panda Royale](https://boardgamegeek.com/boardgame/) (Last Night Games), the dice-drafting party game. Photograph your dice pool each round, confirm what the app read, and it does the scoring math for you — plus a shared scoreboard so everyone at the table can follow along on their own phone.
+A companion scorekeeping app for **Panda Royale** (Last Night Games), the dice-drafting
+party game. Enter each round's dice (or snap a photo and let a vision model read them),
+and the app does the scoring math — across all ten rounds, for every player.
+
+Two ways to play:
+
+- **Separate phones** — one person starts a game, everyone else joins with a 4-character
+  code from their own device, and the scoreboard syncs live.
+- **One shared phone** — pass-and-play: add everyone once, then hand the phone around
+  each round. No code, no network.
 
 This is a fan-made tool and isn't affiliated with or endorsed by Last Night Games.
 
-## Features
-
-- **Photo scoring** — snap a picture of your dice pool; an AI vision call reads each die's color and value, and you confirm or correct the results before anything is scored.
-- **Full rules engine** — implements all seven dice colors' scoring, including doubled purple, glitter-doubled blue, and signed/multiplied red.
-- **Shared scoreboard** — create a game with a short code, everyone at the table joins from their own device, and round-by-round totals sync live.
-- **No install** — a single static HTML file, no build step, no dependencies.
+Live at **https://pnd.ad**.
 
 ## How scoring works
 
@@ -21,38 +25,94 @@ This is a fan-made tool and isn't affiliated with or endorsed by Last Night Game
 | Red | White numerals add, black numerals subtract, summed, then multiplied by the number of red dice rolled |
 | Green | Sum of face values |
 | Clear | Sum of face values |
-| Pink | Face value of your pity die, if you have one |
+| Pink | Face value of your pity die |
 
-## Running it
+The scoring engine lives in [`lib/score.js`](lib/score.js) and runs on both the client
+(for the live preview as you type) and the server (authoritative — the server re-scores
+every submission).
 
-There's nothing to install. `index.html` is a self-contained static page — open it in a browser, or serve it from any static host.
+## Manual entry
+
+The entry screen shows every color at once as plain number fields. Type the face values
+space-separated (`3 5 6`), tab to the next color, and the round total updates on every
+keystroke. Blue has a separate "glitter" box; red has separate white (+) and black (−)
+boxes. No dropdowns, no steppers.
+
+## Architecture
+
+Static `index.html` + Vercel serverless functions. No build step for the front end.
+
+| Piece | Tech | Purpose |
+|---|---|---|
+| Shared game state | **Upstash Redis** (Vercel KV) | One Redis hash per game — players, per-round scores. Per-field writes so players never clobber each other. 24h TTL. |
+| End-of-game finalize | **Upstash Workflow** | On round 10, a durable workflow sleeps 45s for stragglers, then archives the final board and updates the hall of fame. Survives restarts mid-run. |
+| Daily maintenance | **Upstash QStash** (schedule) | Cron job trims the hall-of-fame sorted set to the top 25. |
+| Photo → dice | **Google Gemini** (`gemini-2.0-flash`, free tier) with a **Claude Haiku 4.5** fallback | Server-side proxy so the key never reaches the browser. Optional — manual entry always works. |
+
+### Endpoints
+
+| Route | Notes |
+|---|---|
+| `GET/POST /api/game` | Create / join / leave / score / unscore / reset. `GET ?code=ABCD` returns state (clients poll this every 3s). |
+| `GET/POST /api/analyze` | `GET` reports whether a vision provider is configured; `POST { image }` returns read dice. |
+| `POST /api/workflows/finalize` | Upstash Workflow endpoint (called by QStash, not humans). |
+| `POST /api/tasks/sweep` | QStash-scheduled maintenance, signature-verified. |
+| `GET /api/hof` | Hall of fame — biggest single-round scores across finished games. |
+
+## Deploying
+
+The project auto-deploys to Vercel on push to `main`.
+
+### Required: Redis (multiplayer won't work without it)
+
+1. Vercel dashboard → your project → **Storage** → **Create Database** → **Upstash for Redis**
+   (or **Marketplace → Upstash**). Connect it to the project.
+2. Redeploy. The integration injects `KV_REST_API_URL` / `KV_REST_API_TOKEN`
+   (the store also accepts `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN`).
+
+Until this is connected, "separate phones" shows a friendly banner and only pass-and-play works.
+
+### Optional: QStash + Workflow (archival + hall of fame)
+
+1. Vercel → **Storage / Marketplace** → **Upstash QStash** → connect. It injects
+   `QSTASH_TOKEN`, `QSTASH_CURRENT_SIGNING_KEY`, `QSTASH_NEXT_SIGNING_KEY`.
+2. Set `APP_URL=https://pnd.ad` in the project env (so QStash callbacks hit the right host).
+3. Register the daily schedule once:
+
+   ```bash
+   QSTASH_TOKEN=<token> APP_URL=https://pnd.ad npm run setup:upstash
+   ```
+
+Without these, finishing a game just skips the archive/hall-of-fame step — everything else is unaffected.
+
+### Optional: photo scoring
+
+Set **one** of:
+
+- `GEMINI_API_KEY` — free key from [ai.google.dev](https://ai.google.dev/) (Google AI Studio).
+  Free-tier rate limits are far above what a game night needs.
+- `ANTHROPIC_API_KEY` — uses `claude-haiku-4-5`.
+
+### Domain
+
+`pnd.ad` is configured on the Vercel project. If DNS needs pointing: add the `A` / `CNAME`
+records Vercel shows under **Settings → Domains**.
+
+## Local development
 
 ```bash
-# locally
-open index.html
-
-# or serve it
-npx serve .
+npm install
+npx vercel dev          # runs the functions locally; needs `vercel link` first
 ```
 
-## ⚠️ Platform dependency
-
-This app was built and tested as a **Claude artifact**, and it relies on two browser APIs that Claude's artifact runtime provides automatically:
-
-- `window.storage` — used for all shared/cross-device data (joining a game, submitting scores, the live scoreboard). Outside of Claude, this API doesn't exist, so those actions will fail.
-- An unauthenticated `fetch` to `https://api.anthropic.com/v1/messages` for the photo-reading step — Claude's runtime injects the API credentials automatically. On a standalone deployment (Vercel, etc.), this call will fail with no key configured, and would also hit CORS restrictions from a browser origin Anthropic doesn't allow directly.
-
-**In short: as deployed to Vercel right now, the photo-reading and multiplayer sync features won't work.** To make a standalone deployment fully functional, it needs:
-
-1. A small backend (e.g. a Vercel serverless function) that holds an Anthropic API key server-side and proxies the vision request.
-2. A real shared datastore (e.g. Vercel KV, Upstash, Supabase) behind a small API, replacing `window.storage`.
-
-Happy to build that backend layer if you want this fully working as a standalone site — just say so.
+For a quick front-end-only check, any static server works (`npx serve .`) — pass-and-play
+mode is fully functional offline; the online endpoints will 404 without `vercel dev`.
 
 ## Tech
 
-Plain HTML, CSS, and vanilla JavaScript. No framework, no bundler, no npm dependencies.
+Vanilla HTML/CSS/JS front end (one ES module). Node serverless functions.
+Dependencies: `@upstash/redis`, `@upstash/qstash`, `@upstash/workflow`, `@anthropic-ai/sdk`.
 
 ## License
 
-No license file is included yet — all rights reserved by default. Let me know if you'd like one added (e.g. MIT).
+No license file yet — all rights reserved by default.

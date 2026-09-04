@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#171224" />
 <title>Panda Royale Scorekeeper</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap');
@@ -11,6 +12,7 @@
     --night: #211a35;
     --night-deep: #171224;
     --panel: #2a2242;
+    --panel-2: #322a4d;
     --panel-line: rgba(246,197,103,0.14);
     --paper: #f6f1e4;
     --lantern: #e8a13a;
@@ -42,71 +44,49 @@
       var(--night-deep);
     color:var(--ink);
     min-height:100vh;
+    -webkit-text-size-adjust:100%;
   }
   #app{
     max-width:480px;
     margin:0 auto;
     min-height:100vh;
-    padding-bottom:84px;
+    padding-bottom:86px;
     position:relative;
   }
-  h1,h2,h3,.display{
-    font-family:'Baloo 2', system-ui, sans-serif;
-    font-weight:700;
-    margin:0;
-  }
+  h1,h2,h3,.display{ font-family:'Baloo 2', system-ui, sans-serif; font-weight:700; margin:0; }
   p{ margin:0; }
   button{ font-family:inherit; }
   input{ font-family:inherit; }
 
-  .screen{ padding:20px 20px 12px; }
+  .screen{ padding:20px 18px 12px; }
 
   .topbar{
     display:flex; align-items:center; justify-content:space-between;
-    padding:14px 20px; border-bottom:1px solid var(--panel-line);
+    padding:14px 18px; border-bottom:1px solid var(--panel-line);
   }
-  .topbar .code{
-    font-family:'Baloo 2', monospace;
-    letter-spacing:0.12em;
-    font-size:1.05rem;
-    color:var(--lantern-bright);
-  }
-  .topbar .round{
-    font-size:0.85rem;
-    color:var(--ink-dim);
-  }
-  .link-btn{
-    background:none; border:none; color:var(--ink-dim);
-    font-size:0.85rem; padding:6px 4px; cursor:pointer;
-  }
+  .topbar .code{ font-family:'Baloo 2', monospace; letter-spacing:0.12em; font-size:1.05rem; color:var(--lantern-bright); }
+  .topbar .sub{ font-size:0.8rem; color:var(--ink-dim); }
+  .link-btn{ background:none; border:none; color:var(--ink-dim); font-size:0.85rem; padding:6px 4px; cursor:pointer; }
 
-  .hero{ text-align:left; padding-top:14px; margin-bottom:8px; }
-  .hero h1{ font-size:2rem; line-height:1.1; color:var(--ink); }
+  .hero{ text-align:left; padding-top:12px; margin-bottom:6px; }
+  .hero h1{ font-size:2rem; line-height:1.1; }
   .hero .sub{ color:var(--ink-dim); margin-top:8px; font-size:0.95rem; line-height:1.5; }
-  .lanterns{ display:flex; gap:8px; margin-bottom:18px; }
-  .lanterns span{
-    width:10px; height:10px; border-radius:50%; display:inline-block;
-  }
+  .lanterns{ display:flex; gap:8px; margin-bottom:16px; }
+  .lanterns span{ width:10px; height:10px; border-radius:50%; display:inline-block; }
 
-  label.field-label{
-    display:block; font-size:0.8rem; color:var(--ink-dim);
-    margin-bottom:6px; margin-top:18px;
-  }
+  label.field-label{ display:block; font-size:0.8rem; color:var(--ink-dim); margin-bottom:6px; margin-top:16px; }
   input.text-input{
     width:100%; padding:13px 14px; border-radius:12px;
     border:1px solid var(--panel-line); background:var(--panel);
     color:var(--ink); font-size:1rem;
   }
   input.text-input:focus{ outline:2px solid var(--lantern); outline-offset:1px; }
-  input.code-input{
-    text-transform:uppercase; letter-spacing:0.18em; font-family:'Baloo 2',monospace;
-    font-size:1.2rem; text-align:center;
-  }
+  input.code-input{ text-transform:uppercase; letter-spacing:0.18em; font-family:'Baloo 2',monospace; font-size:1.2rem; text-align:center; }
 
   .btn{
     display:flex; align-items:center; justify-content:center; gap:8px;
     width:100%; padding:15px 16px; border-radius:12px; border:none;
-    font-size:1rem; font-weight:600; cursor:pointer; margin-top:14px;
+    font-size:1rem; font-weight:600; cursor:pointer; margin-top:12px;
   }
   .btn-primary{ background:var(--lantern); color:#241a06; }
   .btn-primary:active{ background:var(--lantern-bright); }
@@ -114,68 +94,70 @@
   .btn-ghost{ background:none; color:var(--lantern-bright); border:1px dashed var(--panel-line); }
   .btn:disabled{ opacity:0.5; }
 
-  .divider{
-    display:flex; align-items:center; gap:10px; margin:22px 0 6px;
-    color:var(--muted); font-size:0.8rem;
+  .seg{
+    display:flex; background:var(--panel); border:1px solid var(--panel-line);
+    border-radius:12px; padding:4px; margin-top:6px;
   }
+  .seg button{
+    flex:1; padding:11px 8px; border:none; background:none; cursor:pointer;
+    color:var(--ink-dim); font-size:0.9rem; font-weight:600; border-radius:9px;
+  }
+  .seg button.on{ background:var(--lantern); color:#241a06; }
+
+  .divider{ display:flex; align-items:center; gap:10px; margin:22px 0 6px; color:var(--muted); font-size:0.8rem; }
   .divider::before,.divider::after{ content:''; flex:1; height:1px; background:var(--panel-line); }
 
-  .card{
-    background:var(--panel); border:1px solid var(--panel-line);
-    border-radius:var(--radius); padding:16px; margin-top:14px;
-  }
+  .card{ background:var(--panel); border:1px solid var(--panel-line); border-radius:var(--radius); padding:16px; margin-top:14px; }
+
   .code-display{
-    text-align:center; padding:22px 16px;
-    border-radius:var(--radius);
+    text-align:center; padding:20px 16px; border-radius:var(--radius);
     background:linear-gradient(180deg, rgba(246,197,103,0.14), rgba(246,197,103,0.03));
-    border:1px solid var(--panel-line);
-    margin-top:16px;
+    border:1px solid var(--panel-line); margin-top:14px;
   }
   .code-display .label{ color:var(--ink-dim); font-size:0.82rem; }
-  .code-display .code-big{
-    font-family:'Baloo 2', monospace; font-size:2.4rem; letter-spacing:0.16em;
-    color:var(--lantern-bright); margin-top:4px;
-  }
+  .code-display .code-big{ font-family:'Baloo 2', monospace; font-size:2.4rem; letter-spacing:0.16em; color:var(--lantern-bright); margin-top:2px; }
 
-  .section-title{
-    font-size:0.78rem; color:var(--ink-dim); margin:22px 0 10px;
-  }
+  .section-title{ font-size:0.78rem; color:var(--ink-dim); margin:22px 0 8px; text-transform:uppercase; letter-spacing:0.06em; }
 
-  .player-row{
-    display:flex; align-items:center; gap:10px; padding:10px 2px;
-    border-bottom:1px solid var(--panel-line);
-  }
+  .player-row{ display:flex; align-items:center; gap:10px; padding:10px 2px; border-bottom:1px solid var(--panel-line); }
   .player-row:last-child{ border-bottom:none; }
   .avatar{
-    width:34px; height:34px; border-radius:50%;
-    display:flex; align-items:center; justify-content:center;
+    width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center;
     font-weight:700; font-size:0.85rem; color:#241a06; flex-shrink:0;
   }
-  .player-row .name{ font-size:0.95rem; }
+  .player-row .name{ font-size:0.95rem; flex:1; }
   .player-row .you-tag{ font-size:0.72rem; color:var(--lantern-bright); margin-left:4px; }
+  .player-row .status{ font-size:0.8rem; color:var(--ink-dim); }
+  .player-row .status.done{ color:var(--good); }
+  .icon-btn{ background:none; border:none; color:var(--muted); font-size:1.1rem; cursor:pointer; padding:4px 6px; }
+  .pill-btn{
+    background:var(--panel-2); border:1px solid var(--panel-line); color:var(--ink);
+    font-size:0.82rem; font-weight:600; padding:7px 12px; border-radius:20px; cursor:pointer;
+  }
+  .pill-btn.done{ color:var(--good); }
 
-  .round-picker{
-    display:flex; align-items:center; justify-content:space-between;
-    gap:10px; margin-top:14px;
-  }
+  .round-picker{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:10px; }
   .round-picker button{
-    width:40px; height:40px; border-radius:10px; border:1px solid var(--panel-line);
-    background:var(--panel); color:var(--ink); font-size:1.1rem; cursor:pointer;
+    width:44px; height:44px; border-radius:11px; border:1px solid var(--panel-line);
+    background:var(--panel); color:var(--ink); font-size:1.2rem; cursor:pointer;
   }
-  .round-picker .round-label{
-    flex:1; text-align:center; font-family:'Baloo 2'; font-size:1.05rem;
-  }
+  .round-picker .round-label{ flex:1; text-align:center; font-family:'Baloo 2'; font-size:1.1rem; }
+
+  .add-row{ display:flex; gap:8px; margin-top:10px; }
+  .add-row input{ flex:1; }
+  .add-row button{ margin-top:0; width:auto; padding:13px 18px; }
 
   .capture-zone{
-    margin-top:18px; border:1.5px dashed var(--panel-line); border-radius:var(--radius);
-    padding:34px 16px; text-align:center; cursor:pointer; background:var(--panel);
+    margin-top:14px; border:1.5px dashed var(--panel-line); border-radius:var(--radius);
+    padding:22px 16px; text-align:center; cursor:pointer; background:var(--panel);
+    display:flex; align-items:center; justify-content:center; gap:12px;
   }
-  .capture-zone .icon{ font-size:2.2rem; }
-  .capture-zone .cta{ margin-top:10px; font-weight:600; }
-  .capture-zone .hint{ margin-top:4px; color:var(--ink-dim); font-size:0.82rem; }
+  .capture-zone .icon{ font-size:1.6rem; }
+  .capture-zone .cta{ font-weight:600; font-size:0.95rem; }
+  .capture-zone .hint{ color:var(--ink-dim); font-size:0.8rem; }
 
-  .thumb-row{ display:flex; align-items:center; gap:12px; margin-top:14px; }
-  .thumb-row img{ width:64px; height:64px; object-fit:cover; border-radius:10px; border:1px solid var(--panel-line); }
+  .thumb-row{ display:flex; align-items:center; gap:12px; margin-top:12px; }
+  .thumb-row img{ width:56px; height:56px; object-fit:cover; border-radius:10px; border:1px solid var(--panel-line); }
   .thumb-row .status{ font-size:0.9rem; color:var(--ink-dim); }
 
   .spinner{
@@ -185,185 +167,200 @@
   }
   @keyframes spin{ to{ transform:rotate(360deg); } }
 
-  .die-row{
-    display:flex; align-items:center; gap:8px; padding:10px 0;
-    border-bottom:1px solid var(--panel-line);
+  .entry-grid{ margin-top:14px; border:1px solid var(--panel-line); border-radius:var(--radius); overflow:hidden; }
+  .entry-r{
+    display:flex; align-items:center; gap:10px; padding:11px 12px;
+    border-bottom:1px solid var(--panel-line); background:var(--panel);
   }
-  .die-row:last-child{ border-bottom:none; }
-  .die-dot{ width:16px; height:16px; border-radius:5px; flex-shrink:0; border:1px solid rgba(0,0,0,0.2); }
-  select.die-color{
-    background:var(--night); color:var(--ink); border:1px solid var(--panel-line);
-    border-radius:8px; padding:7px 6px; font-size:0.86rem;
+  .entry-r:last-child{ border-bottom:none; }
+  .entry-r .dot{ width:15px; height:15px; border-radius:5px; flex-shrink:0; border:1px solid rgba(0,0,0,0.25); }
+  .entry-r .lab{ width:64px; flex-shrink:0; font-size:0.9rem; font-weight:600; }
+  .entry-r .lab small{ display:block; color:var(--muted); font-weight:500; font-size:0.7rem; }
+  .entry-r .ins{ display:flex; gap:6px; flex:1; }
+  .entry-r input{
+    width:100%; min-width:0; padding:9px 8px; border-radius:9px; text-align:center;
+    border:1px solid var(--panel-line); background:var(--night); color:var(--ink);
+    font-size:1rem; font-family:'Baloo 2', monospace; letter-spacing:0.04em;
   }
-  .stepper{ display:flex; align-items:center; gap:6px; margin-left:auto; }
-  .stepper button{
-    width:30px; height:30px; border-radius:8px; border:1px solid var(--panel-line);
-    background:var(--night); color:var(--ink); font-size:1rem; cursor:pointer;
-  }
-  .stepper .val{ min-width:26px; text-align:center; font-family:'Baloo 2'; font-size:1rem; }
-  .mini-toggle{
-    font-size:0.72rem; padding:5px 8px; border-radius:20px; border:1px solid var(--panel-line);
-    background:var(--night); color:var(--ink-dim); cursor:pointer; white-space:nowrap;
-  }
-  .mini-toggle.on{ background:var(--lantern); color:#241a06; border-color:var(--lantern); }
-  .die-remove{
-    background:none; border:none; color:var(--muted); font-size:1.1rem; cursor:pointer; padding:4px 2px;
-  }
+  .entry-r input:focus{ outline:2px solid var(--lantern); outline-offset:1px; }
+  .entry-r input.accent::placeholder{ color:var(--lantern-bright); opacity:0.8; }
+  .entry-hint{ font-size:0.76rem; color:var(--muted); margin-top:8px; line-height:1.5; }
 
   .total-banner{
-    margin-top:18px; padding:18px; border-radius:var(--radius);
+    margin-top:16px; padding:16px; border-radius:var(--radius);
     background:linear-gradient(180deg, rgba(246,197,103,0.16), rgba(246,197,103,0.03));
     border:1px solid var(--panel-line); text-align:center;
   }
-  .total-banner .n{ font-family:'Baloo 2'; font-size:2.6rem; color:var(--lantern-bright); }
-  .total-banner .l{ color:var(--ink-dim); font-size:0.82rem; margin-top:2px; }
-  .breakdown{ margin-top:12px; font-size:0.85rem; color:var(--ink-dim); }
-  .breakdown .row{ display:flex; justify-content:space-between; padding:3px 0; }
+  .total-banner .n{ font-family:'Baloo 2'; font-size:2.4rem; color:var(--lantern-bright); line-height:1; }
+  .total-banner .l{ color:var(--ink-dim); font-size:0.8rem; margin-top:4px; }
+  .breakdown{ margin-top:10px; font-size:0.84rem; color:var(--ink-dim); }
+  .breakdown .row{ display:flex; justify-content:space-between; padding:2px 0; }
 
-  table.board{ width:100%; border-collapse:collapse; margin-top:14px; font-size:0.85rem; }
-  table.board th, table.board td{
-    padding:9px 6px; text-align:center; border-bottom:1px solid var(--panel-line);
-  }
-  table.board th{ color:var(--ink-dim); font-weight:600; font-size:0.75rem; }
+  table.board{ width:100%; border-collapse:collapse; margin-top:12px; font-size:0.85rem; }
+  table.board th, table.board td{ padding:9px 5px; text-align:center; border-bottom:1px solid var(--panel-line); }
+  table.board th{ color:var(--ink-dim); font-weight:600; font-size:0.72rem; }
   table.board td.name-cell, table.board th.name-cell{
     text-align:left; position:sticky; left:0; background:var(--night-deep);
-    padding-left:2px; max-width:84px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+    padding-left:2px; max-width:92px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
   }
   table.board td.total-cell{ font-family:'Baloo 2'; color:var(--lantern-bright); }
   table.board tr.leader td.name-cell{ color:var(--lantern-bright); }
+  table.board td.now{ box-shadow:inset 0 0 0 1px var(--panel-line); border-radius:6px; }
 
-  .empty-state{ text-align:center; padding:32px 12px; color:var(--ink-dim); }
+  .empty-state{ text-align:center; padding:30px 12px; color:var(--ink-dim); }
   .empty-state .icon{ font-size:1.8rem; margin-bottom:6px; }
 
   .toast{
-    position:fixed; left:50%; bottom:96px; transform:translateX(-50%);
+    position:fixed; left:50%; bottom:100px; transform:translateX(-50%);
     background:var(--lantern); color:#241a06; padding:10px 18px; border-radius:30px;
-    font-size:0.85rem; font-weight:600; box-shadow:0 6px 20px rgba(0,0,0,0.35);
-    z-index:50;
+    font-size:0.85rem; font-weight:600; box-shadow:0 6px 20px rgba(0,0,0,0.35); z-index:50; max-width:90%;
   }
 
   .tabbar{
-    position:fixed; bottom:0; left:0; right:0;
-    max-width:480px; margin:0 auto;
-    display:flex; background:var(--night-deep); border-top:1px solid var(--panel-line);
-    z-index:40;
+    position:fixed; bottom:0; left:0; right:0; max-width:480px; margin:0 auto;
+    display:flex; background:var(--night-deep); border-top:1px solid var(--panel-line); z-index:40;
+    padding-bottom:env(safe-area-inset-bottom);
   }
   .tabbar button{
-    flex:1; background:none; border:none; padding:12px 4px 14px;
-    color:var(--muted); font-size:0.78rem; cursor:pointer;
-    display:flex; flex-direction:column; align-items:center; gap:3px;
+    flex:1; background:none; border:none; padding:12px 4px 14px; color:var(--muted);
+    font-size:0.78rem; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:3px;
   }
   .tabbar button.active{ color:var(--lantern-bright); }
   .tabbar .ic{ font-size:1.15rem; }
 
-  .error-msg{
-    margin-top:12px; padding:10px 12px; border-radius:10px;
-    background:rgba(224,122,114,0.14); border:1px solid rgba(224,122,114,0.35);
-    color:#f2b3ae; font-size:0.85rem;
+  .banner{
+    margin-top:12px; padding:10px 12px; border-radius:10px; font-size:0.84rem; line-height:1.5;
+    background:rgba(224,122,114,0.14); border:1px solid rgba(224,122,114,0.35); color:#f2b3ae;
   }
-
+  .banner.info{ background:rgba(87,169,232,0.12); border-color:rgba(87,169,232,0.32); color:#bfe0f7; }
   .small-note{ font-size:0.78rem; color:var(--muted); margin-top:10px; line-height:1.5; }
+
+  .hof{ margin-top:26px; }
+  .hof h3{ font-size:0.78rem; color:var(--ink-dim); text-transform:uppercase; letter-spacing:0.06em; margin-bottom:8px; }
+  .hof .row{ display:flex; justify-content:space-between; gap:10px; padding:7px 2px; border-bottom:1px solid var(--panel-line); font-size:0.86rem; }
+  .hof .row:last-child{ border-bottom:none; }
+  .hof .row .who{ color:var(--ink-dim); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .hof .row .pts{ font-family:'Baloo 2', monospace; color:var(--lantern-bright); flex-shrink:0; }
 </style>
 </head>
 <body>
 <div id="app"></div>
 
-<script>
-/* ---------- storage helpers ---------- */
-async function storGet(key, shared){
-  try{ const r = await window.storage.get(key, shared); return r ? JSON.parse(r.value) : null; }
-  catch(e){ return null; }
-}
-async function storSet(key, value, shared){
-  try{ const r = await window.storage.set(key, JSON.stringify(value), shared); return !!r; }
-  catch(e){ return false; }
-}
-async function storListKeys(prefix, shared){
-  try{ const r = await window.storage.list(prefix, shared); return (r && r.keys) ? r.keys : []; }
-  catch(e){ return []; }
-}
+<script type="module">
+import { scoreRound, DICE_COLORS } from './lib/score.js';
 
-/* ---------- dice config ---------- */
-const DICE_COLORS = [
-  {id:'yellow', label:'Yellow', hex:'var(--c-yellow)'},
-  {id:'purple', label:'Purple', hex:'var(--c-purple)'},
-  {id:'blue',   label:'Blue',   hex:'var(--c-blue)'},
-  {id:'red',    label:'Red',    hex:'var(--c-red)'},
-  {id:'green',  label:'Green',  hex:'var(--c-green)'},
-  {id:'clear',  label:'Clear',  hex:'var(--c-clear)'},
-  {id:'pink',   label:'Pink',   hex:'var(--c-pink)'},
+/* ------------------------------------------------------------------ *
+ * constants
+ * ------------------------------------------------------------------ */
+const ROUNDS = 10;
+
+const COLOR_HEX = {
+  yellow:'var(--c-yellow)', purple:'var(--c-purple)', blue:'var(--c-blue)',
+  red:'var(--c-red)', green:'var(--c-green)', clear:'var(--c-clear)', pink:'var(--c-pink)',
+};
+
+// Every color is always on screen. Just type the face values, space or comma separated.
+const ENTRY_ROWS = [
+  { color:'yellow', label:'Yellow', fields:[{ key:'yellow', ph:'e.g. 3 5 6' }] },
+  { color:'purple', label:'Purple', note:'×2', fields:[{ key:'purple', ph:'values' }] },
+  { color:'blue',   label:'Blue',   fields:[
+      { key:'blue', ph:'plain' }, { key:'blueGlitter', ph:'✨ glitter', accent:true } ] },
+  { color:'red',    label:'Red',    note:'× count', fields:[
+      { key:'redWhite', ph:'white +' }, { key:'redBlack', ph:'black −', accent:true } ] },
+  { color:'green',  label:'Green',  fields:[{ key:'green', ph:'values' }] },
+  { color:'clear',  label:'Clear',  fields:[{ key:'clear', ph:'values' }] },
+  { color:'pink',   label:'Pink',   fields:[{ key:'pink', ph:'pity die' }] },
 ];
-function colorHex(id){
-  const c = DICE_COLORS.find(c=>c.id===id);
-  return c ? c.hex : '#888';
+const FIELD_KEYS = ['yellow','purple','blue','blueGlitter','redWhite','redBlack','green','clear','pink'];
+const emptyFields = () => Object.fromEntries(FIELD_KEYS.map(k => [k, '']));
+
+const AVATAR_COLORS = ['var(--c-yellow)','var(--c-purple)','var(--c-blue)','var(--c-red)','var(--c-green)','var(--c-pink)','var(--c-clear)'];
+function avatarColor(id){ let h=0; for(const ch of String(id)) h += ch.charCodeAt(0); return AVATAR_COLORS[h % AVATAR_COLORS.length]; }
+function genId(){ return 'p_' + Math.random().toString(36).slice(2,10) + Date.now().toString(36).slice(-3); }
+
+/* ------------------------------------------------------------------ *
+ * fields <-> dice
+ * ------------------------------------------------------------------ */
+function parseValues(s){
+  return String(s || '').split(/[^0-9.]+/).map(x => x.trim()).filter(Boolean)
+    .map(Number).filter(n => Number.isFinite(n)).map(n => Math.max(0, Math.min(99, Math.round(n))));
 }
-function colorLabel(id){
-  const c = DICE_COLORS.find(c=>c.id===id);
-  return c ? c.label : id;
+function fieldsToDice(f){
+  const dice = [];
+  parseValues(f.yellow).forEach(v => dice.push({ color:'yellow', value:v }));
+  parseValues(f.purple).forEach(v => dice.push({ color:'purple', value:v }));
+  parseValues(f.blue).forEach(v => dice.push({ color:'blue', value:v, glitter:false }));
+  parseValues(f.blueGlitter).forEach(v => dice.push({ color:'blue', value:v, glitter:true }));
+  parseValues(f.redWhite).forEach(v => dice.push({ color:'red', value:v, sign:'positive' }));
+  parseValues(f.redBlack).forEach(v => dice.push({ color:'red', value:v, sign:'negative' }));
+  parseValues(f.green).forEach(v => dice.push({ color:'green', value:v }));
+  parseValues(f.clear).forEach(v => dice.push({ color:'clear', value:v }));
+  parseValues(f.pink).forEach(v => dice.push({ color:'pink', value:v }));
+  return dice;
 }
-
-/* ---------- scoring ---------- */
-function scoreRound(dice){
-  const by = c => dice.filter(d=>d.color===c);
-  const sum = arr => arr.reduce((s,d)=>s+(Number(d.value)||0),0);
-
-  const yellowSum = sum(by('yellow'));
-
-  const purpleSum = sum(by('purple')) * 2;
-
-  const blueDice = by('blue');
-  const blueRaw = sum(blueDice);
-  const hasGlitter = blueDice.some(d=>d.glitter);
-  const blueScore = hasGlitter ? blueRaw*2 : blueRaw;
-
-  const redDice = by('red');
-  const redSigned = redDice.reduce((s,d)=> s + ((d.sign==='negative') ? -(Number(d.value)||0) : (Number(d.value)||0)), 0);
-  const redScore = redSigned * redDice.length;
-
-  const greenSum = sum(by('green'));
-  const clearSum = sum(by('clear'));
-  const pinkSum = sum(by('pink'));
-
-  const total = yellowSum + purpleSum + blueScore + redScore + greenSum + clearSum + pinkSum;
-
-  return {
-    total,
-    breakdown:{ yellowSum, purpleSum, blueScore, redScore, greenSum, clearSum, pinkSum },
-    counts:{
-      yellow:by('yellow').length, purple:by('purple').length, blue:blueDice.length,
-      red:redDice.length, green:by('green').length, clear:by('clear').length, pink:by('pink').length
-    }
-  };
+function diceToFields(dice){
+  const f = emptyFields();
+  const add = (k, v) => { f[k] = (f[k] ? f[k] + ' ' : '') + v; };
+  (dice || []).forEach(d => {
+    if(!DICE_COLORS.includes(d.color)) return;
+    if(d.color === 'blue') add(d.glitter ? 'blueGlitter' : 'blue', d.value);
+    else if(d.color === 'red') add(d.sign === 'negative' ? 'redBlack' : 'redWhite', d.value);
+    else add(d.color, d.value);
+  });
+  return f;
 }
 
-/* ---------- vision analysis ---------- */
-const SYSTEM_PROMPT = `You are reading a photo of dice from the board game Panda Royale for score tracking.
-Dice come in exactly these colors, each with a specific meaning:
-- yellow: standard die
-- purple: standard die
-- blue: standard die; a small number of blue dice are a "glitter" variant with metallic/sparkly gold-colored numerals instead of plain white numerals
-- red: has some numerals printed in black ink and some in white ink on the same die; report the ink color of the numeral shown face-up as "white" or "black"
-- green: standard die, often a large many-sided die with high numbers
-- clear (translucent/frosted white plastic): standard die
-- pink: standard die, usually just one
+/* ------------------------------------------------------------------ *
+ * local storage
+ * ------------------------------------------------------------------ */
+const LS = {
+  get(k, fb){ try { const v = localStorage.getItem(k); return v == null ? fb : JSON.parse(v); } catch { return fb; } },
+  set(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
+  del(k){ try { localStorage.removeItem(k); } catch {} },
+};
+const roundKey = code => `pr.round.${code}`;
 
-For every individual die visible in the photo, report: color (one of yellow, purple, blue, red, green, clear, pink), the face-up numeric value, and for blue dice a boolean "glitter" (true if it is the sparkly gold-numeral variant), and for red dice a "numeralColor" of "white" or "black".
+/* ------------------------------------------------------------------ *
+ * api
+ * ------------------------------------------------------------------ */
+let aiAvailable = true;
 
-Respond with ONLY a raw JSON array, no markdown fences, no other text. Example:
-[{"color":"yellow","value":4},{"color":"blue","value":2,"glitter":false},{"color":"red","value":5,"numeralColor":"white"}]
+async function api(op, payload){
+  if(op === 'get'){
+    const r = await fetch(`/api/game?code=${encodeURIComponent(payload.code)}`, { cache:'no-store' });
+    if(!r.ok) throw Object.assign(new Error('get failed'), { status:r.status, body: await r.json().catch(()=>({})) });
+    return r.json();
+  }
+  const r = await fetch('/api/game', {
+    method:'POST', headers:{ 'content-type':'application/json' },
+    body: JSON.stringify({ op, ...payload }),
+  });
+  const body = await r.json().catch(() => ({}));
+  if(!r.ok) throw Object.assign(new Error(body.error || 'request failed'), { status:r.status, body });
+  return body;
+}
 
-If you are unsure about a die, still include your best guess - the person reviews and corrects everything before it's used.`;
+async function analyzePhoto(dataUrl){
+  const r = await fetch('/api/analyze', {
+    method:'POST', headers:{ 'content-type':'application/json' },
+    body: JSON.stringify({ image: dataUrl }),
+  });
+  const body = await r.json().catch(() => ({}));
+  if(r.status === 503){ aiAvailable = false; throw Object.assign(new Error('ai off'), { soft:true }); }
+  if(!r.ok) throw new Error(body.message || 'Could not read the photo');
+  return body.dice || [];
+}
 
 function resizeImageFile(file){
-  return new Promise((resolve, reject)=>{
+  return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => {
       const img = new Image();
       img.onload = () => {
-        const maxDim = 1000;
+        const maxDim = 1100;
         let w = img.width, h = img.height;
-        if(w > h && w > maxDim){ h = Math.round(h * maxDim/w); w = maxDim; }
-        else if(h > maxDim){ w = Math.round(w * maxDim/h); h = maxDim; }
+        if(w > h && w > maxDim){ h = Math.round(h * maxDim / w); w = maxDim; }
+        else if(h > maxDim){ w = Math.round(w * maxDim / h); h = maxDim; }
         const canvas = document.createElement('canvas');
         canvas.width = w; canvas.height = h;
         canvas.getContext('2d').drawImage(img, 0, 0, w, h);
@@ -377,472 +374,601 @@ function resizeImageFile(file){
   });
 }
 
-async function analyzeDiceImage(dataUrl){
-  const base64 = dataUrl.split(',')[1];
-  const body = {
-    model: 'claude-sonnet-4-6',
-    max_tokens: 1000,
-    system: SYSTEM_PROMPT,
-    messages: [{
-      role:'user',
-      content:[
-        { type:'image', source:{ type:'base64', media_type:'image/jpeg', data: base64 } },
-        { type:'text', text:'List every die in this photo per your instructions. Respond with only the JSON array.' }
-      ]
-    }]
-  };
-  const res = await fetch('https://api.anthropic.com/v1/messages', {
-    method:'POST',
-    headers:{ 'Content-Type':'application/json' },
-    body: JSON.stringify(body)
-  });
-  const data = await res.json();
-  const textBlock = (data.content||[]).find(b=>b.type==='text');
-  if(!textBlock) throw new Error('No text in response');
-  const clean = textBlock.text.replace(/```json|```/g,'').trim();
-  const parsed = JSON.parse(clean);
-  if(!Array.isArray(parsed)) throw new Error('Bad shape');
-  return parsed.map(d=>({
-    color: DICE_COLORS.some(c=>c.id===d.color) ? d.color : 'yellow',
-    value: Math.max(1, Math.round(Number(d.value)||1)),
-    glitter: !!d.glitter,
-    sign: d.numeralColor === 'black' ? 'negative' : 'positive'
-  }));
-}
-
-/* ---------- ids / codes ---------- */
-function genId(){ return 'p_' + Math.random().toString(36).slice(2,10); }
-function genCode(){
-  const letters = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
-  let c=''; for(let i=0;i<4;i++) c += letters[Math.floor(Math.random()*letters.length)];
-  return c;
-}
-const AVATAR_COLORS = ['var(--c-yellow)','var(--c-purple)','var(--c-blue)','var(--c-red)','var(--c-green)','var(--c-pink)','var(--c-clear)'];
-function avatarColor(id){
-  let h=0; for(const ch of id) h += ch.charCodeAt(0);
-  return AVATAR_COLORS[h % AVATAR_COLORS.length];
-}
-
-/* ---------- state ---------- */
+/* ------------------------------------------------------------------ *
+ * state
+ * ------------------------------------------------------------------ */
 let state = {
-  view: 'home',
-  me: null,
+  screen: 'home',
+  mode: null,                 // 'online' | 'local'
+  homeTab: 'online',          // 'online' | 'local'
+  me: LS.get('pr.me', null) || { id: genId(), name:'' },
+
   code: null,
-  players: [],
-  round: 1,
-  draftDice: [],
-  draftPhoto: null,
+  game: null,                 // server state {code,hostId,players,scores,...}
+
+  local: null,                // {players:[{id,name}], scores:{}, createdAt}
+
+  entryRound: 1,
+  entryPlayerId: null,
+  fields: emptyFields(),
+  photo: null,
   analyzing: false,
   analyzeError: null,
-  scoreboard: null,
-  loadingScoreboard: false,
+
   toast: null,
-  homeMode: 'start',
+  banner: null,
+  hof: [],
 };
-let scoreboardTimer = null;
+let pollTimer = null;
 
-function setState(patch){ state = {...state, ...patch}; render(); }
-function showToast(msg){
-  setState({toast: msg});
-  setTimeout(()=>{ if(state.toast===msg) setState({toast:null}); }, 2400);
+function setState(patch){ state = { ...state, ...patch }; render(); }
+function toast(msg){
+  setState({ toast: msg });
+  clearTimeout(toast._t);
+  toast._t = setTimeout(() => { if(state.toast === msg) setState({ toast:null }); }, 2400);
+}
+function saveMe(name){
+  state.me = { id: state.me.id, name: (name ?? state.me.name).trim() };
+  LS.set('pr.me', state.me);
 }
 
-/* ---------- data ops ---------- */
-async function initMe(){
-  const saved = await storGet('me', false);
-  if(saved && saved.id){ state.me = saved; }
-  else { state.me = { id: genId(), name: '' }; }
+/* ------------------------------------------------------------------ *
+ * unified game view (works for both modes)
+ * ------------------------------------------------------------------ */
+function view(){
+  if(state.mode === 'local'){
+    const g = state.local || { players:[], scores:{} };
+    return { code:'PASS & PLAY', players:g.players, scores:g.scores, hostId:null, isLocal:true };
+  }
+  const g = state.game;
+  if(!g) return null;
+  return { code:g.code, players:g.players || [], scores:g.scores || {}, hostId:g.hostId, isLocal:false };
+}
+function totalsFor(v){
+  return v.players.map(p => {
+    let total = 0;
+    for(let r = 1; r <= ROUNDS; r++){
+      const e = v.scores[r] && v.scores[r][p.id];
+      if(e) total += e.total;
+    }
+    return { ...p, total };
+  }).sort((a, b) => b.total - a.total);
 }
 
-async function refreshPlayers(){
-  if(!state.code) return;
-  const list = await storGet(`pr:${state.code}:players`, true);
-  setState({ players: list || [] });
+/* ------------------------------------------------------------------ *
+ * actions
+ * ------------------------------------------------------------------ */
+async function createOnline(name){
+  saveMe(name);
+  if(!state.me.name){ toast('Enter your name first'); return; }
+  try {
+    const game = await api('create', { playerId: state.me.id, name: state.me.name });
+    LS.set('pr.session', { mode:'online', code: game.code });
+    LS.set(roundKey(game.code), 1);
+    setState({ mode:'online', code: game.code, game, screen:'lobby', entryRound:1, banner:null });
+  } catch(e){ handleApiError(e); }
+}
+async function joinOnline(name, code){
+  code = (code || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+  saveMe(name);
+  if(!state.me.name){ toast('Enter your name first'); return; }
+  if(code.length < 3){ toast('Enter the game code'); return; }
+  try {
+    const game = await api('join', { code, playerId: state.me.id, name: state.me.name });
+    LS.set('pr.session', { mode:'online', code: game.code });
+    const savedRound = LS.get(roundKey(game.code), 1);
+    setState({ mode:'online', code: game.code, game, screen:'lobby', entryRound: savedRound, banner:null });
+  } catch(e){
+    if(e.status === 404){ toast('No game with that code'); return; }
+    handleApiError(e);
+  }
+}
+async function refreshOnline(){
+  if(state.mode !== 'online' || !state.code) return;
+  try {
+    const game = await api('get', { code: state.code });
+    if(JSON.stringify(game) !== JSON.stringify(state.game)) setState({ game });
+  } catch(e){
+    if(e.status === 404){ leaveGame('That game has ended.'); }
+  }
+}
+function handleApiError(e){
+  if(e.status === 503){
+    setState({ banner:'Shared storage is not connected yet. Ask the site owner to attach an Upstash Redis (Vercel KV) store. Pass-and-play on one phone still works.' });
+  } else {
+    toast(e.body && e.body.message ? e.body.message : 'Something went wrong');
+  }
 }
 
-async function joinOrCreate(code, name){
-  const cleanName = (name||'').trim() || 'Player';
-  const me = { id: state.me.id, name: cleanName };
-  await storSet('me', me, false);
-
-  let list = await storGet(`pr:${code}:players`, true) || [];
-  const exists = list.find(p=>p.id===me.id);
-  if(exists){ exists.name = cleanName; }
-  else { list.push(me); }
-  await storSet(`pr:${code}:players`, list, true);
-
-  setState({ me, code, players: list, view:'lobby', round: 1 });
+function startLocal(){
+  const existing = LS.get('pr.local', null);
+  const local = existing && existing.players && existing.players.length
+    ? existing
+    : { players: [], scores: {}, createdAt: Date.now() };
+  LS.set('pr.local', local);
+  LS.set('pr.session', { mode:'local' });
+  setState({ mode:'local', local, screen:'lobby', entryRound:1, code:'PASS & PLAY' });
+}
+function persistLocal(){ if(state.local) LS.set('pr.local', state.local); }
+function addLocalPlayer(name){
+  name = (name || '').trim().slice(0, 24);
+  if(!name) return;
+  const local = { ...state.local, players: [...state.local.players, { id: genId(), name }] };
+  setState({ local }); persistLocal();
+}
+function removeLocalPlayer(id){
+  const players = state.local.players.filter(p => p.id !== id);
+  const scores = {};
+  for(const r of Object.keys(state.local.scores)){
+    scores[r] = { ...state.local.scores[r] }; delete scores[r][id];
+  }
+  setState({ local: { ...state.local, players, scores } }); persistLocal();
 }
 
-async function submitRound(round, dice){
-  const scored = scoreRound(dice);
-  const entry = { name: state.me.name, dice, total: scored.total, breakdown: scored.breakdown, submittedAt: Date.now() };
-  await storSet(`pr:${state.code}:r${round}:${state.me.id}`, entry, true);
-  return scored;
+function leaveGame(msg){
+  stopPoll();
+  if(state.mode === 'online' && state.code){
+    api('leave', { code: state.code, playerId: state.me.id }).catch(() => {});
+  }
+  LS.del('pr.session');
+  setState({
+    screen:'home', mode:null, code:null, game:null, local:null,
+    fields: emptyFields(), photo:null, analyzeError:null, banner: msg || null,
+  });
 }
 
-async function loadScoreboard(){
-  if(!state.code) return;
-  setState({ loadingScoreboard: true });
-  const players = await storGet(`pr:${state.code}:players`, true) || state.players;
-  const keys = await storListKeys(`pr:${state.code}:r`, true);
-  const rounds = {};
-  await Promise.all(keys.map(async key => {
-    const parts = key.split(':'); // pr, code, r{n}, playerId
-    const roundPart = parts[2] || '';
-    const roundNum = parseInt(roundPart.replace('r',''), 10);
-    const playerId = parts.slice(3).join(':');
-    if(!roundNum || !playerId) return;
-    const val = await storGet(key, true);
-    if(!val) return;
-    rounds[roundNum] = rounds[roundNum] || {};
-    rounds[roundNum][playerId] = val;
-  }));
-  setState({ scoreboard: { players, rounds }, players, loadingScoreboard:false });
+async function openEntry(playerId, round){
+  const v = view();
+  const existing = v.scores[round] && v.scores[round][playerId];
+  setState({
+    screen:'entry',
+    entryPlayerId: playerId,
+    entryRound: round,
+    fields: existing ? diceToFields(existing.dice) : emptyFields(),
+    photo: null, analyzeError: null,
+  });
 }
 
-function startScoreboardPolling(){
-  stopScoreboardPolling();
-  loadScoreboard();
-  scoreboardTimer = setInterval(loadScoreboard, 6000);
-}
-function stopScoreboardPolling(){
-  if(scoreboardTimer){ clearInterval(scoreboardTimer); scoreboardTimer = null; }
+async function saveEntry(){
+  const round = state.entryRound;
+  const dice = fieldsToDice(state.fields);
+  if(state.mode === 'local'){
+    const scored = scoreRound(dice);
+    const scores = { ...state.local.scores };
+    scores[round] = { ...(scores[round] || {}) };
+    scores[round][state.entryPlayerId] = { total: scored.total, breakdown: scored.breakdown, dice, submittedAt: Date.now() };
+    const local = { ...state.local, scores };
+    setState({ local, screen:'lobby' });
+    persistLocal();
+    const nextUnscored = local.players.find(p => !(scores[round] && scores[round][p.id]));
+    toast(nextUnscored ? `Saved. Next: ${nextUnscored.name}` : `Round ${round} complete`);
+    return;
+  }
+  try {
+    const game = await api('score', { code: state.code, playerId: state.me.id, round, dice });
+    const next = Math.min(ROUNDS, round + 1);
+    LS.set(roundKey(state.code), next);
+    setState({ game, screen:'lobby', entryRound: next, fields: emptyFields(), photo:null });
+    toast(`Round ${round} saved`);
+  } catch(e){ handleApiError(e); }
 }
 
-/* ---------- render ---------- */
+/* ------------------------------------------------------------------ *
+ * polling
+ * ------------------------------------------------------------------ */
+function syncPolling(){
+  const want = state.mode === 'online' && (state.screen === 'lobby' || state.screen === 'board');
+  if(want && !pollTimer){
+    pollTimer = setInterval(refreshOnline, 3000);
+    refreshOnline();
+  } else if(!want && pollTimer){
+    clearInterval(pollTimer);
+    pollTimer = null;
+  }
+}
+function stopPoll(){ if(pollTimer){ clearInterval(pollTimer); pollTimer = null; } }
+
+/* ------------------------------------------------------------------ *
+ * render
+ * ------------------------------------------------------------------ */
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+
 function render(){
   const app = document.getElementById('app');
-  let html = '';
-  if(state.view==='home') html = renderHome();
-  else if(state.view==='lobby') html = renderLobby();
-  else if(state.view==='capture') html = renderCapture();
-  else if(state.view==='review') html = renderReview();
-  else if(state.view==='scoreboard') html = renderScoreboard();
+  let body = '';
+  if(state.screen === 'home') body = renderHome();
+  else if(state.screen === 'lobby') body = renderLobby();
+  else if(state.screen === 'entry') body = renderEntry();
+  else if(state.screen === 'board') body = renderBoard();
 
-  const showTabs = state.view!=='home';
+  const chrome = state.screen !== 'home';
   app.innerHTML = `
-    ${showTabs ? renderTopbar() : ''}
-    <div class="screen">${html}</div>
-    ${state.toast ? `<div class="toast">${escapeHtml(state.toast)}</div>` : ''}
-    ${showTabs ? renderTabbar() : ''}
+    ${chrome ? renderTopbar() : ''}
+    <div class="screen">${body}</div>
+    ${state.toast ? `<div class="toast">${esc(state.toast)}</div>` : ''}
+    ${chrome ? renderTabbar() : ''}
   `;
-  bindEvents();
-
-  if(state.view==='scoreboard') startScoreboardPolling();
-  else stopScoreboardPolling();
-}
-
-function escapeHtml(s){
-  return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  bind();
+  syncPolling();
 }
 
 function renderTopbar(){
+  const v = view();
   return `
     <div class="topbar">
       <div>
-        <div class="code">${state.code||''}</div>
-        <div class="round">Round ${state.round} of 10</div>
+        <div class="code">${esc(v ? v.code : '')}</div>
+        <div class="sub">${state.mode === 'local' ? `${(state.local?.players.length || 0)} players` : `Round ${state.entryRound} of ${ROUNDS}`}</div>
       </div>
-      <button class="link-btn" data-action="leave">Leave game</button>
-    </div>
-  `;
+      <button class="link-btn" data-a="leave">${state.mode === 'local' ? 'Home' : 'Leave'}</button>
+    </div>`;
 }
-
 function renderTabbar(){
   return `
     <div class="tabbar">
-      <button class="${['lobby','capture','review'].includes(state.view)?'active':''}" data-action="go-lobby">
-        <span class="ic">🐼</span><span>Play</span>
-      </button>
-      <button class="${state.view==='scoreboard'?'active':''}" data-action="go-scoreboard">
-        <span class="ic">🏮</span><span>Scoreboard</span>
-      </button>
-    </div>
-  `;
+      <button class="${['lobby','entry'].includes(state.screen) ? 'active' : ''}" data-a="tab-play">
+        <span class="ic">🐼</span><span>Play</span></button>
+      <button class="${state.screen === 'board' ? 'active' : ''}" data-a="tab-board">
+        <span class="ic">🏮</span><span>Scoreboard</span></button>
+    </div>`;
 }
 
 function renderHome(){
+  const t = state.homeTab;
   return `
     <div class="lanterns">
-      <span style="background:var(--c-yellow)"></span>
-      <span style="background:var(--c-purple)"></span>
-      <span style="background:var(--c-blue)"></span>
-      <span style="background:var(--c-red)"></span>
-      <span style="background:var(--c-green)"></span>
-      <span style="background:var(--c-pink)"></span>
+      ${Object.values(COLOR_HEX).map(c => `<span style="background:${c}"></span>`).join('')}
     </div>
     <div class="hero">
       <h1>Panda Royale<br/>Scorekeeper</h1>
-      <p class="sub">Photograph your dice pool each round. The app reads the colors and does the math — you confirm before it counts.</p>
+      <p class="sub">Score all ten rounds together — one phone passed around the table, or everyone on their own device.</p>
     </div>
 
-    <label class="field-label" for="nameInput">Your name</label>
-    <input class="text-input" id="nameInput" placeholder="e.g. Rob" value="${escapeHtml(state.me?.name||'')}" />
+    ${state.banner ? `<div class="banner ${state.banner.includes('storage') ? '' : 'info'}">${esc(state.banner)}</div>` : ''}
 
-    <button class="btn btn-primary" data-action="create-game">Start a new game</button>
+    <div class="seg" style="margin-top:18px;">
+      <button class="${t === 'online' ? 'on' : ''}" data-a="home-tab" data-v="online">Separate phones</button>
+      <button class="${t === 'local' ? 'on' : ''}" data-a="home-tab" data-v="local">One shared phone</button>
+    </div>
 
-    <div class="divider">or join with a code</div>
-    <input class="text-input code-input" id="codeInput" placeholder="CODE" maxlength="6" />
-    <button class="btn btn-secondary" data-action="join-game">Join game</button>
+    ${t === 'online' ? `
+      <label class="field-label" for="nameInput">Your name</label>
+      <input class="text-input" id="nameInput" placeholder="e.g. Rob" value="${esc(state.me.name || '')}" autocomplete="off" />
+      <button class="btn btn-primary" data-a="create-online">Start a new game</button>
+      <div class="divider">or join with a code</div>
+      <input class="text-input code-input" id="codeInput" placeholder="CODE" maxlength="6" autocomplete="off"
+             value="${esc(state._prefillCode || '')}" />
+      <button class="btn btn-secondary" data-a="join-online">Join game</button>
+    ` : `
+      <p class="small-note" style="margin-top:16px;">Keep this one device at the table. Add everyone once, then hand it to each player to enter their dice each round. No codes, no internet needed.</p>
+      <button class="btn btn-primary" data-a="start-local">
+        ${LS.get('pr.local', null)?.players?.length ? 'Resume pass-and-play game' : 'New pass-and-play game'}
+      </button>
+      ${LS.get('pr.local', null)?.players?.length ? `<button class="btn btn-ghost" data-a="new-local">Start fresh instead</button>` : ''}
+    `}
+
+    ${state.hof.length ? `
+      <div class="hof">
+        <h3>🏮 Hall of Fame — biggest rounds</h3>
+        ${state.hof.map(e => `<div class="row"><span class="who">${esc(e.label)}</span><span class="pts">${e.score}</span></div>`).join('')}
+      </div>
+    ` : ''}
   `;
 }
 
 function renderLobby(){
-  const players = state.players || [];
+  const v = view();
+  const me = state.me.id;
+  const round = state.entryRound;
+
+  const playerList = v.players.length ? v.players.map(p => {
+    const done = v.scores[round] && v.scores[round][p.id];
+    const isMe = !v.isLocal && p.id === me;
+    return `
+      <div class="player-row">
+        <div class="avatar" style="background:${avatarColor(p.id)}">${esc((p.name || '?')[0].toUpperCase())}</div>
+        <div class="name">${esc(p.name)}${isMe ? '<span class="you-tag">you</span>' : ''}</div>
+        ${v.isLocal
+          ? `<button class="pill-btn ${done ? 'done' : ''}" data-a="score-player" data-id="${p.id}">${done ? `✓ ${done.total}` : 'Enter dice'}</button>
+             <button class="icon-btn" data-a="rm-player" data-id="${p.id}">✕</button>`
+          : `<span class="status ${done ? 'done' : ''}">${done ? `✓ ${done.total}` : 'waiting'}</span>`}
+      </div>`;
+  }).join('') : `<div class="player-row"><span class="small-note">No players yet.</span></div>`;
+
   return `
-    <div class="code-display">
-      <div class="label">Share this code with your table</div>
-      <div class="code-big">${state.code}</div>
-    </div>
+    ${state.banner ? `<div class="banner">${esc(state.banner)}</div>` : ''}
 
-    <div class="section-title">Players in this game</div>
-    <div class="card" style="padding:6px 14px;">
-      ${players.length ? players.map(p=>`
-        <div class="player-row">
-          <div class="avatar" style="background:${avatarColor(p.id)}">${escapeHtml((p.name||'?')[0].toUpperCase())}</div>
-          <div class="name">${escapeHtml(p.name)} ${p.id===state.me.id?'<span class="you-tag">you</span>':''}</div>
-        </div>
-      `).join('') : `<div class="player-row"><span class="small-note">No one here yet.</span></div>`}
-    </div>
-    <button class="btn btn-ghost" data-action="refresh-players">Refresh players</button>
-
-    <div class="section-title">Score a round</div>
-    <div class="round-picker">
-      <button data-action="round-prev">−</button>
-      <div class="round-label">Round ${state.round}</div>
-      <button data-action="round-next">+</button>
-    </div>
-    <button class="btn btn-primary" data-action="go-capture">Take dice photo</button>
-    <p class="small-note">Roll, then photograph your whole dice pool for this round before you trade or draft a new die.</p>
-  `;
-}
-
-function renderCapture(){
-  return `
-    <h2 style="font-size:1.2rem;">Round ${state.round}: your dice</h2>
-    <p class="small-note">Lay your dice out so each one is visible, then take a photo.</p>
-
-    <label class="capture-zone" for="photoInput">
-      <div class="icon">📷</div>
-      <div class="cta">${state.draftPhoto? 'Retake photo' : 'Take or choose a photo'}</div>
-      <div class="hint">Good light and dice spread apart works best</div>
-    </label>
-    <input type="file" id="photoInput" accept="image/*" capture="environment" style="display:none" />
-
-    ${state.draftPhoto ? `
-      <div class="thumb-row">
-        <img src="${state.draftPhoto}" />
-        <div class="status">
-          ${state.analyzing ? `<span class="spinner"></span> Reading your dice…` : 'Photo ready'}
-        </div>
+    ${v.isLocal ? '' : `
+      <div class="code-display">
+        <div class="label">Share this code with your table</div>
+        <div class="code-big">${esc(v.code)}</div>
       </div>
-    ` : ''}
+      <button class="btn btn-secondary" data-a="copy-link">Copy invite link</button>
+    `}
 
-    ${state.analyzeError ? `<div class="error-msg">${escapeHtml(state.analyzeError)} You can still add dice by hand on the next screen.</div>` : ''}
+    <div class="section-title">Round</div>
+    <div class="round-picker">
+      <button data-a="round-prev">−</button>
+      <div class="round-label">Round ${round} <span style="color:var(--muted)">of ${ROUNDS}</span></div>
+      <button data-a="round-next">+</button>
+    </div>
 
-    <button class="btn btn-secondary" data-action="skip-to-manual">Skip photo, enter dice manually</button>
+    <div class="section-title">${v.isLocal ? 'Players — tap to enter dice' : 'Players'}</div>
+    <div class="card" style="padding:4px 14px;">${playerList}</div>
+
+    ${v.isLocal ? `
+      <div class="add-row">
+        <input class="text-input" id="addPlayer" placeholder="Add a player" autocomplete="off" />
+        <button class="btn btn-secondary" data-a="add-player">Add</button>
+      </div>
+    ` : `
+      <button class="btn btn-primary" data-a="score-self">
+        ${v.scores[round] && v.scores[round][me] ? `Edit my round ${round}` : `Enter my dice for round ${round}`}
+      </button>
+      <button class="btn btn-ghost" data-a="refresh">Refresh players</button>
+    `}
+
+    ${(!v.isLocal && v.hostId === me) ? `<button class="btn btn-ghost" data-a="reset-scores">Reset all scores (host)</button>` : ''}
+    <p class="small-note">Roll and photograph or type your whole dice pool for the round before you trade or draft a new die.</p>
   `;
 }
 
-function renderReview(){
-  const scored = scoreRound(state.draftDice);
-  const b = scored.breakdown;
-  const c = scored.counts;
+function renderEntry(){
+  const v = view();
+  const p = v.players.find(x => x.id === state.entryPlayerId);
+  const dice = fieldsToDice(state.fields);
+  const scored = scoreRound(dice);
+  const b = scored.breakdown, c = scored.counts;
   const rows = [
     c.yellow ? ['Yellow', b.yellowSum] : null,
-    c.purple ? ['Purple (×2)', b.purpleSum] : null,
-    c.blue   ? ['Blue' + (state.draftDice.some(d=>d.color==='blue'&&d.glitter)?' (glitter ×2)':''), b.blueScore] : null,
-    c.red    ? ['Red (signed × count)', b.redScore] : null,
-    c.green  ? ['Green', b.greenSum] : null,
-    c.clear  ? ['Clear', b.clearSum] : null,
-    c.pink   ? ['Pink', b.pinkSum] : null,
+    c.purple ? ['Purple ×2', b.purpleSum] : null,
+    c.blue ? ['Blue' + (dice.some(d => d.color === 'blue' && d.glitter) ? ' (glitter ×2)' : ''), b.blueScore] : null,
+    c.red ? [`Red (signed × ${c.red})`, b.redScore] : null,
+    c.green ? ['Green', b.greenSum] : null,
+    c.clear ? ['Clear', b.clearSum] : null,
+    c.pink ? ['Pink', b.pinkSum] : null,
   ].filter(Boolean);
 
   return `
-    <h2 style="font-size:1.2rem;">Confirm your dice</h2>
-    <p class="small-note">Fix anything the reader got wrong, then submit.</p>
+    <h2 style="font-size:1.2rem;">Round ${state.entryRound}${p ? ` — ${esc(p.name)}` : ''}</h2>
+    <p class="small-note" style="margin-top:4px;">Type the face values for each color. Totals update as you go.</p>
 
-    <div>
-      ${state.draftDice.map((d, i)=> renderDieRow(d, i)).join('')}
+    ${aiAvailable ? `
+      <label class="capture-zone" for="photoInput">
+        <div class="icon">📷</div>
+        <div>
+          <div class="cta">${state.photo ? 'Retake photo' : 'Scan a dice photo'}</div>
+          <div class="hint">Optional — you can just type below</div>
+        </div>
+      </label>
+      <input type="file" id="photoInput" accept="image/*" capture="environment" style="display:none" />
+      ${state.photo ? `
+        <div class="thumb-row">
+          <img src="${state.photo}" alt="dice" />
+          <div class="status">${state.analyzing ? '<span class="spinner"></span> Reading dice…' : 'Applied — check the values below'}</div>
+        </div>` : ''}
+      ${state.analyzeError ? `<div class="banner">${esc(state.analyzeError)}</div>` : ''}
+    ` : ''}
+
+    <div class="entry-grid">
+      ${ENTRY_ROWS.map(r => `
+        <div class="entry-r">
+          <span class="dot" style="background:${COLOR_HEX[r.color]}"></span>
+          <span class="lab">${r.label}${r.note ? `<small>${r.note}</small>` : ''}</span>
+          <span class="ins">
+            ${r.fields.map(f => `
+              <input data-field="${f.key}" value="${esc(state.fields[f.key] || '')}"
+                     placeholder="${esc(f.ph)}" class="${f.accent ? 'accent' : ''}"
+                     inputmode="numeric" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />
+            `).join('')}
+          </span>
+        </div>`).join('')}
     </div>
-    <button class="btn btn-ghost" data-action="add-die">+ Add a die</button>
+    <p class="entry-hint">Blue: put sparkly-numeral dice in the glitter box (any there doubles all blue). Red: white numerals add, black subtract; the total is multiplied by how many red dice you rolled.</p>
 
     <div class="total-banner">
       <div class="n">${scored.total}</div>
-      <div class="l">Round ${state.round} score</div>
+      <div class="l">Round ${state.entryRound} score</div>
+      ${rows.length ? `<div class="breakdown">${rows.map(([l, val]) => `<div class="row"><span>${l}</span><span>${val}</span></div>`).join('')}</div>` : ''}
     </div>
-    ${rows.length ? `
-      <div class="breakdown">
-        ${rows.map(([label,val])=>`<div class="row"><span>${label}</span><span>${val}</span></div>`).join('')}
-      </div>
-    ` : ''}
 
-    <button class="btn btn-primary" data-action="submit-round">Submit round ${state.round} score</button>
+    <button class="btn btn-primary" data-a="save-entry">Save round ${state.entryRound}</button>
+    <button class="btn btn-ghost" data-a="tab-play">Back</button>
   `;
 }
 
-function renderDieRow(d, i){
-  const isBlue = d.color==='blue';
-  const isRed = d.color==='red';
-  return `
-    <div class="die-row" data-idx="${i}">
-      <span class="die-dot" style="background:${colorHex(d.color)}"></span>
-      <select class="die-color" data-die-field="color" data-idx="${i}">
-        ${DICE_COLORS.map(c=>`<option value="${c.id}" ${c.id===d.color?'selected':''}>${c.label}</option>`).join('')}
-      </select>
-      ${isBlue ? `<button class="mini-toggle ${d.glitter?'on':''}" data-action="toggle-glitter" data-idx="${i}">✨ glitter</button>` : ''}
-      ${isRed ? `<button class="mini-toggle ${d.sign==='negative'?'on':''}" data-action="toggle-sign" data-idx="${i}">${d.sign==='negative'?'− black':'+ white'}</button>` : ''}
-      <div class="stepper">
-        <button data-action="val-down" data-idx="${i}">−</button>
-        <span class="val">${d.value}</span>
-        <button data-action="val-up" data-idx="${i}">+</button>
-      </div>
-      <button class="die-remove" data-action="remove-die" data-idx="${i}">✕</button>
-    </div>
-  `;
-}
-
-function renderScoreboard(){
-  if(state.loadingScoreboard && !state.scoreboard){
-    return `<div class="empty-state"><div class="icon">🏮</div>Loading scoreboard…</div>`;
+function renderBoard(){
+  const v = view();
+  if(!v || !v.players.length){
+    return `<div class="empty-state"><div class="icon">🏮</div>No scores yet — ${v && v.isLocal ? 'add players and enter round 1.' : 'invite your table with the game code.'}</div>`;
   }
-  const sb = state.scoreboard;
-  if(!sb || !sb.players || !sb.players.length){
-    return `<div class="empty-state"><div class="icon">🏮</div>No players yet — invite your table with the game code.</div>`;
-  }
-  const totals = sb.players.map(p=>{
-    let total = 0;
-    for(let r=1;r<=10;r++){
-      const e = sb.rounds[r] && sb.rounds[r][p.id];
-      if(e) total += e.total;
-    }
-    return {...p, total};
-  }).sort((a,b)=>b.total-a.total);
-  const topTotal = totals.length ? totals[0].total : 0;
+  const totals = totalsFor(v);
+  const top = totals.length ? totals[0].total : 0;
+  const now = state.entryRound;
 
   return `
     <h2 style="font-size:1.2rem;">Scoreboard</h2>
-    <div style="overflow-x:auto;">
+    <div style="overflow-x:auto; -webkit-overflow-scrolling:touch;">
       <table class="board">
         <thead>
           <tr>
             <th class="name-cell">Player</th>
-            ${Array.from({length:10}, (_,i)=>`<th>R${i+1}</th>`).join('')}
+            ${Array.from({ length: ROUNDS }, (_, i) => `<th class="${i + 1 === now ? 'now' : ''}">R${i + 1}</th>`).join('')}
             <th>Total</th>
           </tr>
         </thead>
         <tbody>
-          ${totals.map(p=>`
-            <tr class="${p.total===topTotal ? 'leader':''}">
-              <td class="name-cell">${escapeHtml(p.name)}</td>
-              ${Array.from({length:10}, (_,i)=>{
-                const e = sb.rounds[i+1] && sb.rounds[i+1][p.id];
-                return `<td>${e ? e.total : '—'}</td>`;
+          ${totals.map(p => `
+            <tr class="${p.total === top && top !== 0 ? 'leader' : ''}">
+              <td class="name-cell">${esc(p.name)}</td>
+              ${Array.from({ length: ROUNDS }, (_, i) => {
+                const e = v.scores[i + 1] && v.scores[i + 1][p.id];
+                return `<td class="${i + 1 === now ? 'now' : ''}">${e ? e.total : '—'}</td>`;
               }).join('')}
               <td class="total-cell">${p.total}</td>
-            </tr>
-          `).join('')}
+            </tr>`).join('')}
         </tbody>
       </table>
     </div>
-    <button class="btn btn-ghost" data-action="refresh-board">Refresh</button>
-    <p class="small-note">Updates automatically every few seconds while this tab is open.</p>
+    ${v.isLocal ? '' : '<p class="small-note">Updates every few seconds while this tab is open.</p>'}
+    <button class="btn btn-ghost" data-a="${v.isLocal ? 'tab-play' : 'refresh'}">${v.isLocal ? 'Back to players' : 'Refresh now'}</button>
   `;
 }
 
-/* ---------- events ---------- */
-function bindEvents(){
+/* ------------------------------------------------------------------ *
+ * events
+ * ------------------------------------------------------------------ */
+function bind(){
   const app = document.getElementById('app');
 
   app.onclick = async (e) => {
-    const btn = e.target.closest('[data-action]');
-    if(!btn) return;
-    const action = btn.dataset.action;
-    const idx = btn.dataset.idx !== undefined ? parseInt(btn.dataset.idx,10) : null;
+    const el = e.target.closest('[data-a]');
+    if(!el) return;
+    const a = el.dataset.a;
+    const id = el.dataset.id;
 
-    if(action==='create-game'){
-      const name = document.getElementById('nameInput').value;
-      const code = genCode();
-      await joinOrCreate(code, name);
+    if(a === 'home-tab') setState({ homeTab: el.dataset.v });
+    else if(a === 'create-online') createOnline(document.getElementById('nameInput').value);
+    else if(a === 'join-online') joinOnline(document.getElementById('nameInput').value, document.getElementById('codeInput').value);
+    else if(a === 'start-local') startLocal();
+    else if(a === 'new-local'){ LS.del('pr.local'); startLocal(); }
+    else if(a === 'leave') leaveGame();
+    else if(a === 'tab-play') setState({ screen:'lobby' });
+    else if(a === 'tab-board') setState({ screen:'board' });
+    else if(a === 'refresh'){ await refreshOnline(); toast('Updated'); }
+    else if(a === 'round-prev') setState({ entryRound: Math.max(1, state.entryRound - 1) });
+    else if(a === 'round-next') setState({ entryRound: Math.min(ROUNDS, state.entryRound + 1) });
+    else if(a === 'add-player'){
+      const inp = document.getElementById('addPlayer');
+      addLocalPlayer(inp.value); inp.value = '';
     }
-    else if(action==='join-game'){
-      const name = document.getElementById('nameInput').value;
-      const code = (document.getElementById('codeInput').value||'').trim().toUpperCase();
-      if(!code){ showToast('Enter a game code'); return; }
-      await joinOrCreate(code, name);
+    else if(a === 'rm-player') removeLocalPlayer(id);
+    else if(a === 'score-player') openEntry(id, state.entryRound);
+    else if(a === 'score-self') openEntry(state.me.id, state.entryRound);
+    else if(a === 'save-entry') saveEntry();
+    else if(a === 'copy-link'){
+      const link = `${location.origin}/?code=${view().code}`;
+      try { await navigator.clipboard.writeText(link); toast('Invite link copied'); }
+      catch { toast(link); }
     }
-    else if(action==='leave'){
-      stopScoreboardPolling();
-      setState({ view:'home', code:null, players:[], scoreboard:null });
-    }
-    else if(action==='go-lobby'){ setState({ view:'lobby' }); refreshPlayers(); }
-    else if(action==='go-scoreboard'){ setState({ view:'scoreboard', scoreboard:null }); }
-    else if(action==='refresh-players'){ await refreshPlayers(); showToast('Player list updated'); }
-    else if(action==='refresh-board'){ loadScoreboard(); }
-    else if(action==='round-prev'){ setState({ round: Math.max(1, state.round-1) }); }
-    else if(action==='round-next'){ setState({ round: Math.min(10, state.round+1) }); }
-    else if(action==='go-capture'){ setState({ view:'capture', draftPhoto:null, analyzeError:null, draftDice:[] }); }
-    else if(action==='skip-to-manual'){ setState({ view:'review', draftDice: state.draftDice.length?state.draftDice:[{color:'yellow',value:1}] }); }
-    else if(action==='add-die'){
-      const dd = state.draftDice.slice(); dd.push({color:'yellow', value:1});
-      setState({ draftDice: dd });
-    }
-    else if(action==='remove-die'){
-      const dd = state.draftDice.slice(); dd.splice(idx,1);
-      setState({ draftDice: dd });
-    }
-    else if(action==='val-up'){
-      const dd = state.draftDice.slice(); dd[idx].value = Math.min(20, (dd[idx].value||1)+1);
-      setState({ draftDice: dd });
-    }
-    else if(action==='val-down'){
-      const dd = state.draftDice.slice(); dd[idx].value = Math.max(0, (dd[idx].value||1)-1);
-      setState({ draftDice: dd });
-    }
-    else if(action==='toggle-glitter'){
-      const dd = state.draftDice.slice(); dd[idx].glitter = !dd[idx].glitter;
-      setState({ draftDice: dd });
-    }
-    else if(action==='toggle-sign'){
-      const dd = state.draftDice.slice(); dd[idx].sign = dd[idx].sign==='negative' ? 'positive' : 'negative';
-      setState({ draftDice: dd });
-    }
-    else if(action==='submit-round'){
-      await submitRound(state.round, state.draftDice);
-      showToast(`Round ${state.round} saved`);
-      const nextRound = Math.min(10, state.round+1);
-      setState({ view:'lobby', round: nextRound, draftDice:[], draftPhoto:null });
+    else if(a === 'reset-scores'){
+      if(!confirm('Wipe every round score for all players?')) return;
+      try { const game = await api('reset', { code: state.code, playerId: state.me.id }); setState({ game }); toast('Scores cleared'); }
+      catch(err){ handleApiError(err); }
     }
   };
 
-  app.onchange = async (e) => {
-    if(e.target.id==='photoInput'){
-      const file = e.target.files[0];
+  // live recalculation on every keystroke + tidy on blur
+  app.oninput = (e) => {
+    const inp = e.target.closest('[data-field]');
+    if(!inp) return;
+    state.fields = { ...state.fields, [inp.dataset.field]: inp.value };
+    updateEntryTotals();
+  };
+  app.onfocusout = (e) => {
+    const inp = e.target.closest('[data-field]');
+    if(!inp) return;
+    const tidy = parseValues(inp.value).join(' ');
+    if(tidy !== inp.value){ inp.value = tidy; state.fields[inp.dataset.field] = tidy; }
+    updateEntryTotals();
+  };
+  app.onfocusin = (e) => {
+    const inp = e.target.closest('[data-field]');
+    if(inp) inp.select();
+  };
+
+  const photo = document.getElementById('photoInput');
+  if(photo){
+    photo.onchange = async () => {
+      const file = photo.files[0];
       if(!file) return;
-      const dataUrl = await resizeImageFile(file);
-      setState({ draftPhoto: dataUrl, analyzing:true, analyzeError:null });
-      try{
-        const dice = await analyzeDiceImage(dataUrl);
-        setState({ analyzing:false, view:'review', draftDice: dice.length ? dice : [{color:'yellow',value:1}] });
-      }catch(err){
-        setState({ analyzing:false, analyzeError:"Couldn't read the photo automatically." });
+      let dataUrl;
+      try { dataUrl = await resizeImageFile(file); }
+      catch { toast('Could not read that image'); return; }
+      setState({ photo: dataUrl, analyzing: true, analyzeError: null });
+      try {
+        const dice = await analyzePhoto(dataUrl);
+        const merged = mergeFields(state.fields, diceToFields(dice));
+        setState({ analyzing: false, fields: merged });
+      } catch(err){
+        if(err.soft) setState({ analyzing: false, photo: null });
+        else setState({ analyzing: false, analyzeError: (err.message || 'Could not read the photo') + ' — type the values instead.' });
       }
-    }
-    else if(e.target.dataset && e.target.dataset.dieField==='color'){
-      const idx = parseInt(e.target.dataset.idx,10);
-      const dd = state.draftDice.slice();
-      dd[idx].color = e.target.value;
-      setState({ draftDice: dd });
-    }
-  };
+    };
+  }
+
+  const codeInput = document.getElementById('codeInput');
+  if(codeInput) codeInput.oninput = () => { state._prefillCode = codeInput.value; };
 }
 
-/* ---------- boot ---------- */
-(async function boot(){
-  await initMe();
+// only overwrite fields the photo actually found something for
+function mergeFields(cur, found){
+  const out = { ...cur };
+  for(const k of FIELD_KEYS) if(found[k]) out[k] = found[k];
+  return out;
+}
+
+function updateEntryTotals(){
+  const dice = fieldsToDice(state.fields);
+  const scored = scoreRound(dice);
+  const n = document.querySelector('.total-banner .n');
+  if(n) n.textContent = scored.total;
+  const b = scored.breakdown, c = scored.counts;
+  const rows = [
+    c.yellow ? ['Yellow', b.yellowSum] : null,
+    c.purple ? ['Purple ×2', b.purpleSum] : null,
+    c.blue ? ['Blue' + (dice.some(d => d.color === 'blue' && d.glitter) ? ' (glitter ×2)' : ''), b.blueScore] : null,
+    c.red ? [`Red (signed × ${c.red})`, b.redScore] : null,
+    c.green ? ['Green', b.greenSum] : null,
+    c.clear ? ['Clear', b.clearSum] : null,
+    c.pink ? ['Pink', b.pinkSum] : null,
+  ].filter(Boolean);
+  const wrap = document.querySelector('.total-banner .breakdown');
+  const html = rows.map(([l, val]) => `<div class="row"><span>${l}</span><span>${val}</span></div>`).join('');
+  if(wrap) wrap.innerHTML = html;
+  else if(rows.length){
+    const banner = document.querySelector('.total-banner');
+    if(banner) banner.insertAdjacentHTML('beforeend', `<div class="breakdown">${html}</div>`);
+  }
+}
+
+/* ------------------------------------------------------------------ *
+ * boot
+ * ------------------------------------------------------------------ */
+async function boot(){
+  // probe AI availability quietly
+  fetch('/api/analyze', { method:'GET' }).then(r => { if(r.status === 503) aiAvailable = false; }).catch(() => {});
+  // hall of fame (empty until a game finishes)
+  fetch('/api/hof').then(r => r.json()).then(d => {
+    if(d && Array.isArray(d.entries) && d.entries.length){ state.hof = d.entries; if(state.screen === 'home') render(); }
+  }).catch(() => {});
+
+  const params = new URLSearchParams(location.search);
+  const deepCode = (params.get('code') || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+
+  const session = LS.get('pr.session', null);
+  if(deepCode){
+    state.homeTab = 'online';
+    state._prefillCode = deepCode;
+    if(state.me.name){
+      render();
+      await joinOnline(state.me.name, deepCode);
+      return;
+    }
+  } else if(session && session.mode === 'local'){
+    const local = LS.get('pr.local', null);
+    if(local && local.players){ state.mode = 'local'; state.local = local; state.code = 'PASS & PLAY'; state.screen = 'lobby'; }
+  } else if(session && session.mode === 'online' && session.code){
+    try {
+      const game = await api('get', { code: session.code });
+      state.mode = 'online'; state.code = session.code; state.game = game;
+      state.entryRound = LS.get(roundKey(session.code), 1);
+      state.screen = 'lobby';
+    } catch { LS.del('pr.session'); }
+  }
   render();
-})();
+}
+boot();
 </script>
 </body>
 </html>
