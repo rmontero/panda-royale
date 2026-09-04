@@ -78,8 +78,10 @@ export default async function handler(req, res) {
       else if (op === 'score') {
         game = await submitScore(code, { playerId, round: body.round, dice: body.dice });
         if (game && Number(body.round) >= TOTAL_ROUNDS) {
-          // durable: settle for stragglers, then archive + hall of fame
-          triggerFinalize(code).catch(() => {});
+          // durable: settle for stragglers, then archive + hall of fame.
+          // awaited on purpose — a serverless function may freeze before an
+          // un-awaited fetch to QStash completes.
+          await triggerFinalize(code).catch((e) => console.error('triggerFinalize', e));
         }
       } else if (op === 'unscore')
         game = await clearScore(code, { playerId, round: body.round });
