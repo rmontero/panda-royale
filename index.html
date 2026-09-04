@@ -363,22 +363,41 @@
   .upgrade-active{ color:var(--good); }
 
   /* ============================================================ *
-   * responsive — mobile first, then tablet, then desktop
+   * responsive — mobile first, then tablet (fluid, both orientations),
+   * then desktop (fixed, consistent per-screen widths)
    * ============================================================ */
-  @media (min-width: 680px){
+
+  /* short-landscape safety net, any width: a ~375-430px-tall viewport
+     (a phone turned sideways) can't afford a floating bottom tabbar or
+     tall hero padding without pushing content into a scroll. */
+  @media (orientation: landscape) and (max-height: 500px){
+    #app{ padding-bottom: 0; }
+    .tabbar{ position: sticky; left: auto; right: auto; max-width: none; border-inline: 0; }
+    .hero{ padding-top: 4px; }
+    .hero h1{ font-size: 1.7rem; }
+  }
+
+  /* roomy layout: tablets in portrait or landscape, and phones turned
+     landscape (often wider than 680px, or wide-but-short below it) —
+     fluid widths (min(vw, cap)) so the container uses whatever extra
+     space the device has instead of jumping straight to a fixed size */
+  @media (min-width: 680px),
+         (min-width: 560px) and (max-height: 500px) and (orientation: landscape){
     body{ background-attachment: fixed; }
     #app{
-      max-width: 600px;
+      max-width: min(94vw, 640px);
       padding-bottom: 0;
       border-inline: 1px solid var(--panel-line);
       box-shadow: 0 0 90px rgba(0,0,0,0.4);
       background: rgba(23,18,36,0.30);
     }
-    .screen{ padding: 26px 30px 22px; }
-    .topbar{ padding: 16px 30px; }
+    .screen{ padding: 26px 32px 22px; }
+    .topbar{ padding: 16px 32px; }
 
-    /* the scoreboard gets extra room on tablets too (never wider than the viewport) */
-    #app[data-screen="board"]{ max-width: min(760px, 100%); }
+    /* dice entry and the scoreboard have the most content per screen —
+       give them the most extra width, so a tablet needs less scrolling */
+    #app[data-screen="entry"]{ max-width: min(94vw, 760px); }
+    #app[data-screen="board"]{ max-width: min(96vw, 900px); }
 
     /* tab bar joins the app pane instead of floating over the viewport */
     .tabbar{
@@ -391,20 +410,9 @@
 
     .hero h1{ font-size: 2.2rem; }
     .btn{ padding: 14px 16px; }
-  }
 
-  @media (min-width: 1040px){
-    .screen{ padding: 34px 40px 26px; }
-    .topbar{ padding: 18px 40px; }
-
-    /* per-screen widths: forms stay tight, the scoreboard breathes */
-    #app[data-screen="home"]{ max-width: 460px; }
-    #app[data-screen="lobby"]{ max-width: 560px; }
-    #app[data-screen="credits"]{ max-width: 660px; }
-    #app[data-screen="entry"]{ max-width: min(720px, 100%); }
-    #app[data-screen="board"]{ max-width: min(980px, 100%); }
-
-    /* dice entry: two columns on the wider pane; final actions stay narrow and centered */
+    /* dice entry: two columns as soon as there's room, so all 7 colors
+       don't have to be scrolled through one at a time */
     #app[data-screen="entry"] .entry-grid{
       display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
       border: 0; overflow: visible; background: transparent;
@@ -426,14 +434,22 @@
     #app[data-screen="board"] table.board td{ padding: 12px 9px; }
     #app[data-screen="board"] table.board td.name-cell,
     #app[data-screen="board"] table.board th.name-cell{ max-width: none; }
-
-    .hero h1{ font-size: 2.4rem; }
   }
 
-  /* keep long dashboards usable in landscape on short screens */
-  @media (max-height: 460px) and (min-width: 680px){
-    #app{ min-height: 100vh; }
-    .tabbar{ position: sticky; }
+  /* desktop: fixed, consistent per-screen widths — stop scaling with the
+     viewport so the layout doesn't keep stretching as the window widens */
+  @media (min-width: 1040px){
+    .screen{ padding: 34px 40px 26px; }
+    .topbar{ padding: 18px 40px; }
+
+    /* forms stay tight and readable; the scoreboard breathes */
+    #app[data-screen="home"]{ max-width: 460px; }
+    #app[data-screen="lobby"]{ max-width: 560px; }
+    #app[data-screen="credits"]{ max-width: 660px; }
+    #app[data-screen="entry"]{ max-width: min(720px, 100%); }
+    #app[data-screen="board"]{ max-width: min(980px, 100%); }
+
+    .hero h1{ font-size: 2.4rem; }
   }
 </style>
 </head>
