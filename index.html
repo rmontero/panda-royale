@@ -253,6 +253,21 @@
   .lang-select:focus{ outline:2px solid var(--lantern); outline-offset:1px; }
   .lang-select option{ color:#111; }
   .topbar .lang-select{ padding:5px 7px; font-size:0.76rem; }
+
+  .home-foot{ margin-top:30px; text-align:center; }
+  .home-foot .link-btn{ font-size:0.82rem; }
+
+  .credits{ padding-top:6px; }
+  .credits p{ margin-top:16px; line-height:1.65; color:var(--ink-dim); font-size:0.95rem; }
+  .credits p strong{ color:var(--ink); font-weight:600; }
+  .credits .credits-story{
+    color:var(--ink); border-left:2px solid var(--panel-line);
+    padding-left:14px; font-size:1rem;
+  }
+  .credits .credits-sign{ color:var(--ink); font-family:'Baloo 2', system-ui, sans-serif; }
+  .credits .credits-sign a{ color:var(--lantern-bright); text-decoration:none; }
+  .credits .credits-sign a:hover{ text-decoration:underline; }
+  .credits .credits-fan{ font-size:0.8rem; color:var(--muted); margin-top:22px; }
 </style>
 </head>
 <body>
@@ -294,6 +309,11 @@ const I18N = {
     'leave': 'Leave',
     'tab.play': 'Play',
     'tab.board': 'Scoreboard',
+    'tab.credits': 'Credits',
+    'credits.tab': 'Credits',
+    'credits.built': 'Panda Royale Scorekeeper was built by a fully autonomous AI coding factory, designed and operated by <strong>Rob Montero</strong>.',
+    'credits.story': 'Board games are one of my favorite ways to stay close to my brother, <strong>Jose Alberto Fait</strong>, and his wife <strong>KT</strong>. He used his skills to keep America free. I used mine to keep us connected.',
+    'credits.fan': 'A fan-made tool, not affiliated with or endorsed by Last Night Games.',
     'passPlay': 'PASS & PLAY',
     'shareCode': 'Share this code with your table',
     'copyLink': 'Copy invite link',
@@ -381,6 +401,11 @@ const I18N = {
     'leave': 'Salir',
     'tab.play': 'Jugar',
     'tab.board': 'Marcador',
+    'tab.credits': 'Créditos',
+    'credits.tab': 'Créditos',
+    'credits.built': 'Panda Royale Scorekeeper fue creado por una fábrica de programación con IA totalmente autónoma, diseñada y operada por <strong>Rob Montero</strong>.',
+    'credits.story': 'Los juegos de mesa son una de mis formas favoritas de mantenerme cerca de mi hermano, <strong>Jose Alberto Fait</strong>, y su esposa <strong>KT</strong>. Él usó sus habilidades para mantener libre a Estados Unidos. Yo usé las mías para mantenernos conectados.',
+    'credits.fan': 'Herramienta hecha por fans, sin afiliación ni respaldo de Last Night Games.',
     'passPlay': 'MÓVIL COMPARTIDO',
     'shareCode': 'Comparte este código con tu mesa',
     'copyLink': 'Copiar enlace de invitación',
@@ -468,6 +493,11 @@ const I18N = {
     'leave': 'Verlassen',
     'tab.play': 'Spielen',
     'tab.board': 'Punktetafel',
+    'tab.credits': 'Danksagung',
+    'credits.tab': 'Danksagung',
+    'credits.built': 'Panda Royale Scorekeeper wurde von einer vollständig autonomen KI-Programmierfabrik gebaut, entworfen und betrieben von <strong>Rob Montero</strong>.',
+    'credits.story': 'Brettspiele sind eine meiner liebsten Arten, meinem Bruder <strong>Jose Alberto Fait</strong> und seiner Frau <strong>KT</strong> nahe zu bleiben. Er setzte seine Fähigkeiten ein, um Amerika frei zu halten. Ich setze meine ein, um uns verbunden zu halten.',
+    'credits.fan': 'Ein von Fans erstelltes Tool, nicht mit Last Night Games verbunden oder von ihnen unterstützt.',
     'passPlay': 'GEMEINSAMES HANDY',
     'shareCode': 'Teile diesen Code mit deinem Tisch',
     'copyLink': 'Einladungslink kopieren',
@@ -555,6 +585,11 @@ const I18N = {
     'leave': 'Quitter',
     'tab.play': 'Jouer',
     'tab.board': 'Scores',
+    'tab.credits': 'Crédits',
+    'credits.tab': 'Crédits',
+    'credits.built': 'Panda Royale Scorekeeper a été conçu par une usine de programmation IA entièrement autonome, imaginée et exploitée par <strong>Rob Montero</strong>.',
+    'credits.story': 'Les jeux de société sont l’une de mes façons préférées de rester proche de mon frère, <strong>Jose Alberto Fait</strong>, et de sa femme <strong>KT</strong>. Il a mis ses compétences au service de la liberté de l’Amérique. Je mets les miennes au service de nos liens.',
+    'credits.fan': 'Outil créé par des fans, sans affiliation ni approbation de Last Night Games.',
     'passPlay': 'TÉLÉPHONE PARTAGÉ',
     'shareCode': 'Partagez ce code avec votre table',
     'copyLink': "Copier le lien d'invitation",
@@ -642,6 +677,11 @@ const I18N = {
     'leave': 'Sair',
     'tab.play': 'Jogar',
     'tab.board': 'Placar',
+    'tab.credits': 'Créditos',
+    'credits.tab': 'Créditos',
+    'credits.built': 'O Panda Royale Scorekeeper foi criado por uma fábrica de programação com IA totalmente autônoma, concebida e operada por <strong>Rob Montero</strong>.',
+    'credits.story': 'Jogos de tabuleiro são uma das minhas formas favoritas de manter contato com meu irmão, <strong>Jose Alberto Fait</strong>, e sua esposa <strong>KT</strong>. Ele usou as habilidades dele para manter a América livre. Eu usei as minhas para manter a gente conectado.',
+    'credits.fan': 'Ferramenta feita por fãs, sem afiliação ou endosso da Last Night Games.',
     'passPlay': 'CELULAR COMPARTILHADO',
     'shareCode': 'Compartilhe este código com sua mesa',
     'copyLink': 'Copiar link de convite',
@@ -1071,13 +1111,16 @@ function render(){
   else if(state.screen === 'lobby') body = renderLobby();
   else if(state.screen === 'entry') body = renderEntry();
   else if(state.screen === 'board') body = renderBoard();
+  else if(state.screen === 'credits') body = renderCredits();
 
   const chrome = state.screen !== 'home';
+  const showTabs = ['lobby','entry','board'].includes(state.screen)
+    || (state.screen === 'credits' && !!state.mode);
   app.innerHTML = `
     ${chrome ? renderTopbar() : ''}
     <div class="screen">${body}</div>
     ${state.toast ? `<div class="toast">${esc(state.toast)}</div>` : ''}
-    ${chrome ? renderTabbar() : ''}
+    ${showTabs ? renderTabbar() : ''}
   `;
   bind();
   syncPolling();
@@ -1091,6 +1134,19 @@ function langSelect(){
 
 function renderTopbar(){
   const v = view();
+  if(state.screen === 'credits'){
+    return `
+    <div class="topbar">
+      <div>
+        <div class="code">Panda Royale</div>
+        <div class="sub">${esc(t('credits.tab'))}</div>
+      </div>
+      <div style="display:flex; align-items:center; gap:6px;">
+        ${langSelect()}
+        <button class="link-btn" data-a="credits-back">${esc(state.mode ? t('back') : t('home'))}</button>
+      </div>
+    </div>`;
+  }
   const code = state.mode === 'local' ? t('passPlay') : (v ? v.code : '');
   return `
     <div class="topbar">
@@ -1113,6 +1169,8 @@ function renderTabbar(){
         <span class="ic">🐼</span><span>${esc(t('tab.play'))}</span></button>
       <button class="${state.screen === 'board' ? 'active' : ''}" data-a="tab-board">
         <span class="ic">🏮</span><span>${esc(t('tab.board'))}</span></button>
+      <button class="${state.screen === 'credits' ? 'active' : ''}" data-a="tab-credits">
+        <span class="ic">🎲</span><span>${esc(t('tab.credits'))}</span></button>
     </div>`;
 }
 
@@ -1158,6 +1216,10 @@ function renderHome(){
         ${state.hof.map(e => `<div class="row"><span class="who">${esc(e.label)}</span><span class="pts">${e.score}</span></div>`).join('')}
       </div>
     ` : ''}
+
+    <div class="home-foot">
+      <button class="link-btn" data-a="go-credits">🎲 ${esc(t('tab.credits'))}</button>
+    </div>
   `;
 }
 
@@ -1335,6 +1397,29 @@ function renderBoard(){
   `;
 }
 
+function renderCredits(){
+  return `
+    <div class="credits">
+      <div class="lanterns" style="margin-bottom:18px;">
+        ${Object.values(COLOR_HEX).map(c => `<span style="background:${c}"></span>`).join('')}
+      </div>
+      <h2 style="font-size:1.3rem;">${esc(t('credits.tab'))}</h2>
+
+      <p>${t('credits.built')}</p>
+
+      <p class="credits-story">${t('credits.story')}</p>
+
+      <p class="credits-sign">— Rob Montero &nbsp;·&nbsp;
+        <a href="https://rob.cr" target="_blank" rel="noopener noreferrer">rob.cr</a>
+      </p>
+
+      <p class="credits-fan">${esc(t('credits.fan'))}</p>
+
+      ${state.mode ? `<button class="btn btn-ghost" data-a="credits-back">${esc(t('back'))}</button>` : ''}
+    </div>
+  `;
+}
+
 /* ------------------------------------------------------------------ *
  * events
  * ------------------------------------------------------------------ */
@@ -1356,6 +1441,9 @@ function bind(){
     else if(a === 'leave') leaveGame();
     else if(a === 'tab-play') setState({ screen:'lobby' });
     else if(a === 'tab-board') setState({ screen:'board' });
+    else if(a === 'tab-credits') setState({ screen:'credits' });
+    else if(a === 'credits-back') setState({ screen: state.mode ? 'lobby' : 'home' });
+    else if(a === 'go-credits') setState({ screen:'credits' });
     else if(a === 'refresh'){ await refreshOnline(); toast(t('t.updated')); }
     else if(a === 'round-prev') setState({ entryRound: Math.max(1, state.entryRound - 1) });
     else if(a === 'round-next') setState({ entryRound: Math.min(ROUNDS, state.entryRound + 1) });
