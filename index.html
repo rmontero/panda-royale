@@ -147,14 +147,16 @@
   .add-row input{ flex:1; }
   .add-row button{ margin-top:0; width:auto; padding:13px 18px; }
 
+  .photo-section{ margin-top:26px; padding-top:18px; border-top:1px solid var(--panel-line); }
+  .photo-section .section-title{ margin-top:0; }
   .capture-zone{
-    margin-top:14px; border:1.5px dashed var(--panel-line); border-radius:var(--radius);
-    padding:22px 16px; text-align:center; cursor:pointer; background:var(--panel);
-    display:flex; align-items:center; justify-content:center; gap:12px;
+    margin-top:10px; border:1.5px dashed var(--panel-line); border-radius:var(--radius);
+    padding:20px 16px; cursor:pointer; background:var(--panel);
+    display:flex; align-items:center; gap:12px; text-align:left;
   }
-  .capture-zone .icon{ font-size:1.6rem; }
+  .capture-zone .icon{ font-size:1.6rem; flex-shrink:0; }
   .capture-zone .cta{ font-weight:600; font-size:0.95rem; }
-  .capture-zone .hint{ color:var(--ink-dim); font-size:0.8rem; }
+  .capture-zone .hint{ color:var(--ink-dim); font-size:0.8rem; margin-top:3px; line-height:1.45; }
 
   .thumb-row{ display:flex; align-items:center; gap:12px; margin-top:12px; }
   .thumb-row img{ width:56px; height:56px; object-fit:cover; border-radius:10px; border:1px solid var(--panel-line); }
@@ -316,8 +318,11 @@ const I18N = {
     'scanPhoto': 'Scan a dice photo',
     'retakePhoto': 'Retake photo',
     'photo.optional': 'Optional — you can just type below',
+    'photo.section': 'Or scan a photo instead',
+    'photo.help': 'Lay every die flat with its value facing up, spread apart, in good light. The reader groups them by color, counts the pips (or reads the printed number), and fills the boxes above. Always check its work before saving.',
     'photo.reading': 'Reading dice…',
-    'photo.applied': 'Applied — check the values below',
+    'photo.applied': 'Read {n} dice — check the values below',
+    't.noDice': 'No dice found in that photo — try again or type the values.',
     'entry.hint': 'Blue: put sparkly-numeral dice in the glitter box (any there doubles all blue). Red: white numerals add, black subtract; the total is multiplied by how many red dice you rolled.',
     'color.yellow': 'Yellow', 'color.purple': 'Purple', 'color.blue': 'Blue', 'color.red': 'Red',
     'color.green': 'Green', 'color.clear': 'Clear', 'color.pink': 'Pink',
@@ -400,8 +405,11 @@ const I18N = {
     'scanPhoto': 'Escanear foto de dados',
     'retakePhoto': 'Repetir foto',
     'photo.optional': 'Opcional — también puedes escribir abajo',
+    'photo.section': 'O escanea una foto',
+    'photo.help': 'Coloca cada dado plano con su valor hacia arriba, separados y con buena luz. El lector los agrupa por color, cuenta los puntos (o lee el número impreso) y rellena las casillas de arriba. Revisa siempre el resultado antes de guardar.',
     'photo.reading': 'Leyendo dados…',
-    'photo.applied': 'Aplicado — revisa los valores abajo',
+    'photo.applied': 'Leídos {n} dados — revisa los valores abajo',
+    't.noDice': 'No se encontraron dados en la foto — inténtalo de nuevo o escribe los valores.',
     'entry.hint': 'Azul: pon los dados de números brillantes en la casilla glitter (si hay alguno, se duplica todo el azul). Rojo: los números blancos suman, los negros restan; el total se multiplica por la cantidad de dados rojos.',
     'color.yellow': 'Amarillo', 'color.purple': 'Morado', 'color.blue': 'Azul', 'color.red': 'Rojo',
     'color.green': 'Verde', 'color.clear': 'Transparente', 'color.pink': 'Rosa',
@@ -484,8 +492,11 @@ const I18N = {
     'scanPhoto': 'Würfelfoto scannen',
     'retakePhoto': 'Foto wiederholen',
     'photo.optional': 'Optional — du kannst auch einfach tippen',
+    'photo.section': 'Oder ein Foto scannen',
+    'photo.help': 'Leg jeden Würfel flach mit der Augenzahl nach oben, mit Abstand und bei gutem Licht. Der Leser gruppiert sie nach Farbe, zählt die Augen (oder liest die aufgedruckte Zahl) und füllt die Felder oben aus. Prüfe das Ergebnis immer vor dem Speichern.',
     'photo.reading': 'Würfel werden gelesen…',
-    'photo.applied': 'Übernommen — prüfe die Werte unten',
+    'photo.applied': '{n} Würfel gelesen — prüfe die Werte unten',
+    't.noDice': 'Keine Würfel im Foto gefunden — noch mal versuchen oder Werte eintippen.',
     'entry.hint': 'Blau: Würfel mit glitzernden Ziffern ins Glitter-Feld (schon einer verdoppelt alles Blau). Rot: weiße Ziffern addieren, schwarze abziehen; die Summe wird mit der Anzahl roter Würfel multipliziert.',
     'color.yellow': 'Gelb', 'color.purple': 'Lila', 'color.blue': 'Blau', 'color.red': 'Rot',
     'color.green': 'Grün', 'color.clear': 'Klar', 'color.pink': 'Pink',
@@ -568,8 +579,11 @@ const I18N = {
     'scanPhoto': 'Scanner une photo de dés',
     'retakePhoto': 'Reprendre la photo',
     'photo.optional': 'Facultatif — vous pouvez aussi saisir ci-dessous',
+    'photo.section': 'Ou scanner une photo',
+    'photo.help': 'Posez chaque dé à plat, valeur vers le haut, espacés, sous une bonne lumière. Le lecteur les regroupe par couleur, compte les points (ou lit le nombre imprimé) et remplit les cases ci-dessus. Vérifiez toujours avant d’enregistrer.',
     'photo.reading': 'Lecture des dés…',
-    'photo.applied': 'Appliqué — vérifiez les valeurs ci-dessous',
+    'photo.applied': '{n} dés lus — vérifiez les valeurs ci-dessous',
+    't.noDice': 'Aucun dé trouvé sur la photo — réessayez ou saisissez les valeurs.',
     'entry.hint': 'Bleu : mettez les dés à chiffres pailletés dans la case glitter (un seul double tout le bleu). Rouge : les chiffres blancs s’ajoutent, les noirs se soustraient ; le total est multiplié par le nombre de dés rouges.',
     'color.yellow': 'Jaune', 'color.purple': 'Violet', 'color.blue': 'Bleu', 'color.red': 'Rouge',
     'color.green': 'Vert', 'color.clear': 'Transparent', 'color.pink': 'Rose',
@@ -652,8 +666,11 @@ const I18N = {
     'scanPhoto': 'Escanear foto dos dados',
     'retakePhoto': 'Tirar foto de novo',
     'photo.optional': 'Opcional — você também pode digitar abaixo',
+    'photo.section': 'Ou escaneie uma foto',
+    'photo.help': 'Coloque cada dado plano com o valor para cima, separados e com boa luz. O leitor agrupa por cor, conta os pontos (ou lê o número impresso) e preenche os campos acima. Confira sempre antes de salvar.',
     'photo.reading': 'Lendo os dados…',
-    'photo.applied': 'Aplicado — confira os valores abaixo',
+    'photo.applied': '{n} dados lidos — confira os valores abaixo',
+    't.noDice': 'Nenhum dado encontrado na foto — tente de novo ou digite os valores.',
     'entry.hint': 'Azul: coloque os dados de números brilhantes na caixa glitter (qualquer um dobra todo o azul). Vermelho: números brancos somam, pretos subtraem; o total é multiplicado pela quantidade de dados vermelhos.',
     'color.yellow': 'Amarelo', 'color.purple': 'Roxo', 'color.blue': 'Azul', 'color.red': 'Vermelho',
     'color.green': 'Verde', 'color.clear': 'Transparente', 'color.pink': 'Rosa',
@@ -999,7 +1016,7 @@ async function openEntry(playerId, round){
     entryPlayerId: playerId,
     entryRound: round,
     fields: existing ? diceToFields(existing.dice) : emptyFields(),
-    photo: null, analyzeError: null,
+    photo: null, analyzeError: null, photoCount: 0,
   });
 }
 
@@ -1213,26 +1230,28 @@ function renderEntry(){
   const rows = breakdownRows(dice, scored);
   const visibleRows = isR1 ? ENTRY_ROWS.filter(r => r.color === 'yellow') : ENTRY_ROWS;
 
-  return `
-    <h2 style="font-size:1.2rem;">${esc(p ? t('entry.titleWho', { n: state.entryRound, name: p.name }) : t('entry.title', { n: state.entryRound }))}</h2>
-    <p class="small-note" style="margin-top:4px;">${esc(isR1 ? t('entry.r1note') : t('entry.note'))}</p>
-
-    ${(aiAvailable && !isR1) ? `
+  const photoSection = (aiAvailable && !isR1) ? `
+    <div class="photo-section">
+      <div class="section-title">${esc(t('photo.section'))}</div>
       <label class="capture-zone" for="photoInput">
         <div class="icon">📷</div>
         <div>
           <div class="cta">${esc(state.photo ? t('retakePhoto') : t('scanPhoto'))}</div>
-          <div class="hint">${esc(t('photo.optional'))}</div>
+          <div class="hint">${esc(t('photo.help'))}</div>
         </div>
       </label>
       <input type="file" id="photoInput" accept="image/*" capture="environment" style="display:none" />
       ${state.photo ? `
         <div class="thumb-row">
           <img src="${state.photo}" alt="dice" />
-          <div class="status">${state.analyzing ? `<span class="spinner"></span> ${esc(t('photo.reading'))}` : esc(t('photo.applied'))}</div>
+          <div class="status">${state.analyzing ? `<span class="spinner"></span> ${esc(t('photo.reading'))}` : esc(t('photo.applied', { n: state.photoCount || 0 }))}</div>
         </div>` : ''}
       ${state.analyzeError ? `<div class="banner">${esc(state.analyzeError)}</div>` : ''}
-    ` : ''}
+    </div>` : '';
+
+  return `
+    <h2 style="font-size:1.2rem;">${esc(p ? t('entry.titleWho', { n: state.entryRound, name: p.name }) : t('entry.title', { n: state.entryRound }))}</h2>
+    <p class="small-note" style="margin-top:4px;">${esc(isR1 ? t('entry.r1note') : t('entry.note'))}</p>
 
     <div class="entry-grid">
       ${visibleRows.map(r => `
@@ -1258,6 +1277,8 @@ function renderEntry(){
 
     <button class="btn btn-primary" data-a="save-entry">${esc(t('saveRound', { n: state.entryRound }))}</button>
     <button class="btn btn-ghost" data-a="tab-play">${esc(t('back'))}</button>
+
+    ${photoSection}
   `;
 }
 
@@ -1393,8 +1414,13 @@ function bind(){
       setState({ photo: dataUrl, analyzing: true, analyzeError: null });
       try {
         const dice = await analyzePhoto(dataUrl);
+        if(!dice.length){
+          setState({ analyzing: false, analyzeError: t('t.noDice') });
+          return;
+        }
         const merged = mergeFields(state.fields, diceToFields(dice));
-        setState({ analyzing: false, fields: merged });
+        const count = FIELD_KEYS.reduce((s, k) => s + (merged[k] ? String(merged[k]).trim().split(/\s+/).length : 0), 0);
+        setState({ analyzing: false, fields: merged, analyzeError: null, photoCount: count });
       } catch(err){
         if(err.soft) setState({ analyzing: false, photo: null });
         else setState({ analyzing: false, analyzeError: t('t.photoErr') });
