@@ -112,6 +112,22 @@ npx vercel dev          # runs the functions locally; needs `vercel link` first
 For a quick front-end-only check, any static server works (`npx serve .`) — pass-and-play
 mode is fully functional offline; the online endpoints will 404 without `vercel dev`.
 
+## SEO & discovery
+
+- `index.html` head: title/description, canonical, Open Graph + Twitter card,
+  per-locale `og:locale:alternate`, and JSON-LD (`WebApplication` + `Game`).
+- `og.jpg` (1200×630) is a static card (title + tagline + product photo).
+  Favicon is a die: `favicon.svg` (primary) + PNG fallbacks + `site.webmanifest`.
+- `robots.txt` allows search + answer engines (so assistants can cite the app)
+  and blocks AI-training crawlers and commercial SEO scrapers. If a bot ignores
+  it, add a Vercel Firewall / Cloudflare WAF rule.
+- `llms.txt` is a plain-language description of the app and the scoring rules
+  for generative engines. Geographic `geo.*` meta tags don't apply here.
+- Canonical is `https://pnd.ad/`; set **pnd.ad** as the primary domain in Vercel
+  (Settings → Domains) so `www` redirects to it, not the other way around.
+- `<title>` and description are also translated client-side per language; the
+  static tags stay English for non-JS crawlers.
+
 ## Tech
 
 Vanilla HTML/CSS/JS front end (one ES module). Node serverless functions.
