@@ -309,6 +309,15 @@ function diceToFields(dice){
   });
   return f;
 }
+// Round 1: every player rolls only their single starting yellow die.
+function diceForRound(fields, round){
+  const dice = fieldsToDice(fields);
+  if(round === 1){
+    const y = dice.find(d => d.color === 'yellow');
+    return y ? [{ color:'yellow', value:y.value }] : [];
+  }
+  return dice;
+}
 
 /* ------------------------------------------------------------------ *
  * local storage
@@ -531,7 +540,7 @@ async function openEntry(playerId, round){
 
 async function saveEntry(){
   const round = state.entryRound;
-  const dice = fieldsToDice(state.fields);
+  const dice = diceForRound(state.fields, round);
   if(state.mode === 'local'){
     const scored = scoreRound(dice);
     const scores = { ...state.local.scores };
@@ -716,7 +725,8 @@ function renderLobby(){
 function renderEntry(){
   const v = view();
   const p = v.players.find(x => x.id === state.entryPlayerId);
-  const dice = fieldsToDice(state.fields);
+  const isR1 = state.entryRound === 1;
+  const dice = diceForRound(state.fields, state.entryRound);
   const scored = scoreRound(dice);
   const b = scored.breakdown, c = scored.counts;
   const rows = [
@@ -729,11 +739,15 @@ function renderEntry(){
     c.pink ? ['Pink', b.pinkSum] : null,
   ].filter(Boolean);
 
+  const visibleRows = isR1 ? ENTRY_ROWS.filter(r => r.color === 'yellow') : ENTRY_ROWS;
+
   return `
     <h2 style="font-size:1.2rem;">Round ${state.entryRound}${p ? ` — ${esc(p.name)}` : ''}</h2>
-    <p class="small-note" style="margin-top:4px;">Type the face values for each color. Totals update as you go.</p>
+    <p class="small-note" style="margin-top:4px;">${isR1
+      ? 'Round 1: everyone rolls just their single starting yellow die.'
+      : 'Type the face values for each color. Totals update as you go.'}</p>
 
-    ${aiAvailable ? `
+    ${(aiAvailable && !isR1) ? `
       <label class="capture-zone" for="photoInput">
         <div class="icon">📷</div>
         <div>
@@ -751,20 +765,20 @@ function renderEntry(){
     ` : ''}
 
     <div class="entry-grid">
-      ${ENTRY_ROWS.map(r => `
+      ${visibleRows.map(r => `
         <div class="entry-r">
           <span class="dot" style="background:${COLOR_HEX[r.color]}"></span>
-          <span class="lab">${r.label}${r.note ? `<small>${r.note}</small>` : ''}</span>
+          <span class="lab">${r.label}${(r.note && !isR1) ? `<small>${r.note}</small>` : ''}</span>
           <span class="ins">
             ${r.fields.map(f => `
               <input data-field="${f.key}" value="${esc(state.fields[f.key] || '')}"
-                     placeholder="${esc(f.ph)}" class="${f.accent ? 'accent' : ''}"
+                     placeholder="${esc(isR1 ? 'e.g. 4' : f.ph)}" class="${f.accent ? 'accent' : ''}"
                      type="text" pattern="[0-9 ,]*" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />
             `).join('')}
           </span>
         </div>`).join('')}
     </div>
-    <p class="entry-hint">Blue: put sparkly-numeral dice in the glitter box (any there doubles all blue). Red: white numerals add, black subtract; the total is multiplied by how many red dice you rolled.</p>
+    ${isR1 ? '' : `<p class="entry-hint">Blue: put sparkly-numeral dice in the glitter box (any there doubles all blue). Red: white numerals add, black subtract; the total is multiplied by how many red dice you rolled.</p>`}
 
     <div class="total-banner">
       <div class="n">${scored.total}</div>
@@ -909,7 +923,7 @@ function mergeFields(cur, found){
 }
 
 function updateEntryTotals(){
-  const dice = fieldsToDice(state.fields);
+  const dice = diceForRound(state.fields, state.entryRound);
   const scored = scoreRound(dice);
   const n = document.querySelector('.total-banner .n');
   if(n) n.textContent = scored.total;

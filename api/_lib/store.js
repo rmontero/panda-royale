@@ -156,7 +156,12 @@ export async function submitScore(code, { playerId, round, dice }) {
   if (!(await redis.exists(key(code)))) return null;
 
   const r = Math.max(1, Math.min(TOTAL_ROUNDS, parseInt(round, 10) || 1));
-  const clean = sanitizeDice(dice);
+  let clean = sanitizeDice(dice);
+  if (r === 1) {
+    // round 1: every player rolls only their single starting yellow die
+    const y = clean.find((d) => d.color === 'yellow');
+    clean = y ? [{ color: 'yellow', value: y.value }] : [];
+  }
   const scored = scoreRound(clean);
   const entry = {
     total: scored.total,
