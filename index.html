@@ -254,6 +254,454 @@ import { scoreRound, DICE_COLORS } from './lib/score.js';
  * ------------------------------------------------------------------ */
 const ROUNDS = 10;
 
+/* ------------------------------------------------------------------ *
+ * i18n — English, Spanish, German, French, Portuguese
+ * ------------------------------------------------------------------ */
+const LANGS = { en: 'English', es: 'Español', de: 'Deutsch', fr: 'Français', pt: 'Português' };
+
+const I18N = {
+  en: {
+    'title2': 'Scorekeeper',
+    'home.sub': 'Score all ten rounds together — one phone passed around the table, or everyone on their own device.',
+    'seg.online': 'Separate phones',
+    'seg.local': 'One shared phone',
+    'yourName': 'Your name',
+    'ph.name': 'e.g. Alex',
+    'startGame': 'Start a new game',
+    'orJoin': 'or join with a code',
+    'ph.code': 'CODE',
+    'joinGame': 'Join game',
+    'local.blurb': 'Keep this one device at the table. Add everyone once, then hand it to each player to enter their dice each round. No codes, no internet needed.',
+    'local.new': 'New pass-and-play game',
+    'local.resume': 'Resume pass-and-play game',
+    'local.fresh': 'Start fresh instead',
+    'hof.title': '🏮 Hall of Fame — biggest rounds',
+    'topbar.round': 'Round {n} of {total}',
+    'topbar.players': 'Players: {n}',
+    'home': 'Home',
+    'leave': 'Leave',
+    'tab.play': 'Play',
+    'tab.board': 'Scoreboard',
+    'passPlay': 'PASS & PLAY',
+    'shareCode': 'Share this code with your table',
+    'copyLink': 'Copy invite link',
+    'round': 'Round',
+    'roundOf': 'Round {n} <span style="color:var(--muted)">of {total}</span>',
+    'players.tap': 'Players — tap to enter dice',
+    'players': 'Players',
+    'ph.addPlayer': 'Add a player',
+    'add': 'Add',
+    'enterDice': 'Enter dice',
+    'waiting': 'waiting',
+    'enterMyDice': 'Enter my dice for round {n}',
+    'editMyRound': 'Edit my round {n}',
+    'refreshPlayers': 'Refresh players',
+    'resetScores': 'Reset all scores (host)',
+    'lobby.note': 'Roll and photograph or type your whole dice pool for the round before you trade or draft a new die.',
+    'noPlayers': 'No players yet.',
+    'entry.title': 'Round {n}',
+    'entry.titleWho': 'Round {n} — {name}',
+    'entry.r1note': 'Round 1: everyone rolls just their single starting yellow die.',
+    'entry.note': 'Type the face values for each color. Totals update as you go.',
+    'scanPhoto': 'Scan a dice photo',
+    'retakePhoto': 'Retake photo',
+    'photo.optional': 'Optional — you can just type below',
+    'photo.reading': 'Reading dice…',
+    'photo.applied': 'Applied — check the values below',
+    'entry.hint': 'Blue: put sparkly-numeral dice in the glitter box (any there doubles all blue). Red: white numerals add, black subtract; the total is multiplied by how many red dice you rolled.',
+    'color.yellow': 'Yellow', 'color.purple': 'Purple', 'color.blue': 'Blue', 'color.red': 'Red',
+    'color.green': 'Green', 'color.clear': 'Clear', 'color.pink': 'Pink',
+    'note.x2': '×2', 'note.xcount': '× count',
+    'ph.values': 'values', 'ph.plain': 'plain', 'ph.glitter': '✨ glitter',
+    'ph.whitePlus': 'white +', 'ph.blackMinus': 'black −', 'ph.pityDie': 'pity die', 'ph.egN': 'e.g. 4', 'ph.eg356': 'e.g. 3 5 6',
+    'bd.purple': 'Purple ×2', 'bd.blueGlitter': 'Blue (glitter ×2)', 'bd.red': 'Red (signed × {n})',
+    'roundScore': 'Round {n} score',
+    'saveRound': 'Save round {n}',
+    'back': 'Back',
+    'board.player': 'Player',
+    'board.total': 'Total',
+    'board.updates': 'Updates every few seconds while this tab is open.',
+    'board.backPlayers': 'Back to players',
+    'board.refreshNow': 'Refresh now',
+    'board.emptyLocal': 'No scores yet — add players and enter round 1.',
+    'board.emptyOnline': 'No scores yet — invite your table with the game code.',
+    'board.winner': '🏆 {name} wins with {n}!',
+    't.enterName': 'Enter your name first',
+    't.enterCode': 'Enter the game code',
+    't.noGame': 'No game with that code',
+    't.wrong': 'Something went wrong',
+    't.gameEnded': 'That game has ended.',
+    't.updated': 'Updated',
+    't.savedNext': 'Saved. Next: {name}',
+    't.roundComplete': 'Round {n} complete',
+    't.roundSaved': 'Round {n} saved',
+    't.linkCopied': 'Invite link copied',
+    't.scoresCleared': 'Scores cleared',
+    't.badImage': "Couldn't read that image",
+    't.photoErr': "Couldn't read the photo — type the values instead.",
+    'confirm.wipe': 'Wipe every round score for all players?',
+    'banner.storage': 'Shared storage is not connected yet. Pass-and-play on one phone still works.',
+    'lang.label': 'Language',
+  },
+  es: {
+    'title2': 'Anotador',
+    'home.sub': 'Anota las diez rondas juntos: un móvil que circula por la mesa, o cada quien en el suyo.',
+    'seg.online': 'Móviles separados',
+    'seg.local': 'Un móvil compartido',
+    'yourName': 'Tu nombre',
+    'ph.name': 'p. ej. Alex',
+    'startGame': 'Crear partida nueva',
+    'orJoin': 'o únete con un código',
+    'ph.code': 'CÓDIGO',
+    'joinGame': 'Unirse',
+    'local.blurb': 'Deja este dispositivo en la mesa. Añade a todos una vez y pásalo a cada jugador para que anote sus dados en cada ronda. Sin códigos ni internet.',
+    'local.new': 'Nueva partida en un móvil',
+    'local.resume': 'Reanudar partida en un móvil',
+    'local.fresh': 'Empezar de cero',
+    'hof.title': '🏮 Salón de la fama — mejores rondas',
+    'topbar.round': 'Ronda {n} de {total}',
+    'topbar.players': 'Jugadores: {n}',
+    'home': 'Inicio',
+    'leave': 'Salir',
+    'tab.play': 'Jugar',
+    'tab.board': 'Marcador',
+    'passPlay': 'MÓVIL COMPARTIDO',
+    'shareCode': 'Comparte este código con tu mesa',
+    'copyLink': 'Copiar enlace de invitación',
+    'round': 'Ronda',
+    'roundOf': 'Ronda {n} <span style="color:var(--muted)">de {total}</span>',
+    'players.tap': 'Jugadores — toca para anotar dados',
+    'players': 'Jugadores',
+    'ph.addPlayer': 'Añadir jugador',
+    'add': 'Añadir',
+    'enterDice': 'Anotar dados',
+    'waiting': 'esperando',
+    'enterMyDice': 'Anotar mis dados de la ronda {n}',
+    'editMyRound': 'Editar mi ronda {n}',
+    'refreshPlayers': 'Actualizar jugadores',
+    'resetScores': 'Reiniciar todo (anfitrión)',
+    'lobby.note': 'Tira y fotografía o escribe todos tus dados de la ronda antes de intercambiar o robar un dado nuevo.',
+    'noPlayers': 'Aún no hay jugadores.',
+    'entry.title': 'Ronda {n}',
+    'entry.titleWho': 'Ronda {n} — {name}',
+    'entry.r1note': 'Ronda 1: todos tiran solo su dado amarillo inicial.',
+    'entry.note': 'Escribe los valores de cada color. El total se actualiza al momento.',
+    'scanPhoto': 'Escanear foto de dados',
+    'retakePhoto': 'Repetir foto',
+    'photo.optional': 'Opcional — también puedes escribir abajo',
+    'photo.reading': 'Leyendo dados…',
+    'photo.applied': 'Aplicado — revisa los valores abajo',
+    'entry.hint': 'Azul: pon los dados de números brillantes en la casilla glitter (si hay alguno, se duplica todo el azul). Rojo: los números blancos suman, los negros restan; el total se multiplica por la cantidad de dados rojos.',
+    'color.yellow': 'Amarillo', 'color.purple': 'Morado', 'color.blue': 'Azul', 'color.red': 'Rojo',
+    'color.green': 'Verde', 'color.clear': 'Transparente', 'color.pink': 'Rosa',
+    'note.x2': '×2', 'note.xcount': '× cantidad',
+    'ph.values': 'valores', 'ph.plain': 'normal', 'ph.glitter': '✨ glitter',
+    'ph.whitePlus': 'blanco +', 'ph.blackMinus': 'negro −', 'ph.pityDie': 'dado de consuelo', 'ph.egN': 'p. ej. 4', 'ph.eg356': 'p. ej. 3 5 6',
+    'bd.purple': 'Morado ×2', 'bd.blueGlitter': 'Azul (glitter ×2)', 'bd.red': 'Rojo (con signo × {n})',
+    'roundScore': 'Puntos de la ronda {n}',
+    'saveRound': 'Guardar ronda {n}',
+    'back': 'Atrás',
+    'board.player': 'Jugador',
+    'board.total': 'Total',
+    'board.updates': 'Se actualiza cada pocos segundos mientras esta pestaña está abierta.',
+    'board.backPlayers': 'Volver a jugadores',
+    'board.refreshNow': 'Actualizar ahora',
+    'board.emptyLocal': 'Aún no hay puntos — añade jugadores y anota la ronda 1.',
+    'board.emptyOnline': 'Aún no hay puntos — invita a tu mesa con el código.',
+    'board.winner': '🏆 ¡{name} gana con {n}!',
+    't.enterName': 'Escribe tu nombre primero',
+    't.enterCode': 'Escribe el código de la partida',
+    't.noGame': 'No hay ninguna partida con ese código',
+    't.wrong': 'Algo salió mal',
+    't.gameEnded': 'Esa partida ha terminado.',
+    't.updated': 'Actualizado',
+    't.savedNext': 'Guardado. Siguiente: {name}',
+    't.roundComplete': 'Ronda {n} completa',
+    't.roundSaved': 'Ronda {n} guardada',
+    't.linkCopied': 'Enlace de invitación copiado',
+    't.scoresCleared': 'Puntos reiniciados',
+    't.badImage': 'No se pudo leer esa imagen',
+    't.photoErr': 'No se pudo leer la foto — escribe los valores a mano.',
+    'confirm.wipe': '¿Borrar los puntos de todas las rondas de todos los jugadores?',
+    'banner.storage': 'El almacenamiento compartido aún no está conectado. El modo de un móvil compartido sigue funcionando.',
+    'lang.label': 'Idioma',
+  },
+  de: {
+    'title2': 'Punktezähler',
+    'home.sub': 'Zählt alle zehn Runden gemeinsam — ein Handy wandert um den Tisch, oder jeder nutzt sein eigenes.',
+    'seg.online': 'Getrennte Handys',
+    'seg.local': 'Ein gemeinsames Handy',
+    'yourName': 'Dein Name',
+    'ph.name': 'z. B. Alex',
+    'startGame': 'Neues Spiel starten',
+    'orJoin': 'oder mit Code beitreten',
+    'ph.code': 'CODE',
+    'joinGame': 'Beitreten',
+    'local.blurb': 'Lass dieses Gerät auf dem Tisch. Alle einmal hinzufügen, dann pro Runde jedem Spieler zum Eintragen reichen. Kein Code, kein Internet nötig.',
+    'local.new': 'Neues Spiel auf einem Handy',
+    'local.resume': 'Spiel auf einem Handy fortsetzen',
+    'local.fresh': 'Stattdessen neu beginnen',
+    'hof.title': '🏮 Ruhmeshalle — größte Runden',
+    'topbar.round': 'Runde {n} von {total}',
+    'topbar.players': 'Spieler: {n}',
+    'home': 'Start',
+    'leave': 'Verlassen',
+    'tab.play': 'Spielen',
+    'tab.board': 'Punktetafel',
+    'passPlay': 'GEMEINSAMES HANDY',
+    'shareCode': 'Teile diesen Code mit deinem Tisch',
+    'copyLink': 'Einladungslink kopieren',
+    'round': 'Runde',
+    'roundOf': 'Runde {n} <span style="color:var(--muted)">von {total}</span>',
+    'players.tap': 'Spieler — zum Eintragen tippen',
+    'players': 'Spieler',
+    'ph.addPlayer': 'Spieler hinzufügen',
+    'add': 'Hinzu',
+    'enterDice': 'Würfel eintragen',
+    'waiting': 'wartet',
+    'enterMyDice': 'Meine Würfel für Runde {n} eintragen',
+    'editMyRound': 'Meine Runde {n} bearbeiten',
+    'refreshPlayers': 'Spieler aktualisieren',
+    'resetScores': 'Alle Punkte zurücksetzen (Host)',
+    'lobby.note': 'Würfle und fotografiere oder tippe deinen ganzen Würfelvorrat der Runde ein, bevor du tauschst oder einen neuen Würfel ziehst.',
+    'noPlayers': 'Noch keine Spieler.',
+    'entry.title': 'Runde {n}',
+    'entry.titleWho': 'Runde {n} — {name}',
+    'entry.r1note': 'Runde 1: alle würfeln nur ihren einzelnen gelben Startwürfel.',
+    'entry.note': 'Tippe die Augenzahlen je Farbe ein. Die Summe aktualisiert sich sofort.',
+    'scanPhoto': 'Würfelfoto scannen',
+    'retakePhoto': 'Foto wiederholen',
+    'photo.optional': 'Optional — du kannst auch einfach tippen',
+    'photo.reading': 'Würfel werden gelesen…',
+    'photo.applied': 'Übernommen — prüfe die Werte unten',
+    'entry.hint': 'Blau: Würfel mit glitzernden Ziffern ins Glitter-Feld (schon einer verdoppelt alles Blau). Rot: weiße Ziffern addieren, schwarze abziehen; die Summe wird mit der Anzahl roter Würfel multipliziert.',
+    'color.yellow': 'Gelb', 'color.purple': 'Lila', 'color.blue': 'Blau', 'color.red': 'Rot',
+    'color.green': 'Grün', 'color.clear': 'Klar', 'color.pink': 'Pink',
+    'note.x2': '×2', 'note.xcount': '× Anzahl',
+    'ph.values': 'Werte', 'ph.plain': 'normal', 'ph.glitter': '✨ Glitter',
+    'ph.whitePlus': 'weiß +', 'ph.blackMinus': 'schwarz −', 'ph.pityDie': 'Trostwürfel', 'ph.egN': 'z. B. 4', 'ph.eg356': 'z. B. 3 5 6',
+    'bd.purple': 'Lila ×2', 'bd.blueGlitter': 'Blau (Glitter ×2)', 'bd.red': 'Rot (mit Vorzeichen × {n})',
+    'roundScore': 'Punkte Runde {n}',
+    'saveRound': 'Runde {n} speichern',
+    'back': 'Zurück',
+    'board.player': 'Spieler',
+    'board.total': 'Gesamt',
+    'board.updates': 'Aktualisiert sich alle paar Sekunden, solange dieser Tab offen ist.',
+    'board.backPlayers': 'Zurück zu Spielern',
+    'board.refreshNow': 'Jetzt aktualisieren',
+    'board.emptyLocal': 'Noch keine Punkte — Spieler hinzufügen und Runde 1 eintragen.',
+    'board.emptyOnline': 'Noch keine Punkte — lade deinen Tisch mit dem Code ein.',
+    'board.winner': '🏆 {name} gewinnt mit {n}!',
+    't.enterName': 'Gib zuerst deinen Namen ein',
+    't.enterCode': 'Gib den Spielcode ein',
+    't.noGame': 'Kein Spiel mit diesem Code',
+    't.wrong': 'Etwas ist schiefgelaufen',
+    't.gameEnded': 'Dieses Spiel ist beendet.',
+    't.updated': 'Aktualisiert',
+    't.savedNext': 'Gespeichert. Weiter: {name}',
+    't.roundComplete': 'Runde {n} komplett',
+    't.roundSaved': 'Runde {n} gespeichert',
+    't.linkCopied': 'Einladungslink kopiert',
+    't.scoresCleared': 'Punkte zurückgesetzt',
+    't.badImage': 'Bild konnte nicht gelesen werden',
+    't.photoErr': 'Foto konnte nicht gelesen werden — tippe die Werte ein.',
+    'confirm.wipe': 'Alle Rundenpunkte aller Spieler löschen?',
+    'banner.storage': 'Der gemeinsame Speicher ist noch nicht verbunden. Der Modus mit einem gemeinsamen Handy funktioniert weiterhin.',
+    'lang.label': 'Sprache',
+  },
+  fr: {
+    'title2': 'Marqueur',
+    'home.sub': 'Comptez les dix manches ensemble — un téléphone qui circule autour de la table, ou chacun sur le sien.',
+    'seg.online': 'Téléphones séparés',
+    'seg.local': 'Un téléphone partagé',
+    'yourName': 'Votre nom',
+    'ph.name': 'p. ex. Alex',
+    'startGame': 'Créer une partie',
+    'orJoin': 'ou rejoindre avec un code',
+    'ph.code': 'CODE',
+    'joinGame': 'Rejoindre',
+    'local.blurb': 'Laissez cet appareil sur la table. Ajoutez tout le monde une fois, puis passez-le à chaque joueur pour saisir ses dés à chaque manche. Sans code ni internet.',
+    'local.new': 'Nouvelle partie sur un téléphone',
+    'local.resume': 'Reprendre la partie sur un téléphone',
+    'local.fresh': 'Recommencer à zéro',
+    'hof.title': '🏮 Panthéon — meilleures manches',
+    'topbar.round': 'Manche {n} sur {total}',
+    'topbar.players': 'Joueurs : {n}',
+    'home': 'Accueil',
+    'leave': 'Quitter',
+    'tab.play': 'Jouer',
+    'tab.board': 'Scores',
+    'passPlay': 'TÉLÉPHONE PARTAGÉ',
+    'shareCode': 'Partagez ce code avec votre table',
+    'copyLink': "Copier le lien d'invitation",
+    'round': 'Manche',
+    'roundOf': 'Manche {n} <span style="color:var(--muted)">sur {total}</span>',
+    'players.tap': 'Joueurs — touchez pour saisir les dés',
+    'players': 'Joueurs',
+    'ph.addPlayer': 'Ajouter un joueur',
+    'add': 'Ajouter',
+    'enterDice': 'Saisir les dés',
+    'waiting': 'en attente',
+    'enterMyDice': 'Saisir mes dés de la manche {n}',
+    'editMyRound': 'Modifier ma manche {n}',
+    'refreshPlayers': 'Actualiser les joueurs',
+    'resetScores': 'Réinitialiser les scores (hôte)',
+    'lobby.note': 'Lancez puis photographiez ou saisissez tout votre pool de dés de la manche avant d’échanger ou de piocher un nouveau dé.',
+    'noPlayers': 'Aucun joueur pour l’instant.',
+    'entry.title': 'Manche {n}',
+    'entry.titleWho': 'Manche {n} — {name}',
+    'entry.r1note': 'Manche 1 : chacun lance uniquement son dé jaune de départ.',
+    'entry.note': 'Saisissez les valeurs de chaque couleur. Le total se met à jour en direct.',
+    'scanPhoto': 'Scanner une photo de dés',
+    'retakePhoto': 'Reprendre la photo',
+    'photo.optional': 'Facultatif — vous pouvez aussi saisir ci-dessous',
+    'photo.reading': 'Lecture des dés…',
+    'photo.applied': 'Appliqué — vérifiez les valeurs ci-dessous',
+    'entry.hint': 'Bleu : mettez les dés à chiffres pailletés dans la case glitter (un seul double tout le bleu). Rouge : les chiffres blancs s’ajoutent, les noirs se soustraient ; le total est multiplié par le nombre de dés rouges.',
+    'color.yellow': 'Jaune', 'color.purple': 'Violet', 'color.blue': 'Bleu', 'color.red': 'Rouge',
+    'color.green': 'Vert', 'color.clear': 'Transparent', 'color.pink': 'Rose',
+    'note.x2': '×2', 'note.xcount': '× nombre',
+    'ph.values': 'valeurs', 'ph.plain': 'normal', 'ph.glitter': '✨ glitter',
+    'ph.whitePlus': 'blanc +', 'ph.blackMinus': 'noir −', 'ph.pityDie': 'dé de consolation', 'ph.egN': 'p. ex. 4', 'ph.eg356': 'p. ex. 3 5 6',
+    'bd.purple': 'Violet ×2', 'bd.blueGlitter': 'Bleu (glitter ×2)', 'bd.red': 'Rouge (signé × {n})',
+    'roundScore': 'Score de la manche {n}',
+    'saveRound': 'Enregistrer la manche {n}',
+    'back': 'Retour',
+    'board.player': 'Joueur',
+    'board.total': 'Total',
+    'board.updates': 'Se met à jour toutes les quelques secondes tant que cet onglet est ouvert.',
+    'board.backPlayers': 'Retour aux joueurs',
+    'board.refreshNow': 'Actualiser',
+    'board.emptyLocal': 'Aucun score — ajoutez des joueurs et saisissez la manche 1.',
+    'board.emptyOnline': 'Aucun score — invitez votre table avec le code.',
+    'board.winner': '🏆 {name} gagne avec {n} !',
+    't.enterName': 'Saisissez d’abord votre nom',
+    't.enterCode': 'Saisissez le code de la partie',
+    't.noGame': 'Aucune partie avec ce code',
+    't.wrong': 'Un problème est survenu',
+    't.gameEnded': 'Cette partie est terminée.',
+    't.updated': 'Actualisé',
+    't.savedNext': 'Enregistré. Suivant : {name}',
+    't.roundComplete': 'Manche {n} terminée',
+    't.roundSaved': 'Manche {n} enregistrée',
+    't.linkCopied': "Lien d'invitation copié",
+    't.scoresCleared': 'Scores réinitialisés',
+    't.badImage': 'Impossible de lire cette image',
+    't.photoErr': 'Impossible de lire la photo — saisissez les valeurs.',
+    'confirm.wipe': 'Effacer tous les scores de toutes les manches pour tous les joueurs ?',
+    'banner.storage': 'Le stockage partagé n’est pas encore connecté. Le mode téléphone partagé fonctionne toujours.',
+    'lang.label': 'Langue',
+  },
+  pt: {
+    'title2': 'Marcador',
+    'home.sub': 'Pontuem as dez rodadas juntos — um celular passando pela mesa, ou cada um no seu.',
+    'seg.online': 'Celulares separados',
+    'seg.local': 'Um celular compartilhado',
+    'yourName': 'Seu nome',
+    'ph.name': 'ex. Alex',
+    'startGame': 'Criar novo jogo',
+    'orJoin': 'ou entre com um código',
+    'ph.code': 'CÓDIGO',
+    'joinGame': 'Entrar',
+    'local.blurb': 'Deixe este aparelho na mesa. Adicione todos uma vez e passe para cada jogador registrar seus dados a cada rodada. Sem códigos, sem internet.',
+    'local.new': 'Novo jogo em um celular',
+    'local.resume': 'Retomar jogo em um celular',
+    'local.fresh': 'Começar do zero',
+    'hof.title': '🏮 Hall da fama — maiores rodadas',
+    'topbar.round': 'Rodada {n} de {total}',
+    'topbar.players': 'Jogadores: {n}',
+    'home': 'Início',
+    'leave': 'Sair',
+    'tab.play': 'Jogar',
+    'tab.board': 'Placar',
+    'passPlay': 'CELULAR COMPARTILHADO',
+    'shareCode': 'Compartilhe este código com sua mesa',
+    'copyLink': 'Copiar link de convite',
+    'round': 'Rodada',
+    'roundOf': 'Rodada {n} <span style="color:var(--muted)">de {total}</span>',
+    'players.tap': 'Jogadores — toque para registrar dados',
+    'players': 'Jogadores',
+    'ph.addPlayer': 'Adicionar jogador',
+    'add': 'Adicionar',
+    'enterDice': 'Registrar dados',
+    'waiting': 'aguardando',
+    'enterMyDice': 'Registrar meus dados da rodada {n}',
+    'editMyRound': 'Editar minha rodada {n}',
+    'refreshPlayers': 'Atualizar jogadores',
+    'resetScores': 'Zerar todos os pontos (anfitrião)',
+    'lobby.note': 'Role e fotografe ou digite todo o seu conjunto de dados da rodada antes de trocar ou comprar um dado novo.',
+    'noPlayers': 'Ainda não há jogadores.',
+    'entry.title': 'Rodada {n}',
+    'entry.titleWho': 'Rodada {n} — {name}',
+    'entry.r1note': 'Rodada 1: todos rolam apenas o seu único dado amarelo inicial.',
+    'entry.note': 'Digite os valores de cada cor. O total atualiza na hora.',
+    'scanPhoto': 'Escanear foto dos dados',
+    'retakePhoto': 'Tirar foto de novo',
+    'photo.optional': 'Opcional — você também pode digitar abaixo',
+    'photo.reading': 'Lendo os dados…',
+    'photo.applied': 'Aplicado — confira os valores abaixo',
+    'entry.hint': 'Azul: coloque os dados de números brilhantes na caixa glitter (qualquer um dobra todo o azul). Vermelho: números brancos somam, pretos subtraem; o total é multiplicado pela quantidade de dados vermelhos.',
+    'color.yellow': 'Amarelo', 'color.purple': 'Roxo', 'color.blue': 'Azul', 'color.red': 'Vermelho',
+    'color.green': 'Verde', 'color.clear': 'Transparente', 'color.pink': 'Rosa',
+    'note.x2': '×2', 'note.xcount': '× quantidade',
+    'ph.values': 'valores', 'ph.plain': 'normal', 'ph.glitter': '✨ glitter',
+    'ph.whitePlus': 'branco +', 'ph.blackMinus': 'preto −', 'ph.pityDie': 'dado de consolação', 'ph.egN': 'ex. 4', 'ph.eg356': 'ex. 3 5 6',
+    'bd.purple': 'Roxo ×2', 'bd.blueGlitter': 'Azul (glitter ×2)', 'bd.red': 'Vermelho (com sinal × {n})',
+    'roundScore': 'Pontos da rodada {n}',
+    'saveRound': 'Salvar rodada {n}',
+    'back': 'Voltar',
+    'board.player': 'Jogador',
+    'board.total': 'Total',
+    'board.updates': 'Atualiza a cada poucos segundos enquanto esta aba estiver aberta.',
+    'board.backPlayers': 'Voltar aos jogadores',
+    'board.refreshNow': 'Atualizar agora',
+    'board.emptyLocal': 'Ainda sem pontos — adicione jogadores e registre a rodada 1.',
+    'board.emptyOnline': 'Ainda sem pontos — convide sua mesa com o código.',
+    'board.winner': '🏆 {name} vence com {n}!',
+    't.enterName': 'Digite seu nome primeiro',
+    't.enterCode': 'Digite o código do jogo',
+    't.noGame': 'Nenhum jogo com esse código',
+    't.wrong': 'Algo deu errado',
+    't.gameEnded': 'Esse jogo terminou.',
+    't.updated': 'Atualizado',
+    't.savedNext': 'Salvo. Próximo: {name}',
+    't.roundComplete': 'Rodada {n} completa',
+    't.roundSaved': 'Rodada {n} salva',
+    't.linkCopied': 'Link de convite copiado',
+    't.scoresCleared': 'Pontos zerados',
+    't.badImage': 'Não deu para ler essa imagem',
+    't.photoErr': 'Não deu para ler a foto — digite os valores.',
+    'confirm.wipe': 'Apagar os pontos de todas as rodadas de todos os jogadores?',
+    'banner.storage': 'O armazenamento compartilhado ainda não está conectado. O modo de um celular compartilhado continua funcionando.',
+    'lang.label': 'Idioma',
+  },
+};
+
+function detectLang(){
+  try {
+    const saved = localStorage.getItem('pr.lang');
+    if(saved && I18N[saved]) return saved;
+  } catch {}
+  const prefs = navigator.languages && navigator.languages.length ? navigator.languages : [navigator.language || 'en'];
+  for(const p of prefs){
+    const base = String(p || '').toLowerCase().split('-')[0];
+    if(I18N[base]) return base;
+  }
+  return 'en';
+}
+function t(key, vars){
+  const dict = I18N[state.lang] || I18N.en;
+  let s = (dict[key] != null ? dict[key] : (I18N.en[key] != null ? I18N.en[key] : key));
+  if(vars) for(const k in vars) s = s.split('{' + k + '}').join(String(vars[k]));
+  return s;
+}
+function setLang(l){
+  if(!I18N[l]) return;
+  try { localStorage.setItem('pr.lang', l); } catch {}
+  document.documentElement.lang = l;
+  setState({ lang: l });
+}
+
 const COLOR_HEX = {
   yellow:'var(--c-yellow)', purple:'var(--c-purple)', blue:'var(--c-blue)',
   red:'var(--c-red)', green:'var(--c-green)', clear:'var(--c-clear)', pink:'var(--c-pink)',
@@ -261,15 +709,15 @@ const COLOR_HEX = {
 
 // Every color is always on screen. Just type the face values, space or comma separated.
 const ENTRY_ROWS = [
-  { color:'yellow', label:'Yellow', fields:[{ key:'yellow', ph:'e.g. 3 5 6' }] },
-  { color:'purple', label:'Purple', note:'×2', fields:[{ key:'purple', ph:'values' }] },
-  { color:'blue',   label:'Blue',   fields:[
-      { key:'blue', ph:'plain' }, { key:'blueGlitter', ph:'✨ glitter', accent:true } ] },
-  { color:'red',    label:'Red',    note:'× count', fields:[
-      { key:'redWhite', ph:'white +' }, { key:'redBlack', ph:'black −', accent:true } ] },
-  { color:'green',  label:'Green',  fields:[{ key:'green', ph:'values' }] },
-  { color:'clear',  label:'Clear',  fields:[{ key:'clear', ph:'values' }] },
-  { color:'pink',   label:'Pink',   fields:[{ key:'pink', ph:'pity die' }] },
+  { color:'yellow', fields:[{ key:'yellow', phKey:'ph.eg356' }] },
+  { color:'purple', noteKey:'note.x2', fields:[{ key:'purple', phKey:'ph.values' }] },
+  { color:'blue', fields:[
+      { key:'blue', phKey:'ph.plain' }, { key:'blueGlitter', phKey:'ph.glitter', accent:true } ] },
+  { color:'red', noteKey:'note.xcount', fields:[
+      { key:'redWhite', phKey:'ph.whitePlus' }, { key:'redBlack', phKey:'ph.blackMinus', accent:true } ] },
+  { color:'green', fields:[{ key:'green', phKey:'ph.values' }] },
+  { color:'clear', fields:[{ key:'clear', phKey:'ph.values' }] },
+  { color:'pink', fields:[{ key:'pink', phKey:'ph.pityDie' }] },
 ];
 const FIELD_KEYS = ['yellow','purple','blue','blueGlitter','redWhite','redBlack','green','clear','pink'];
 const emptyFields = () => Object.fromEntries(FIELD_KEYS.map(k => [k, '']));
@@ -388,6 +836,7 @@ function resizeImageFile(file){
  * ------------------------------------------------------------------ */
 let state = {
   screen: 'home',
+  lang: 'en',                 // set from detectLang() in boot()
   mode: null,                 // 'online' | 'local'
   homeTab: 'online',          // 'online' | 'local'
   me: LS.get('pr.me', null) || { id: genId(), name:'' },
@@ -601,64 +1050,75 @@ function render(){
   syncPolling();
 }
 
+function langSelect(){
+  return `<select class="lang-select" data-a="lang" aria-label="${esc(t('lang.label'))}">
+    ${Object.entries(LANGS).map(([k, name]) => `<option value="${k}" ${k === state.lang ? 'selected' : ''}>${name}</option>`).join('')}
+  </select>`;
+}
+
 function renderTopbar(){
   const v = view();
+  const code = state.mode === 'local' ? t('passPlay') : (v ? v.code : '');
   return `
     <div class="topbar">
       <div>
-        <div class="code">${esc(v ? v.code : '')}</div>
-        <div class="sub">${state.mode === 'local' ? `${(state.local?.players.length || 0)} players` : `Round ${state.entryRound} of ${ROUNDS}`}</div>
+        <div class="code">${esc(code)}</div>
+        <div class="sub">${state.mode === 'local'
+          ? esc(t('topbar.players', { n: state.local?.players.length || 0 }))
+          : esc(t('topbar.round', { n: state.entryRound, total: ROUNDS }))}</div>
       </div>
-      <button class="link-btn" data-a="leave">${state.mode === 'local' ? 'Home' : 'Leave'}</button>
+      <button class="link-btn" data-a="leave">${esc(state.mode === 'local' ? t('home') : t('leave'))}</button>
     </div>`;
 }
 function renderTabbar(){
   return `
     <div class="tabbar">
       <button class="${['lobby','entry'].includes(state.screen) ? 'active' : ''}" data-a="tab-play">
-        <span class="ic">🐼</span><span>Play</span></button>
+        <span class="ic">🐼</span><span>${esc(t('tab.play'))}</span></button>
       <button class="${state.screen === 'board' ? 'active' : ''}" data-a="tab-board">
-        <span class="ic">🏮</span><span>Scoreboard</span></button>
+        <span class="ic">🏮</span><span>${esc(t('tab.board'))}</span></button>
     </div>`;
 }
 
 function renderHome(){
-  const t = state.homeTab;
+  const tab = state.homeTab;
+  const hasLocal = !!LS.get('pr.local', null)?.players?.length;
   return `
-    <div class="lanterns">
-      ${Object.values(COLOR_HEX).map(c => `<span style="background:${c}"></span>`).join('')}
+    <div class="home-top">
+      <div class="lanterns">
+        ${Object.values(COLOR_HEX).map(c => `<span style="background:${c}"></span>`).join('')}
+      </div>
+      ${langSelect()}
     </div>
     <div class="hero">
-      <h1>Panda Royale<br/>Scorekeeper</h1>
-      <p class="sub">Score all ten rounds together — one phone passed around the table, or everyone on their own device.</p>
+      <h1>Panda Royale<br/>${esc(t('title2'))}</h1>
+      <p class="sub">${esc(t('home.sub'))}</p>
     </div>
 
-    ${state.banner ? `<div class="banner ${state.banner.includes('storage') ? '' : 'info'}">${esc(state.banner)}</div>` : ''}
+    ${state.banner ? `<div class="banner ${state.bannerKind === 'info' ? 'info' : ''}">${esc(state.banner)}</div>` : ''}
 
     <div class="seg" style="margin-top:18px;">
-      <button class="${t === 'online' ? 'on' : ''}" data-a="home-tab" data-v="online">Separate phones</button>
-      <button class="${t === 'local' ? 'on' : ''}" data-a="home-tab" data-v="local">One shared phone</button>
+      <button class="${tab === 'online' ? 'on' : ''}" data-a="home-tab" data-v="online">${esc(t('seg.online'))}</button>
+      <button class="${tab === 'local' ? 'on' : ''}" data-a="home-tab" data-v="local">${esc(t('seg.local'))}</button>
     </div>
 
-    ${t === 'online' ? `
-      <label class="field-label" for="nameInput">Your name</label>
-      <input class="text-input" id="nameInput" placeholder="e.g. Rob" value="${esc(state.me.name || '')}" autocomplete="off" />
-      <button class="btn btn-primary" data-a="create-online">Start a new game</button>
-      <div class="divider">or join with a code</div>
-      <input class="text-input code-input" id="codeInput" placeholder="CODE" maxlength="6" autocomplete="off"
+    ${tab === 'online' ? `
+      <label class="field-label" for="nameInput">${esc(t('yourName'))}</label>
+      <input class="text-input" id="nameInput" placeholder="${esc(t('ph.name'))}" value="${esc(state.me.name || '')}" autocomplete="off" />
+      <button class="btn btn-primary" data-a="create-online">${esc(t('startGame'))}</button>
+      <div class="divider">${esc(t('orJoin'))}</div>
+      <input class="text-input code-input" id="codeInput" placeholder="${esc(t('ph.code'))}" maxlength="6" autocomplete="off"
              value="${esc(state._prefillCode || '')}" />
-      <button class="btn btn-secondary" data-a="join-online">Join game</button>
+      <button class="btn btn-secondary" data-a="join-online">${esc(t('joinGame'))}</button>
     ` : `
-      <p class="small-note" style="margin-top:16px;">Keep this one device at the table. Add everyone once, then hand it to each player to enter their dice each round. No codes, no internet needed.</p>
-      <button class="btn btn-primary" data-a="start-local">
-        ${LS.get('pr.local', null)?.players?.length ? 'Resume pass-and-play game' : 'New pass-and-play game'}
-      </button>
-      ${LS.get('pr.local', null)?.players?.length ? `<button class="btn btn-ghost" data-a="new-local">Start fresh instead</button>` : ''}
+      <p class="small-note" style="margin-top:16px;">${esc(t('local.blurb'))}</p>
+      <button class="btn btn-primary" data-a="start-local">${esc(hasLocal ? t('local.resume') : t('local.new'))}</button>
+      ${hasLocal ? `<button class="btn btn-ghost" data-a="new-local">${esc(t('local.fresh'))}</button>` : ''}
     `}
 
     ${state.hof.length ? `
       <div class="hof">
-        <h3>🏮 Hall of Fame — biggest rounds</h3>
+        <h3>${esc(t('hof.title'))}</h3>
         ${state.hof.map(e => `<div class="row"><span class="who">${esc(e.label)}</span><span class="pts">${e.score}</span></div>`).join('')}
       </div>
     ` : ''}

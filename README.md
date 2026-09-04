@@ -47,7 +47,7 @@ Static `index.html` + Vercel serverless functions. No build step for the front e
 | Shared game state | **Upstash Redis** (Vercel KV) | One Redis hash per game — players, per-round scores. Per-field writes so players never clobber each other. 24h TTL. |
 | End-of-game finalize | **Upstash Workflow** | On round 10, a durable workflow sleeps 45s for stragglers, then archives the final board and updates the hall of fame. Survives restarts mid-run. |
 | Daily maintenance | **Upstash QStash** (schedule) | Cron job trims the hall-of-fame sorted set to the top 25. |
-| Photo → dice | **Google Gemini** (`gemini-2.0-flash`, free tier) with a **Claude Haiku 4.5** fallback | Server-side proxy so the key never reaches the browser. Optional — manual entry always works. |
+| Photo → dice | **Google Gemini** (`gemini-3.6-flash`, free tier) with a **Claude Haiku 4.5** fallback | Server-side proxy so the key never reaches the browser. Optional — manual entry always works. |
 
 ### Endpoints
 

@@ -3,8 +3,8 @@
 //   POST /api/analyze { image }       -> { dice: [...] }   (image = data URL or bare base64 JPEG)
 //
 // Provider preference:
-//   1. Google Gemini  (GEMINI_API_KEY)  — free tier at ai.google.dev, model gemini-2.0-flash.
-//      A resized dice photo is well within the free RPM/RPD limits.
+//   1. Google Gemini  (GEMINI_API_KEY)  — free tier at ai.google.dev, model gemini-3.6-flash
+//      (override with GEMINI_MODEL). A resized dice photo is well within the free RPM/RPD limits.
 //   2. Anthropic      (ANTHROPIC_API_KEY) — claude-haiku-4-5, cheapest Claude with vision.
 // If neither key is set the endpoint reports ai_unconfigured and the client
 // falls back to manual entry (which is always available anyway).
@@ -70,7 +70,7 @@ function parseDiceArray(text) {
 }
 
 async function readWithGemini(base64) {
-  const model = process.env.GEMINI_MODEL || 'gemini-2.0-flash';
+  const model = process.env.GEMINI_MODEL || 'gemini-3.6-flash';
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${process.env.GEMINI_API_KEY}`;
   const r = await fetch(url, {
     method: 'POST',

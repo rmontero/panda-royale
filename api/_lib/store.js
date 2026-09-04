@@ -68,8 +68,13 @@ function shapeGame(code, hash) {
 
   const players = [];
   const rounds = {};
+  let finished = null;
   for (const [field, raw] of Object.entries(hash)) {
     if (field === 'meta') continue;
+    if (field === 'finished') {
+      finished = asObject(raw) || true;
+      continue;
+    }
     const val = asObject(raw);
     if (!val) continue;
     if (field.startsWith('player:')) {
@@ -91,6 +96,7 @@ function shapeGame(code, hash) {
     createdAt: meta.createdAt || null,
     players,
     scores: rounds,
+    finished: finished ? finished.at || true : null,
     updatedAt: Date.now(),
   };
 }
