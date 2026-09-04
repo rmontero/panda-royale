@@ -94,12 +94,19 @@ explicitly turned on, so this ships inert.
   revoked mid-session. `api/analyze.js`'s `POST` checks entitlement independently
   of `onlinePaywalled`, so photo scanning is paid even inside a free
   pass-and-play game.
+- **The product:** a single $10 one-time item, "Panda Score Keeper Pro",
+  defined inline in [`api/billing.js`](api/billing.js) (`price_data`, not a
+  dashboard-created Stripe Price — nothing to pre-configure there). Its
+  description carries the disclaimer shown at checkout and on the
+  Stripe-generated invoice (`invoice_creation`): no guarantees, no refunds, no
+  support — it funds development of the paid features, the free tier stays
+  free, and the project may be discontinued without notice.
 - **Required env vars** to actually sell it: `STRIPE_SECRET_KEY`,
-  `STRIPE_PRICE_ID` (a one-time Price created in the Stripe dashboard),
   `STRIPE_WEBHOOK_SECRET` (from the webhook endpoint's settings in Stripe,
   pointed at `/api/billing/webhook`), and optionally `RESEND_API_KEY` /
-  `RESEND_FROM` for the confirmation email. Without these, `POST /api/billing { op: "checkout" }`
-  and the webhook report `billing_unconfigured` rather than failing silently.
+  `RESEND_FROM` for the confirmation email. Without `STRIPE_SECRET_KEY`,
+  `POST /api/billing { op: "checkout" }` and the webhook report
+  `billing_unconfigured` rather than failing silently.
 
 ## Deploying
 

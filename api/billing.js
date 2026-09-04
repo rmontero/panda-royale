@@ -8,6 +8,10 @@
 //   POST /api/billing { op: "checkout", email? }        -> { url }
 //   POST /api/billing { op: "redeem", code }             -> { ok, email }
 //   GET  /api/billing?op=session&session_id=cs_...       -> { code, email } | { pending: true } | 404
+//
+// The product ("Panda Score Keeper Pro", $10 one-time) is defined inline in
+// opCheckout via price_data — see PRODUCT_* below — not a dashboard-created
+// Stripe Price, so STRIPE_PRICE_ID is no longer used/required.
 
 import { getCodeForSession, getEntitlement } from './_lib/entitlements.js';
 
@@ -35,11 +39,25 @@ function appBaseUrl() {
   return `https://${host}`;
 }
 
+// The one and only thing for sale: a single $10 one-time unlock. Defined
+// inline (price_data) rather than a dashboard-created Stripe Price so there's
+// nothing to pre-configure beyond STRIPE_SECRET_KEY — the name, amount, and
+// disclaimer all live here in code.
+const PRODUCT_NAME = 'Panda Score Keeper Pro';
+const PRODUCT_DESCRIPTION =
+  'One-time unlock for online multiplayer and photo scanning. No guarantees, ' +
+  'no backsies, no support — this fee just supports development of the ' +
+  "game's advanced features; the basic version remains fully functional for " +
+  'free. Software projects have a natural life cycle and this one may be ' +
+  'discontinued without prior notice — this fee is not a lifetime commitment ' +
+  'or an uptime warranty.';
+const PRODUCT_AMOUNT_CENTS = 1000; // $10.00
+const PRODUCT_CURRENCY = 'usd';
+
 async function opCheckout(req, res) {
   const secretKey = process.env.STRIPE_SECRET_KEY;
-  const priceId = process.env.STRIPE_PRICE_ID;
-  if (!secretKey || !priceId) {
-    return send(res, 503, { error: 'billing_unconfigured', message: 'Set STRIPE_SECRET_KEY and STRIPE_PRICE_ID to enable purchases.' });
+  if (!secretKey) {
+    return send(res, 503, { error: 'billing_unconfigured', message: 'Set STRIPE_SECRET_KEY to enable purchases.' });
   }
   try {
     const body = readBody(req);
@@ -49,7 +67,22 @@ async function opCheckout(req, res) {
     const base = appBaseUrl();
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',
-      line_items: [{ price: priceId, quantity: 1 }],
+      line_items: [
+        {
+          price_data: {
+            currency: PRODUCT_CURRENCY,
+            unit_amount: PRODUCT_AMOUNT_CENTS,
+            product_data: { name: PRODUCT_NAME, description: PRODUCT_DESCRIPTION },
+          },
+          quantity: 1,
+        },
+      ],
+      // Gives the buyer a real Stripe-generated invoice/receipt for this
+      // one-time payment, same as they'd get from a formal invoice.
+      invoice_creation: {
+        enabled: true,
+        invoice_data: { description: PRODUCT_DESCRIPTION, footer: PRODUCT_DESCRIPTION },
+      },
       success_url: `${base}/?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${base}/`,
       customer_email: email || undefined,
