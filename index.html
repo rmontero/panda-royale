@@ -124,9 +124,14 @@
     max-width:480px;
     margin:0 auto;
     min-height:100vh;
-    padding-bottom:86px;
+    min-height:100svh;
+    padding-bottom:calc(80px + env(safe-area-inset-bottom));
     position:relative;
+    display:flex;
+    flex-direction:column;
   }
+  #app[data-tabs="n"]{ padding-bottom:0; }
+  .screen{ flex:1 1 auto; }
   h1,h2,h3,.display{ font-family:'Baloo 2', system-ui, sans-serif; font-weight:700; margin:0; }
   p{ margin:0; }
   button{ font-family:inherit; }
@@ -342,6 +347,80 @@
   .credits .credits-sign a{ color:var(--lantern-bright); text-decoration:none; }
   .credits .credits-sign a:hover{ text-decoration:underline; }
   .credits .credits-fan{ font-size:0.8rem; color:var(--muted); margin-top:22px; }
+
+  /* ============================================================ *
+   * responsive — mobile first, then tablet, then desktop
+   * ============================================================ */
+  @media (min-width: 680px){
+    body{ background-attachment: fixed; }
+    #app{
+      max-width: 600px;
+      padding-bottom: 0;
+      border-inline: 1px solid var(--panel-line);
+      box-shadow: 0 0 90px rgba(0,0,0,0.4);
+      background: rgba(23,18,36,0.30);
+    }
+    .screen{ padding: 26px 30px 22px; }
+    .topbar{ padding: 16px 30px; }
+
+    /* the scoreboard gets extra room on tablets too (never wider than the viewport) */
+    #app[data-screen="board"]{ max-width: min(760px, 100%); }
+
+    /* tab bar joins the app pane instead of floating over the viewport */
+    .tabbar{
+      position: sticky;
+      left: auto; right: auto; margin: 0;
+      max-width: none;
+      border-inline: 0;
+    }
+    .toast{ bottom: 88px; }
+
+    .hero h1{ font-size: 2.2rem; }
+    .btn{ padding: 14px 16px; }
+  }
+
+  @media (min-width: 1040px){
+    .screen{ padding: 34px 40px 26px; }
+    .topbar{ padding: 18px 40px; }
+
+    /* per-screen widths: forms stay tight, the scoreboard breathes */
+    #app[data-screen="home"]{ max-width: 460px; }
+    #app[data-screen="lobby"]{ max-width: 560px; }
+    #app[data-screen="credits"]{ max-width: 660px; }
+    #app[data-screen="entry"]{ max-width: min(720px, 100%); }
+    #app[data-screen="board"]{ max-width: min(980px, 100%); }
+
+    /* dice entry: two columns on the wider pane; final actions stay narrow and centered */
+    #app[data-screen="entry"] .entry-grid{
+      display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+      border: 0; overflow: visible; background: transparent;
+    }
+    #app[data-screen="entry"] .entry-grid .entry-r{
+      border: 1px solid var(--panel-line); border-radius: 12px;
+    }
+    #app[data-screen="entry"] .entry-grid .entry-r:only-child{ grid-column: 1 / -1; }
+    #app[data-screen="entry"] .total-banner,
+    #app[data-screen="entry"] .entry-hint,
+    #app[data-screen="entry"] .photo-section,
+    #app[data-screen="entry"] .screen > .btn{
+      max-width: 480px; margin-left: auto; margin-right: auto;
+    }
+
+    /* scoreboard: no horizontal scroll, roomier cells, full names */
+    #app[data-screen="board"] table.board{ font-size: 0.92rem; }
+    #app[data-screen="board"] table.board th,
+    #app[data-screen="board"] table.board td{ padding: 12px 9px; }
+    #app[data-screen="board"] table.board td.name-cell,
+    #app[data-screen="board"] table.board th.name-cell{ max-width: none; }
+
+    .hero h1{ font-size: 2.4rem; }
+  }
+
+  /* keep long dashboards usable in landscape on short screens */
+  @media (max-height: 460px) and (min-width: 680px){
+    #app{ min-height: 100vh; }
+    .tabbar{ position: sticky; }
+  }
 </style>
 </head>
 <body>
@@ -1209,6 +1288,8 @@ function render(){
   const chrome = state.screen !== 'home';
   const showTabs = ['lobby','entry','board'].includes(state.screen)
     || (state.screen === 'credits' && !!state.mode);
+  app.dataset.screen = state.screen;
+  app.dataset.tabs = showTabs ? 'y' : 'n';
   app.innerHTML = `
     ${chrome ? renderTopbar() : ''}
     <div class="screen">${body}</div>
