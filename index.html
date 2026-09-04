@@ -348,6 +348,20 @@
   .credits .credits-sign a:hover{ text-decoration:underline; }
   .credits .credits-fan{ font-size:0.8rem; color:var(--muted); margin-top:22px; }
 
+  .pro-badge{
+    display:inline-block; font-size:0.62rem; font-weight:700; letter-spacing:0.04em;
+    color:#241a06; background:var(--lantern); border-radius:6px; padding:1px 6px;
+    vertical-align:1px;
+  }
+  .upgrade-card{ text-align:center; }
+  .upgrade-price{ font-family:'Baloo 2'; font-size:1.3rem; color:var(--lantern-bright); }
+  .upgrade-features{ list-style:none; margin:12px 0 0; padding:0; text-align:left; }
+  .upgrade-features li{
+    font-size:0.88rem; color:var(--ink-dim); padding:6px 0 6px 22px; position:relative;
+  }
+  .upgrade-features li::before{ content:'✓'; position:absolute; left:0; color:var(--good); font-weight:700; }
+  .upgrade-active{ color:var(--good); }
+
   /* ============================================================ *
    * responsive — mobile first, then tablet, then desktop
    * ============================================================ */
@@ -533,6 +547,26 @@ const I18N = {
     'meta.title': 'Panda Royale Scorekeeper',
     'meta.desc': 'Keep score for Panda Royale — one shared phone or everyone on their own device.',
     'you': 'you',
+    'pro.badge': 'PRO',
+    'upgrade.title': 'Panda Royale Pro',
+    'upgrade.blurb': 'A one-time unlock for online multiplayer and photo scanning — pay once, use forever, on any device.',
+    'upgrade.reasonOnline': 'Playing on separate phones needs a one-time Pro unlock.',
+    'upgrade.reasonAi': 'Scanning a dice photo needs a one-time Pro unlock.',
+    'upgrade.price': 'One-time payment · see exact price at checkout',
+    'upgrade.featOnline': 'Play with friends on separate phones, synced live',
+    'upgrade.featAi': 'Scan a dice photo instead of typing',
+    'upgrade.emailLabel': 'Email (for your receipt and code)',
+    'ph.email': 'you@example.com',
+    'upgrade.buyBtn': 'Unlock Pro',
+    'upgrade.haveCode': 'or enter your Pro code',
+    'ph.proCode': 'PRO CODE',
+    'upgrade.redeemBtn': 'Redeem',
+    'upgrade.currentlyPro': "You're Pro on this device ({email}).",
+    'upgrade.unlocked': 'Pro unlocked! Enjoy online play and photo scanning.',
+    'upgrade.checkEmail': 'Purchase received — check your email for your Pro code.',
+    'upgrade.redeemOk': 'Pro code applied!',
+    'upgrade.redeemBad': "That code doesn't match a purchase.",
+    'upgrade.billingOff': "Purchases aren't set up yet — try again soon.",
   },
   es: {
     'title2': 'Anotador',
@@ -627,6 +661,26 @@ const I18N = {
     'meta.title': 'Anotador de Panda Royale',
     'meta.desc': 'Lleva la cuenta de Panda Royale — un móvil compartido o cada quien en el suyo.',
     'you': 'tú',
+    'pro.badge': 'PRO',
+    'upgrade.title': 'Panda Royale Pro',
+    'upgrade.blurb': 'Un pago único para desbloquear el multijugador en línea y el escaneo de fotos — pagas una vez y lo usas siempre, en cualquier dispositivo.',
+    'upgrade.reasonOnline': 'Jugar en móviles separados necesita un desbloqueo Pro de pago único.',
+    'upgrade.reasonAi': 'Escanear una foto de dados necesita un desbloqueo Pro de pago único.',
+    'upgrade.price': 'Pago único · precio exacto al pagar',
+    'upgrade.featOnline': 'Juega con amigos en móviles separados, sincronizado en vivo',
+    'upgrade.featAi': 'Escanea una foto de dados en vez de escribir',
+    'upgrade.emailLabel': 'Correo (para tu recibo y código)',
+    'ph.email': 'tu@correo.com',
+    'upgrade.buyBtn': 'Desbloquear Pro',
+    'upgrade.haveCode': 'o ingresa tu código Pro',
+    'ph.proCode': 'CÓDIGO PRO',
+    'upgrade.redeemBtn': 'Canjear',
+    'upgrade.currentlyPro': 'Pro está activo en este dispositivo ({email}).',
+    'upgrade.unlocked': '¡Pro desbloqueado! Disfruta el juego en línea y el escaneo de fotos.',
+    'upgrade.checkEmail': 'Compra recibida — revisa tu correo para tu código Pro.',
+    'upgrade.redeemOk': '¡Código Pro aplicado!',
+    'upgrade.redeemBad': 'Ese código no corresponde a ninguna compra.',
+    'upgrade.billingOff': 'Los pagos aún no están disponibles — intenta más tarde.',
   },
   de: {
     'title2': 'Punktezähler',
@@ -721,6 +775,26 @@ const I18N = {
     'meta.title': 'Panda Royale Punktezähler',
     'meta.desc': 'Punkte zählen für Panda Royale — ein gemeinsames Handy oder jeder auf seinem eigenen.',
     'you': 'du',
+    'pro.badge': 'PRO',
+    'upgrade.title': 'Panda Royale Pro',
+    'upgrade.blurb': 'Eine einmalige Freischaltung für Online-Mehrspieler und Fotoscan — einmal zahlen, für immer nutzen, auf jedem Gerät.',
+    'upgrade.reasonOnline': 'Auf getrennten Handys spielen erfordert eine einmalige Pro-Freischaltung.',
+    'upgrade.reasonAi': 'Ein Würfelfoto scannen erfordert eine einmalige Pro-Freischaltung.',
+    'upgrade.price': 'Einmalzahlung · genauer Preis an der Kasse',
+    'upgrade.featOnline': 'Mit Freunden auf getrennten Handys spielen, live synchronisiert',
+    'upgrade.featAi': 'Ein Würfelfoto scannen statt eintippen',
+    'upgrade.emailLabel': 'E-Mail (für Beleg und Code)',
+    'ph.email': 'du@beispiel.de',
+    'upgrade.buyBtn': 'Pro freischalten',
+    'upgrade.haveCode': 'oder Pro-Code eingeben',
+    'ph.proCode': 'PRO-CODE',
+    'upgrade.redeemBtn': 'Einlösen',
+    'upgrade.currentlyPro': 'Pro ist auf diesem Gerät aktiv ({email}).',
+    'upgrade.unlocked': 'Pro freigeschaltet! Viel Spaß mit Online-Spiel und Fotoscan.',
+    'upgrade.checkEmail': 'Kauf erhalten — prüfe deine E-Mails für deinen Pro-Code.',
+    'upgrade.redeemOk': 'Pro-Code angewendet!',
+    'upgrade.redeemBad': 'Dieser Code passt zu keinem Kauf.',
+    'upgrade.billingOff': 'Käufe sind noch nicht eingerichtet — versuch es bald wieder.',
   },
   fr: {
     'title2': 'Marqueur',
@@ -815,6 +889,26 @@ const I18N = {
     'meta.title': 'Panda Royale — Marqueur de points',
     'meta.desc': 'Comptez les points de Panda Royale — un téléphone partagé ou chacun sur le sien.',
     'you': 'vous',
+    'pro.badge': 'PRO',
+    'upgrade.title': 'Panda Royale Pro',
+    'upgrade.blurb': 'Un paiement unique pour débloquer le multijoueur en ligne et la lecture de photos — payez une fois, utilisez pour toujours, sur n’importe quel appareil.',
+    'upgrade.reasonOnline': 'Jouer sur des téléphones séparés nécessite un déblocage Pro à paiement unique.',
+    'upgrade.reasonAi': 'Scanner une photo de dés nécessite un déblocage Pro à paiement unique.',
+    'upgrade.price': 'Paiement unique · prix exact au paiement',
+    'upgrade.featOnline': 'Jouez avec des amis sur des téléphones séparés, synchronisé en direct',
+    'upgrade.featAi': 'Scannez une photo de dés au lieu de saisir',
+    'upgrade.emailLabel': 'E-mail (pour votre reçu et votre code)',
+    'ph.email': 'vous@exemple.com',
+    'upgrade.buyBtn': 'Débloquer Pro',
+    'upgrade.haveCode': 'ou entrez votre code Pro',
+    'ph.proCode': 'CODE PRO',
+    'upgrade.redeemBtn': 'Valider',
+    'upgrade.currentlyPro': 'Pro est actif sur cet appareil ({email}).',
+    'upgrade.unlocked': 'Pro débloqué ! Profitez du jeu en ligne et du scan de photos.',
+    'upgrade.checkEmail': 'Achat reçu — vérifiez vos e-mails pour votre code Pro.',
+    'upgrade.redeemOk': 'Code Pro appliqué !',
+    'upgrade.redeemBad': 'Ce code ne correspond à aucun achat.',
+    'upgrade.billingOff': "Les achats ne sont pas encore disponibles — réessayez bientôt.",
   },
   pt: {
     'title2': 'Marcador',
@@ -909,6 +1003,26 @@ const I18N = {
     'meta.title': 'Marcador de Panda Royale',
     'meta.desc': 'Marque os pontos de Panda Royale — um celular compartilhado ou cada um no seu.',
     'you': 'você',
+    'pro.badge': 'PRO',
+    'upgrade.title': 'Panda Royale Pro',
+    'upgrade.blurb': 'Um pagamento único para desbloquear o multiplayer online e a leitura de fotos — pague uma vez, use para sempre, em qualquer aparelho.',
+    'upgrade.reasonOnline': 'Jogar em celulares separados precisa de um desbloqueio Pro de pagamento único.',
+    'upgrade.reasonAi': 'Escanear uma foto de dados precisa de um desbloqueio Pro de pagamento único.',
+    'upgrade.price': 'Pagamento único · preço exato no checkout',
+    'upgrade.featOnline': 'Jogue com amigos em celulares separados, sincronizado ao vivo',
+    'upgrade.featAi': 'Escaneie uma foto dos dados em vez de digitar',
+    'upgrade.emailLabel': 'E-mail (para seu recibo e código)',
+    'ph.email': 'voce@exemplo.com',
+    'upgrade.buyBtn': 'Desbloquear Pro',
+    'upgrade.haveCode': 'ou digite seu código Pro',
+    'ph.proCode': 'CÓDIGO PRO',
+    'upgrade.redeemBtn': 'Resgatar',
+    'upgrade.currentlyPro': 'O Pro está ativo neste aparelho ({email}).',
+    'upgrade.unlocked': 'Pro desbloqueado! Aproveite o jogo online e o escaneamento de fotos.',
+    'upgrade.checkEmail': 'Compra recebida — confira seu e-mail para o código Pro.',
+    'upgrade.redeemOk': 'Código Pro aplicado!',
+    'upgrade.redeemBad': 'Esse código não corresponde a nenhuma compra.',
+    'upgrade.billingOff': 'As compras ainda não estão disponíveis — tente novamente em breve.',
   },
 };
 
@@ -1034,7 +1148,7 @@ async function api(op, payload){
   }
   const r = await fetch('/api/game', {
     method:'POST', headers:{ 'content-type':'application/json' },
-    body: JSON.stringify({ op, ...payload }),
+    body: JSON.stringify({ op, proCode: state.pro?.code, ...payload }),
   });
   const body = await r.json().catch(() => ({}));
   if(!r.ok) throw Object.assign(new Error(body.error || 'request failed'), { status:r.status, body });
@@ -1044,10 +1158,11 @@ async function api(op, payload){
 async function analyzePhoto(dataUrl){
   const r = await fetch('/api/analyze', {
     method:'POST', headers:{ 'content-type':'application/json' },
-    body: JSON.stringify({ image: dataUrl }),
+    body: JSON.stringify({ image: dataUrl, proCode: state.pro?.code }),
   });
   const body = await r.json().catch(() => ({}));
   if(r.status === 503){ aiAvailable = false; throw Object.assign(new Error('ai off'), { soft:true }); }
+  if(r.status === 402) throw Object.assign(new Error('payment_required'), { status:402 });
   if(!r.ok) throw new Error(body.message || 'Could not read the photo');
   return body.dice || [];
 }
@@ -1100,6 +1215,11 @@ let state = {
   toast: null,
   banner: null,
   hof: [],
+
+  pro: LS.get('pr.pro', null),                     // {code, email} | null — a Pro unlock on this device
+  flags: { paywallEnabled:false, onlinePaywalled:false, aiPaywalled:false },
+  upgradeFrom: 'home',                             // screen to return to from the upgrade screen
+  upgradeReason: null,                             // 'online' | 'ai' | null — why the upgrade screen opened
 };
 let pollTimer = null;
 
@@ -1148,7 +1268,7 @@ async function createOnline(name){
     LS.set('pr.session', { mode:'online', code: game.code });
     LS.set(roundKey(game.code), 1);
     setState({ mode:'online', code: game.code, game, screen:'lobby', entryRound:1, banner:null });
-  } catch(e){ handleApiError(e); }
+  } catch(e){ handleApiError(e, { from:'home', reason:'online' }); }
 }
 async function joinOnline(name, code){
   code = (code || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
@@ -1162,7 +1282,7 @@ async function joinOnline(name, code){
     setState({ mode:'online', code: game.code, game, screen:'lobby', entryRound: savedRound, banner:null });
   } catch(e){
     if(e.status === 404){ toast(t('t.noGame')); return; }
-    handleApiError(e);
+    handleApiError(e, { from:'home', reason:'online' });
   }
 }
 async function refreshOnline(){
@@ -1174,9 +1294,11 @@ async function refreshOnline(){
     if(e.status === 404){ leaveGame(t('t.gameEnded'), 'info'); }
   }
 }
-function handleApiError(e){
+function handleApiError(e, opts){
   if(e.status === 503){
     setState({ banner: t('banner.storage'), bannerKind: 'error' });
+  } else if(e.status === 402){
+    setState({ screen:'upgrade', upgradeFrom: (opts && opts.from) || state.screen, upgradeReason: (opts && opts.reason) || 'online' });
   } else {
     toast(t('t.wrong'));
   }
@@ -1284,6 +1406,7 @@ function render(){
   else if(state.screen === 'entry') body = renderEntry();
   else if(state.screen === 'board') body = renderBoard();
   else if(state.screen === 'credits') body = renderCredits();
+  else if(state.screen === 'upgrade') body = renderUpgrade();
 
   const chrome = state.screen !== 'home';
   const showTabs = ['lobby','entry','board'].includes(state.screen)
@@ -1321,6 +1444,19 @@ function renderTopbar(){
       </div>
     </div>`;
   }
+  if(state.screen === 'upgrade'){
+    return `
+    <div class="topbar">
+      <div>
+        <div class="code">Panda Royale</div>
+        <div class="sub">${esc(t('upgrade.title'))}</div>
+      </div>
+      <div style="display:flex; align-items:center; gap:6px;">
+        ${langSelect()}
+        <button class="link-btn" data-a="upgrade-back">${esc(t('back'))}</button>
+      </div>
+    </div>`;
+  }
   const code = state.mode === 'local' ? t('passPlay') : (v ? v.code : '');
   return `
     <div class="topbar">
@@ -1351,6 +1487,7 @@ function renderTabbar(){
 function renderHome(){
   const tab = state.homeTab;
   const hasLocal = !!LS.get('pr.local', null)?.players?.length;
+  const onlineNeedsPro = state.flags.paywallEnabled && state.flags.onlinePaywalled && !state.pro;
   return `
     <div class="home-top">
       <div class="lanterns">
@@ -1366,7 +1503,7 @@ function renderHome(){
     ${state.banner ? `<div class="banner ${state.bannerKind === 'info' ? 'info' : ''}">${esc(state.banner)}</div>` : ''}
 
     <div class="seg" style="margin-top:18px;">
-      <button class="${tab === 'online' ? 'on' : ''}" data-a="home-tab" data-v="online">${esc(t('seg.online'))}</button>
+      <button class="${tab === 'online' ? 'on' : ''}" data-a="home-tab" data-v="online">${esc(t('seg.online'))}${onlineNeedsPro ? ` <span class="pro-badge">${esc(t('pro.badge'))}</span>` : ''}</button>
       <button class="${tab === 'local' ? 'on' : ''}" data-a="home-tab" data-v="local">${esc(t('seg.local'))}</button>
     </div>
 
@@ -1466,9 +1603,10 @@ function renderEntry(){
   const rows = breakdownRows(dice, scored);
   const visibleRows = isR1 ? ENTRY_ROWS.filter(r => r.color === 'yellow') : ENTRY_ROWS;
 
+  const aiNeedsPro = state.flags.paywallEnabled && state.flags.aiPaywalled && !state.pro;
   const photoSection = (aiAvailable && !isR1) ? `
     <div class="photo-section">
-      <div class="section-title">${esc(t('photo.section'))}</div>
+      <div class="section-title">${esc(t('photo.section'))}${aiNeedsPro ? ` <span class="pro-badge">${esc(t('pro.badge'))}</span>` : ''}</div>
       <label class="capture-zone" for="photoInput">
         <div class="icon">📷</div>
         <div>
@@ -1594,6 +1732,40 @@ function renderCredits(){
   `;
 }
 
+function renderUpgrade(){
+  const reasonKey = state.upgradeReason === 'ai' ? 'upgrade.reasonAi'
+    : state.upgradeReason === 'online' ? 'upgrade.reasonOnline' : 'upgrade.blurb';
+  return `
+    <div class="upgrade">
+      <div class="lanterns" style="margin-bottom:14px;">
+        ${Object.values(COLOR_HEX).map(c => `<span style="background:${c}"></span>`).join('')}
+      </div>
+      <h2 style="font-size:1.3rem;">${esc(t('upgrade.title'))}</h2>
+      <p class="small-note" style="margin-top:6px;">${esc(t(reasonKey))}</p>
+
+      <div class="card upgrade-card">
+        <div class="upgrade-price">${esc(t('upgrade.price'))}</div>
+        <ul class="upgrade-features">
+          <li>${esc(t('upgrade.featOnline'))}</li>
+          <li>${esc(t('upgrade.featAi'))}</li>
+        </ul>
+      </div>
+
+      <label class="field-label" for="upgradeEmail">${esc(t('upgrade.emailLabel'))}</label>
+      <input class="text-input" id="upgradeEmail" type="email" placeholder="${esc(t('ph.email'))}" autocomplete="email" />
+      <button class="btn btn-primary" data-a="checkout">${esc(t('upgrade.buyBtn'))}</button>
+
+      <div class="divider">${esc(t('upgrade.haveCode'))}</div>
+      <input class="text-input code-input" id="redeemInput" placeholder="${esc(t('ph.proCode'))}" maxlength="8" autocomplete="off" />
+      <button class="btn btn-secondary" data-a="redeem-code">${esc(t('upgrade.redeemBtn'))}</button>
+
+      ${state.pro ? `<p class="small-note upgrade-active">${esc(t('upgrade.currentlyPro', { email: state.pro.email || '' }))}</p>` : ''}
+
+      <button class="btn btn-ghost" data-a="upgrade-back">${esc(t('back'))}</button>
+    </div>
+  `;
+}
+
 /* ------------------------------------------------------------------ *
  * events
  * ------------------------------------------------------------------ */
@@ -1618,6 +1790,40 @@ function bind(){
     else if(a === 'tab-credits') setState({ screen:'credits' });
     else if(a === 'credits-back') setState({ screen: state.mode ? 'lobby' : 'home' });
     else if(a === 'go-credits') setState({ screen:'credits' });
+    else if(a === 'upgrade-back') setState({ screen: state.upgradeFrom || 'home' });
+    else if(a === 'checkout'){
+      const email = (document.getElementById('upgradeEmail')?.value || '').trim();
+      try {
+        const r = await fetch('/api/billing/checkout', {
+          method:'POST', headers:{ 'content-type':'application/json' },
+          body: JSON.stringify({ email: email || undefined }),
+        });
+        const data = await r.json().catch(() => ({}));
+        if(r.status === 503){ toast(t('upgrade.billingOff')); return; }
+        if(!r.ok || !data.url){ toast(t('t.wrong')); return; }
+        location.href = data.url;
+      } catch { toast(t('t.wrong')); }
+    }
+    else if(a === 'redeem-code'){
+      const inp = document.getElementById('redeemInput');
+      const code = (inp?.value || '').trim().toUpperCase();
+      if(!code) return;
+      try {
+        const r = await fetch('/api/billing/redeem', {
+          method:'POST', headers:{ 'content-type':'application/json' },
+          body: JSON.stringify({ code }),
+        });
+        const data = await r.json().catch(() => ({}));
+        if(r.ok && data.ok){
+          state.pro = { code, email: data.email || null };
+          LS.set('pr.pro', state.pro);
+          toast(t('upgrade.redeemOk'));
+          setState({ screen: state.upgradeFrom || 'home' });
+        } else {
+          toast(t('upgrade.redeemBad'));
+        }
+      } catch { toast(t('t.wrong')); }
+    }
     else if(a === 'refresh'){ await refreshOnline(); toast(t('t.updated')); }
     else if(a === 'round-prev') setState({ entryRound: Math.max(1, state.entryRound - 1) });
     else if(a === 'round-next') setState({ entryRound: Math.min(ROUNDS, state.entryRound + 1) });
@@ -1685,6 +1891,7 @@ function bind(){
         setState({ analyzing: false, fields: merged, analyzeError: null, photoCount: count });
       } catch(err){
         if(err.soft) setState({ analyzing: false, photo: null });
+        else if(err.status === 402) setState({ analyzing:false, photo:null, screen:'upgrade', upgradeFrom:'entry', upgradeReason:'ai' });
         else setState({ analyzing: false, analyzeError: t('t.photoErr') });
       }
     };
@@ -1719,6 +1926,31 @@ function updateEntryTotals(){
 /* ------------------------------------------------------------------ *
  * boot
  * ------------------------------------------------------------------ */
+// After a successful Stripe redirect (?session_id=...): the webhook that mints
+// the Pro code can lag a beat behind the redirect, so poll briefly before
+// falling back to "check your email".
+async function handleCheckoutReturn(sessionId){
+  for(let i = 0; i < 6; i++){
+    try {
+      const r = await fetch(`/api/billing/session?session_id=${encodeURIComponent(sessionId)}`);
+      if(r.ok){
+        const d = await r.json();
+        if(d && d.code){
+          state.pro = { code: d.code, email: d.email || null };
+          LS.set('pr.pro', state.pro);
+          history.replaceState({}, '', location.pathname);
+          toast(t('upgrade.unlocked'));
+          render();
+          return;
+        }
+      }
+    } catch {}
+    await new Promise(r => setTimeout(r, 1500));
+  }
+  history.replaceState({}, '', location.pathname);
+  toast(t('upgrade.checkEmail'));
+}
+
 async function boot(){
   // language: saved choice, else the browser's preferred, else English
   state.lang = detectLang();
@@ -1731,9 +1963,15 @@ async function boot(){
   fetch('/api/hof').then(r => r.json()).then(d => {
     if(d && Array.isArray(d.entries) && d.entries.length){ state.hof = d.entries; if(state.screen === 'home') render(); }
   }).catch(() => {});
+  // paywall feature flags — everything defaults to free until these say otherwise
+  fetch('/api/flags').then(r => r.json()).then(d => {
+    if(d && typeof d === 'object'){ state.flags = { ...state.flags, ...d }; render(); }
+  }).catch(() => {});
 
   const params = new URLSearchParams(location.search);
   const deepCode = (params.get('code') || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+  const sessionId = params.get('session_id');
+  if(sessionId) handleCheckoutReturn(sessionId);
 
   const session = LS.get('pr.session', null);
   if(deepCode){

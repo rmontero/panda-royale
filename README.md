@@ -62,6 +62,39 @@ Static `index.html` + Vercel serverless functions. No build step for the front e
 | `POST /api/workflows/finalize` | Upstash Workflow endpoint (called by QStash, not humans). |
 | `POST /api/tasks/sweep` | QStash-scheduled maintenance, signature-verified. |
 | `GET /api/hof` | Hall of fame — biggest single-round scores across finished games. |
+| `GET /api/flags` | Paywall feature flags — see **Pro / paywall** below. |
+| `POST /api/billing/checkout` | Creates a Stripe Checkout Session for the one-time Pro unlock. |
+| `POST /api/billing/webhook` | Stripe webhook — mints a Pro code on `checkout.session.completed`. |
+| `GET /api/billing/session` | Post-checkout: looks up the code just minted for a `session_id`. |
+| `POST /api/billing/redeem` | Validates a Pro code so it can be entered on another device. |
+
+## Pro / paywall
+
+Pass-and-play is free forever — it's 100% client-side and touches none of the
+endpoints above. Online multiplayer (separate phones) and photo scanning can
+each be gated behind a one-time "Pro" unlock, independently, via feature flags
+stored in Redis (`config:flags`) — everything defaults to **off** (free) until
+explicitly turned on, so this ships inert.
+
+- **Toggle it** (no deploy needed): `npm run flags -- --paywall=on --online=on --ai=on`
+  (needs the project's Redis env vars available locally — see below). Turning
+  `paywallEnabled` off is the kill-switch if something goes wrong.
+- **Identity model:** no accounts or passwords. Stripe Checkout collects an
+  email, the webhook mints a short Pro code (`pro:<CODE>` in Redis, permanent),
+  emails it via Resend, and shows it immediately on the post-checkout screen.
+  Entering that code on any device unlocks it there (`pr.pro` in `localStorage`).
+- **What's gated, and when:** `api/game.js` checks entitlement only on
+  `create`/`join` — never on `score`/`unscore`/`leave`/`reset` — so a game
+  already in progress keeps working even if a flag flips or a code is later
+  revoked mid-session. `api/analyze.js`'s `POST` checks entitlement independently
+  of `onlinePaywalled`, so photo scanning is paid even inside a free
+  pass-and-play game.
+- **Required env vars** to actually sell it: `STRIPE_SECRET_KEY`,
+  `STRIPE_PRICE_ID` (a one-time Price created in the Stripe dashboard),
+  `STRIPE_WEBHOOK_SECRET` (from the webhook endpoint's settings in Stripe,
+  pointed at `/api/billing/webhook`), and optionally `RESEND_API_KEY` /
+  `RESEND_FROM` for the confirmation email. Without these, `/api/billing/checkout`
+  and the webhook report `billing_unconfigured` rather than failing silently.
 
 ## Deploying
 
@@ -131,7 +164,7 @@ mode is fully functional offline; the online endpoints will 404 without `vercel 
 ## Tech
 
 Vanilla HTML/CSS/JS front end (one ES module). Node serverless functions.
-Dependencies: `@upstash/redis`, `@upstash/qstash`, `@upstash/workflow`, `@anthropic-ai/sdk`.
+Dependencies: `@upstash/redis`, `@upstash/qstash`, `@upstash/workflow`, `@anthropic-ai/sdk`, `stripe`, `resend`.
 
 ## License
 

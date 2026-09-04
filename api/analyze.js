@@ -10,6 +10,7 @@
 // falls back to manual entry (which is always available anyway).
 
 import { DICE_COLORS } from '../lib/score.js';
+import { getFlags, isEntitled } from './_lib/entitlements.js';
 
 export const config = { maxDuration: 30 };
 
@@ -231,6 +232,13 @@ export default async function handler(req, res) {
       return send(res, 400, { error: 'missing_image' });
     }
     const base64 = body.image.includes(',') ? body.image.split(',')[1] : body.image;
+
+    // Paid regardless of pass-and-play vs. separate-phones — this check is
+    // independent of the online-multiplayer gate in api/game.js.
+    const flags = await getFlags();
+    if (flags.paywallEnabled && flags.aiPaywalled && !(await isEntitled(body.proCode))) {
+      return send(res, 402, { error: 'payment_required', message: 'Photo scanning needs a Pro unlock.' });
+    }
 
     const text = p === 'gemini' ? await readWithGemini(base64) : await readWithAnthropic(base64);
     const parsed = parseModelJson(text);

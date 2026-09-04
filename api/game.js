@@ -19,6 +19,7 @@ import {
   TOTAL_ROUNDS,
 } from './_lib/store.js';
 import { triggerFinalize } from './_lib/upstash.js';
+import { getFlags, isEntitled } from './_lib/entitlements.js';
 
 function send(res, status, body) {
   res.status(status).setHeader('content-type', 'application/json');
@@ -63,6 +64,20 @@ export default async function handler(req, res) {
       const op = body.op;
       const playerId = String(body.playerId || '').slice(0, 40);
       if (!playerId) return send(res, 400, { error: 'missing_player_id' });
+
+      // Entitlement is checked only at the door — starting or joining a new
+      // online game — never on score/unscore/leave/reset. That way a game
+      // already in progress keeps working even if a flag flips or a code is
+      // later revoked mid-session.
+      if (op === 'create' || op === 'join') {
+        const flags = await getFlags();
+        if (flags.paywallEnabled && flags.onlinePaywalled && !(await isEntitled(body.proCode))) {
+          return send(res, 402, {
+            error: 'payment_required',
+            message: 'Separate-phones play needs a Pro unlock.',
+          });
+        }
+      }
 
       if (op === 'create') {
         const game = await createGame({ hostId: playerId, name: body.name });
