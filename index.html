@@ -606,6 +606,7 @@ const I18N = {
     'auth.loggedInAs': 'Logged in as {email}',
     'auth.emailTaken': 'An account already exists for that email — log in instead.',
     'auth.invalidCode': "That code isn't valid.",
+    'auth.emailMismatch': "That's not the email this code's receipt went to.",
     'auth.invalidCredentials': 'Incorrect email or password.',
     'auth.passwordShort': 'Password must be at least 8 characters.',
     'auth.accountCreated': "Account created — you're logged in.",
@@ -738,6 +739,7 @@ const I18N = {
     'auth.loggedInAs': 'Sesión iniciada como {email}',
     'auth.emailTaken': 'Ya existe una cuenta con ese correo — inicia sesión en su lugar.',
     'auth.invalidCode': 'Ese código no es válido.',
+    'auth.emailMismatch': 'Ese no es el correo al que se envió el recibo de este código.',
     'auth.invalidCredentials': 'Correo o contraseña incorrectos.',
     'auth.passwordShort': 'La contraseña debe tener al menos 8 caracteres.',
     'auth.accountCreated': 'Cuenta creada — sesión iniciada.',
@@ -870,6 +872,7 @@ const I18N = {
     'auth.loggedInAs': 'Angemeldet als {email}',
     'auth.emailTaken': 'Für diese E-Mail existiert bereits ein Konto — bitte anmelden.',
     'auth.invalidCode': 'Dieser Code ist ungültig.',
+    'auth.emailMismatch': 'Das ist nicht die E-Mail, an die die Quittung für diesen Code ging.',
     'auth.invalidCredentials': 'E-Mail oder Passwort falsch.',
     'auth.passwordShort': 'Das Passwort muss mindestens 8 Zeichen haben.',
     'auth.accountCreated': 'Konto erstellt — du bist angemeldet.',
@@ -1002,6 +1005,7 @@ const I18N = {
     'auth.loggedInAs': 'Connecté en tant que {email}',
     'auth.emailTaken': 'Un compte existe déjà pour cet e-mail — connectez-vous plutôt.',
     'auth.invalidCode': "Ce code n'est pas valide.",
+    'auth.emailMismatch': "Ce n'est pas l'e-mail auquel le reçu de ce code a été envoyé.",
     'auth.invalidCredentials': 'E-mail ou mot de passe incorrect.',
     'auth.passwordShort': 'Le mot de passe doit comporter au moins 8 caractères.',
     'auth.accountCreated': 'Compte créé — vous êtes connecté.',
@@ -1134,6 +1138,7 @@ const I18N = {
     'auth.loggedInAs': 'Conectado como {email}',
     'auth.emailTaken': 'Já existe uma conta com esse e-mail — entre em vez disso.',
     'auth.invalidCode': 'Esse código não é válido.',
+    'auth.emailMismatch': 'Esse não é o e-mail para o qual o recibo desse código foi enviado.',
     'auth.invalidCredentials': 'E-mail ou senha incorretos.',
     'auth.passwordShort': 'A senha deve ter pelo menos 8 caracteres.',
     'auth.accountCreated': 'Conta criada — você está conectado.',
@@ -2075,6 +2080,8 @@ function bind(){
           toast(t('auth.accountCreated'));
         } else if(data.error === 'email_taken'){ toast(t('auth.emailTaken')); }
         else if(data.error === 'invalid_code'){ toast(t('auth.invalidCode')); }
+        else if(data.error === 'retired'){ toast(t('upgrade.redeemRetired')); setState({ showLoginForm: true }); }
+        else if(data.error === 'email_mismatch'){ toast(t('auth.emailMismatch')); }
         else { toast(t('t.wrong')); }
       } catch { toast(t('t.wrong')); }
     }

@@ -129,9 +129,20 @@ async function verifyPassword(password, stored) {
   return a.length === b.length && timingSafeEqual(a, b);
 }
 
-// Creates an account tied to an already-valid Pro code, and marks that code
-// "retired" (kept, not deleted — see api/billing.js's opRedeem for why: no
-// password-reset flow exists yet, so the raw code stays a recovery path).
+// Creates an account tied to an already-valid, not-yet-retired Pro code, and
+// marks that code "retired" (kept, not deleted — see api/billing.js's
+// opRedeem for why: no password-reset flow exists yet, so the raw code
+// stays a recovery path).
+//
+// Security note: the account's email is bound to entitlement.email (the
+// address Stripe actually collected at purchase) whenever the code has one,
+// rather than trusting the caller's email — otherwise anyone holding any
+// valid code (including one they legitimately bought themselves) could
+// register an account for an arbitrary victim email, squatting it before
+// the real owner ever signs up. A code with no attached email (e.g. a
+// manually-granted comp code) has no ground truth to bind to, so the
+// caller's email is accepted as-is in that case — matching how those codes
+// are meant to be freely handed out.
 export async function createAccount({ email, code, password }) {
   const redis = getRedis();
   if (!redis) return { error: 'storage_unconfigured' };
@@ -140,6 +151,9 @@ export async function createAccount({ email, code, password }) {
 
   const entitlement = await getEntitlement(code);
   if (!entitlement) return { error: 'invalid_code' };
+  if (entitlement.retiredAt) return { error: 'retired' };
+  const entitlementEmail = String(entitlement.email || '').toLowerCase().trim();
+  if (entitlementEmail && entitlementEmail !== email) return { error: 'email_mismatch' };
   if (await redis.exists(accountKey(email))) return { error: 'email_taken' };
 
   const passwordHash = await hashPassword(password);
