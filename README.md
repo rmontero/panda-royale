@@ -21,6 +21,10 @@ in `localStorage` (`pr.lang`). All strings live in the `I18N` table in `index.ht
 
 ## How scoring works
 
+For the exhaustive version of everything in this section — round structure,
+exact formulas with worked examples, pity-die guidance, standings/crown
+rules, and a file/function map — see [`GAME_RULES.md`](GAME_RULES.md).
+
 | Color | Rule |
 |---|---|
 | Yellow | Sum of face values |
