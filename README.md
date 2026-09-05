@@ -88,6 +88,10 @@ explicitly turned on, so this ships inert.
 - **Toggle it** (no deploy needed): `npm run flags -- --paywall=on --online=on --ai=on`
   (needs the project's Redis env vars available locally — see below). Turning
   `paywallEnabled` off is the kill-switch if something goes wrong.
+- **Photo scanning has its own hard kill-switch**, `aiEnabled` (default
+  **on**, opposite polarity from the paywall flags above) — independent of
+  Pro/paywall status, for hiding the feature entirely while its accuracy is
+  still being worked on: `npm run flags -- --enabled=off`.
 - **Identity model:** no accounts or passwords. Stripe Checkout collects an
   email, the webhook mints a short Pro code (`pro:<CODE>` in Redis, permanent),
   emails it via Resend, and shows it immediately on the post-checkout screen.

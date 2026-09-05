@@ -8,8 +8,12 @@
 //   KV_REST_API_URL=... KV_REST_API_TOKEN=... node scripts/set-flags.mjs --status
 //   KV_REST_API_URL=... KV_REST_API_TOKEN=... node scripts/set-flags.mjs --paywall=on --online=on --ai=on
 //   KV_REST_API_URL=... KV_REST_API_TOKEN=... node scripts/set-flags.mjs --paywall=off   # kill-switch
+//   KV_REST_API_URL=... KV_REST_API_TOKEN=... node scripts/set-flags.mjs --enabled=off   # hide photo scanning entirely
 //
-// Flags default to "off" everywhere until explicitly turned on — see
+// The paywall flags (paywall/online/ai) default to "off" (free) until
+// explicitly turned on; --enabled (aiEnabled) is the opposite polarity — it
+// defaults "on" (the feature exists) and is a hard kill-switch for hiding
+// photo scanning altogether, independent of Pro/paywall status — see
 // api/_lib/entitlements.js's DEFAULT_FLAGS.
 
 import { getFlags, setFlags } from '../api/_lib/entitlements.js';
@@ -38,9 +42,10 @@ const patch = {};
 if ('paywall' in args) patch.paywallEnabled = toBool(args.paywall);
 if ('online' in args) patch.onlinePaywalled = toBool(args.online);
 if ('ai' in args) patch.aiPaywalled = toBool(args.ai);
+if ('enabled' in args) patch.aiEnabled = toBool(args.enabled);
 
 if (Object.keys(patch).length === 0) {
-  console.log('Nothing to change. Usage: --status | --paywall=on|off --online=on|off --ai=on|off');
+  console.log('Nothing to change. Usage: --status | --paywall=on|off --online=on|off --ai=on|off --enabled=on|off');
   console.log('Current flags:', await getFlags());
   process.exit(0);
 }

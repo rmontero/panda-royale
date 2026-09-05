@@ -210,7 +210,12 @@ async function readWithAnthropic(base64) {
 }
 
 export default async function handler(req, res) {
-  const p = provider();
+  const flags = await getFlags();
+  // aiEnabled is a hard kill-switch, independent of whether a provider key is
+  // configured — used to hide the feature entirely while its accuracy is
+  // still being worked on, regardless of Pro status.
+  const p = flags.aiEnabled === false ? null : provider();
+  const disabledByFlag = flags.aiEnabled === false;
 
   if (req.method === 'GET') {
     return send(res, p ? 200 : 503, { available: !!p, provider: p });
@@ -220,10 +225,9 @@ export default async function handler(req, res) {
     return send(res, 405, { error: 'method_not_allowed' });
   }
   if (!p) {
-    return send(res, 503, {
-      error: 'ai_unconfigured',
-      message: 'Photo reading is off. Set GEMINI_API_KEY (free) or ANTHROPIC_API_KEY to enable it.',
-    });
+    return send(res, 503, disabledByFlag
+      ? { error: 'ai_disabled', message: 'Photo reading is temporarily off while dice recognition improves.' }
+      : { error: 'ai_unconfigured', message: 'Photo reading is off. Set GEMINI_API_KEY (free) or ANTHROPIC_API_KEY to enable it.' });
   }
 
   try {
@@ -235,7 +239,6 @@ export default async function handler(req, res) {
 
     // Paid regardless of pass-and-play vs. separate-phones — this check is
     // independent of the online-multiplayer gate in api/game.js.
-    const flags = await getFlags();
     if (flags.paywallEnabled && flags.aiPaywalled && !(await isEntitled(body.proCode))) {
       return send(res, 402, { error: 'payment_required', message: 'Photo scanning needs a Pro unlock.' });
     }

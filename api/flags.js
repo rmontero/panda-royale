@@ -1,4 +1,4 @@
-// GET /api/flags -> { paywallEnabled, onlinePaywalled, aiPaywalled }
+// GET /api/flags -> { paywallEnabled, onlinePaywalled, aiPaywalled, aiEnabled }
 // Public, no auth. Always returns a usable object — missing/unconfigured
 // storage just means every flag is false (paywall off, everything free).
 
@@ -12,6 +12,6 @@ export default async function handler(req, res) {
     res.status(200).end(JSON.stringify(flags));
   } catch (err) {
     console.error('flags error', err);
-    res.status(200).end(JSON.stringify({ paywallEnabled: false, onlinePaywalled: false, aiPaywalled: false }));
+    res.status(200).end(JSON.stringify({ paywallEnabled: false, onlinePaywalled: false, aiPaywalled: false, aiEnabled: true }));
   }
 }

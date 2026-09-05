@@ -18,7 +18,10 @@ import { getRedis } from './store.js';
 const scrypt = promisify(scryptCb);
 
 const FLAGS_KEY = 'config:flags';
-const DEFAULT_FLAGS = { paywallEnabled: false, onlinePaywalled: false, aiPaywalled: false };
+// aiEnabled defaults true (the feature exists unless explicitly turned off) —
+// opposite polarity from the paywall flags (which default false/free), since
+// this is a "does the feature exist at all" kill-switch, not a paywall gate.
+const DEFAULT_FLAGS = { paywallEnabled: false, onlinePaywalled: false, aiPaywalled: false, aiEnabled: true };
 
 export async function getFlags() {
   const redis = getRedis();
