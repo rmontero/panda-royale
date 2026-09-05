@@ -1704,29 +1704,49 @@ function renderLobby(){
   const me = state.me.id;
   const round = state.entryRound;
 
-  // Local mode: rank by current standings once real scores exist (crown the
-  // leader(s), ribbon the players currently holding the pity die), otherwise
-  // show the roster in seating/drag order.
-  const totals = v.isLocal ? totalsFor(v) : null;
+  // Local mode: the LIST ORDER reflects last round's results (so the phone
+  // naturally passes to whoever's turn feels "next" by recent momentum), but
+  // each name still carries its overall #rank (aggregate total across all
+  // rounds so far) and a pity-die ribbon for whoever's currently lowest
+  // overall — e.g. the round-3 winner can sit at the top of the list while
+  // still showing "#2" if someone else leads the aggregate score.
+  const totals = v.isLocal ? totalsFor(v) : null; // sorted desc by aggregate total
   const showRankings = !!(totals && totals.some(p => p.total > 0));
   const pinkCount = v.isLocal ? pinkDiceFor(v.players.length) : 0;
   const bottomIds = showRankings ? new Set(totals.slice(Math.max(0, totals.length - pinkCount)).map(p => p.id)) : new Set();
-  const topTotal = showRankings ? totals[0].total : null;
-  const orderedPlayers = showRankings ? totals : v.players;
+
+  // Overall rank number per player, competition-style (ties share a rank;
+  // the next distinct total skips accordingly).
+  const rankOf = new Map();
+  if(showRankings){
+    let rank = 0, seen = 0, prevTotal = null;
+    for(const p of totals){
+      seen++;
+      if(p.total !== prevTotal){ rank = seen; prevTotal = p.total; }
+      rankOf.set(p.id, rank);
+    }
+  }
+
+  const prevRound = round - 1;
+  const orderedPlayers = v.isLocal && prevRound >= 1
+    ? [...v.players].sort((a, b) => {
+        const sa = (v.scores[prevRound] && v.scores[prevRound][a.id]) ? v.scores[prevRound][a.id].total : 0;
+        const sb = (v.scores[prevRound] && v.scores[prevRound][b.id]) ? v.scores[prevRound][b.id].total : 0;
+        return sb - sa;
+      })
+    : (showRankings ? totals : v.players);
   const started = v.isLocal && Object.keys(v.scores).length > 0;
 
   const playerList = orderedPlayers.length ? orderedPlayers.map(p => {
     const done = v.scores[round] && v.scores[round][p.id];
     const isMe = !v.isLocal && p.id === me;
-    const rankTag = v.isLocal && showRankings
-      ? (p.total === topTotal ? ' <span class="rank-tag" title="Leading">👑</span>'
-        : bottomIds.has(p.id) ? ' <span class="rank-tag" title="Pity die">🎀</span>' : '')
-      : '';
+    const rankTag = v.isLocal && rankOf.has(p.id) ? ` <span class="rank-tag" title="Overall rank">#${rankOf.get(p.id)}</span>` : '';
+    const pityTag = v.isLocal && bottomIds.has(p.id) ? ' <span class="rank-tag" title="Pity die">🎀</span>' : '';
     return `
       <div class="player-row" data-pid="${p.id}">
         ${v.isLocal ? `<span class="drag-handle" data-id="${p.id}" aria-label="${esc(t('local.reorder'))}">⠿</span>` : ''}
         <div class="avatar" ${v.isLocal ? `data-a="cycle-color" data-id="${p.id}"` : ''} style="background:${playerColor(p)}">${esc((p.name || '?')[0].toUpperCase())}</div>
-        <div class="name">${esc(p.name)}${rankTag}${isMe ? `<span class="you-tag">${esc(t('you'))}</span>` : ''}</div>
+        <div class="name">${esc(p.name)}${rankTag}${pityTag}${isMe ? `<span class="you-tag">${esc(t('you'))}</span>` : ''}</div>
         ${v.isLocal
           ? `<button class="pill-btn ${done ? 'done' : ''}" data-a="score-player" data-id="${p.id}">${done ? `✓ ${done.total}` : esc(t('enterDice'))}</button>
              <button class="icon-btn" data-a="rm-player" data-id="${p.id}">✕</button>`
