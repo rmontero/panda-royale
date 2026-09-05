@@ -9,11 +9,25 @@
 //   POST /api/billing { op: "redeem", code }             -> { ok, email }
 //   GET  /api/billing?op=session&session_id=cs_...       -> { code, email } | { pending: true } | 404
 //
+//   -- optional email+password login, layered on top of a redeemed code --
+//   POST /api/billing { op: "register", email, code, password } -> { ok, code, email } + session cookie
+//   POST /api/billing { op: "login", email, password }           -> { ok, code, email } + session cookie
+//   POST /api/billing { op: "logout" }                            -> { ok } (clears session cookie)
+//   GET  /api/billing?op=me                                       -> { loggedIn, code?, email? }
+//
 // The product ("Panda Score Keeper Pro", $10 one-time) is defined inline in
 // opCheckout via price_data — see PRODUCT_* below — not a dashboard-created
 // Stripe Price, so STRIPE_PRICE_ID is no longer used/required.
 
-import { getCodeForSession, getEntitlement } from './_lib/entitlements.js';
+import {
+  getCodeForSession,
+  getEntitlement,
+  createAccount,
+  verifyAccountPassword,
+  createSession,
+  getSessionAccount,
+  deleteSession,
+} from './_lib/entitlements.js';
 
 function send(res, status, body) {
   res.status(status).setHeader('content-type', 'application/json');
@@ -31,6 +45,31 @@ function readBody(req) {
     }
   }
   return req.body;
+}
+
+const SESSION_COOKIE = 'pr_session';
+const SESSION_MAX_AGE = 60 * 60 * 24 * 90; // 90 days, matches createSession's Redis TTL
+
+function parseCookies(req) {
+  const header = req.headers.cookie || '';
+  const out = {};
+  for (const part of header.split(';')) {
+    const i = part.indexOf('=');
+    if (i === -1) continue;
+    out[part.slice(0, i).trim()] = decodeURIComponent(part.slice(i + 1).trim());
+  }
+  return out;
+}
+
+// HttpOnly: the client never reads this cookie directly — it learns whether
+// it's logged in via GET ?op=me, which is the point (a token client JS can't
+// read can't be stolen by an XSS bug either).
+function setSessionCookie(res, token) {
+  res.setHeader('Set-Cookie', `${SESSION_COOKIE}=${token}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${SESSION_MAX_AGE}`);
+}
+
+function clearSessionCookie(res) {
+  res.setHeader('Set-Cookie', `${SESSION_COOKIE}=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0`);
 }
 
 function appBaseUrl() {
@@ -106,6 +145,9 @@ async function opRedeem(req, res) {
     if (!code) return send(res, 400, { error: 'missing_code' });
     const entitlement = await getEntitlement(code);
     if (!entitlement) return send(res, 404, { ok: false, error: 'not_found' });
+    if (entitlement.retiredAt) {
+      return send(res, 409, { ok: false, error: 'retired', message: 'This code is now tied to an account — log in instead.' });
+    }
     return send(res, 200, { ok: true, email: entitlement.email || null });
   } catch (err) {
     console.error('billing redeem error', err);
@@ -131,16 +173,75 @@ async function opSession(req, res) {
   }
 }
 
+async function opRegister(req, res) {
+  const { storageConfigured } = await import('./_lib/store.js');
+  if (!storageConfigured()) return send(res, 503, { error: 'storage_unconfigured' });
+  try {
+    const body = readBody(req);
+    const result = await createAccount({ email: body.email, code: body.code, password: body.password });
+    if (result.error) return send(res, 400, { ok: false, error: result.error });
+    const token = await createSession(result.email);
+    if (token) setSessionCookie(res, token);
+    return send(res, 200, { ok: true, code: result.code, email: result.email });
+  } catch (err) {
+    console.error('billing register error', err);
+    return send(res, 500, { error: 'server_error' });
+  }
+}
+
+async function opLogin(req, res) {
+  const { storageConfigured } = await import('./_lib/store.js');
+  if (!storageConfigured()) return send(res, 503, { error: 'storage_unconfigured' });
+  try {
+    const body = readBody(req);
+    const account = await verifyAccountPassword(body.email, body.password);
+    if (!account) return send(res, 401, { ok: false, error: 'invalid_credentials' });
+    const token = await createSession(account.email);
+    if (token) setSessionCookie(res, token);
+    return send(res, 200, { ok: true, code: account.code, email: account.email });
+  } catch (err) {
+    console.error('billing login error', err);
+    return send(res, 500, { error: 'server_error' });
+  }
+}
+
+async function opLogout(req, res) {
+  try {
+    const token = parseCookies(req)[SESSION_COOKIE];
+    if (token) await deleteSession(token);
+  } catch (err) {
+    console.error('billing logout error', err);
+  }
+  clearSessionCookie(res);
+  return send(res, 200, { ok: true });
+}
+
+async function opMe(req, res) {
+  try {
+    const token = parseCookies(req)[SESSION_COOKIE];
+    const account = token ? await getSessionAccount(token) : null;
+    if (!account) return send(res, 200, { loggedIn: false });
+    return send(res, 200, { loggedIn: true, code: account.code, email: account.email });
+  } catch (err) {
+    console.error('billing me error', err);
+    return send(res, 200, { loggedIn: false });
+  }
+}
+
 export default async function handler(req, res) {
   if (req.method === 'GET') {
     const op = String(req.query.op || 'session');
     if (op === 'session') return opSession(req, res);
+    if (op === 'me') return opMe(req, res);
     return send(res, 400, { error: 'unknown_op' });
   }
   if (req.method === 'POST') {
     const op = String(readBody(req).op || '');
     if (op === 'checkout') return opCheckout(req, res);
     if (op === 'redeem') return opRedeem(req, res);
+    if (op === 'register') return opRegister(req, res);
+    if (op === 'login') return opLogin(req, res);
+    if (op === 'logout') return opLogout(req, res);
     return send(res, 400, { error: 'unknown_op' });
   }
   res.setHeader('Allow', 'GET, POST');

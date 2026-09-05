@@ -198,13 +198,17 @@
 
   .section-title{ font-size:0.78rem; color:var(--ink-dim); margin:22px 0 8px; text-transform:uppercase; letter-spacing:0.06em; }
 
-  .player-row{ display:flex; align-items:center; gap:10px; padding:10px 2px; border-bottom:1px solid var(--panel-line); }
+  .player-row{ display:flex; align-items:center; gap:10px; padding:10px 2px; border-bottom:1px solid var(--panel-line); position:relative; }
   .player-row:last-child{ border-bottom:none; }
+  .player-row.dragging{ z-index:5; background:var(--panel-2); box-shadow:0 8px 20px rgba(0,0,0,0.4); border-radius:10px; opacity:0.95; }
+  .drag-handle{ cursor:grab; color:var(--muted); font-size:1rem; padding:4px 2px; touch-action:none; flex-shrink:0; }
   .avatar{
     width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center;
     font-weight:700; font-size:0.85rem; color:#241a06; flex-shrink:0;
   }
+  .avatar[data-a="cycle-color"]{ cursor:pointer; }
   .player-row .name{ font-size:0.95rem; flex:1; }
+  .player-row .rank-tag{ margin-left:2px; }
   .player-row .you-tag{ font-size:0.72rem; color:var(--lantern-bright); margin-left:4px; }
   .player-row .status{ font-size:0.8rem; color:var(--ink-dim); }
   .player-row .status.done{ color:var(--good); }
@@ -512,6 +516,9 @@ const I18N = {
     'players': 'Players',
     'ph.addPlayer': 'Add a player',
     'add': 'Add',
+    'local.diceHint': 'Each player starts with 1 yellow die. With {n} players, keep {p} pink (pity) dice in the box.',
+    'local.newMatch': 'Start new match',
+    'local.reorder': 'Drag to reorder',
     'enterDice': 'Enter dice',
     'waiting': 'waiting',
     'enterMyDice': 'Enter my dice for round {n}',
@@ -557,7 +564,7 @@ const I18N = {
     't.gameEnded': 'That game has ended.',
     't.updated': 'Updated',
     't.savedNext': 'Saved. Next: {name}',
-    't.roundComplete': 'Round {n} complete',
+    't.roundLeader': '👑 {name} leads round {r} with {n}!',
     't.roundSaved': 'Round {n} saved',
     't.linkCopied': 'Invite link copied',
     't.scoresCleared': 'Scores cleared',
@@ -574,7 +581,7 @@ const I18N = {
     'upgrade.blurb': 'A one-time unlock for online multiplayer and photo scanning — pay once, use forever, on any device.',
     'upgrade.reasonOnline': 'Playing on separate phones needs a one-time Pro unlock.',
     'upgrade.reasonAi': 'Scanning a dice photo needs a one-time Pro unlock.',
-    'upgrade.price': 'One-time payment · see exact price at checkout',
+    'upgrade.price': 'One-time payment · $10 USD',
     'upgrade.featOnline': 'Play with friends on separate phones, synced live',
     'upgrade.featAi': 'Scan a dice photo instead of typing',
     'upgrade.emailLabel': 'Email (for your receipt and code)',
@@ -588,7 +595,22 @@ const I18N = {
     'upgrade.checkEmail': 'Purchase received — check your email for your Pro code.',
     'upgrade.redeemOk': 'Pro code applied!',
     'upgrade.redeemBad': "That code doesn't match a purchase.",
+    'upgrade.redeemRetired': 'This code is now tied to an account — log in below instead.',
     'upgrade.billingOff': "Purchases aren't set up yet — try again soon.",
+    'ph.password': 'Password',
+    'auth.saveAccount': 'Save your email & a password so you can log in on any device',
+    'auth.createBtn': 'Create account',
+    'auth.login': 'Already have an account? Log in',
+    'auth.loginBtn': 'Log in',
+    'auth.logoutBtn': 'Log out',
+    'auth.loggedInAs': 'Logged in as {email}',
+    'auth.emailTaken': 'An account already exists for that email — log in instead.',
+    'auth.invalidCode': "That code isn't valid.",
+    'auth.invalidCredentials': 'Incorrect email or password.',
+    'auth.passwordShort': 'Password must be at least 8 characters.',
+    'auth.accountCreated': "Account created — you're logged in.",
+    'auth.loggedIn': 'Logged in.',
+    'auth.loggedOut': 'Logged out.',
   },
   es: {
     'title2': 'Anotador',
@@ -626,6 +648,9 @@ const I18N = {
     'players': 'Jugadores',
     'ph.addPlayer': 'Añadir jugador',
     'add': 'Añadir',
+    'local.diceHint': 'Cada jugador empieza con 1 dado amarillo. Con {n} jugadores, ten {p} dados rosas (de compasión) en la caja.',
+    'local.newMatch': 'Empezar otra partida',
+    'local.reorder': 'Arrastra para reordenar',
     'enterDice': 'Anotar dados',
     'waiting': 'esperando',
     'enterMyDice': 'Anotar mis dados de la ronda {n}',
@@ -671,7 +696,7 @@ const I18N = {
     't.gameEnded': 'Esa partida ha terminado.',
     't.updated': 'Actualizado',
     't.savedNext': 'Guardado. Siguiente: {name}',
-    't.roundComplete': 'Ronda {n} completa',
+    't.roundLeader': '👑 {name} lidera la ronda {r} con {n}!',
     't.roundSaved': 'Ronda {n} guardada',
     't.linkCopied': 'Enlace de invitación copiado',
     't.scoresCleared': 'Puntos reiniciados',
@@ -688,7 +713,7 @@ const I18N = {
     'upgrade.blurb': 'Un pago único para desbloquear el multijugador en línea y el escaneo de fotos — pagas una vez y lo usas siempre, en cualquier dispositivo.',
     'upgrade.reasonOnline': 'Jugar en móviles separados necesita un desbloqueo Pro de pago único.',
     'upgrade.reasonAi': 'Escanear una foto de dados necesita un desbloqueo Pro de pago único.',
-    'upgrade.price': 'Pago único · precio exacto al pagar',
+    'upgrade.price': 'Pago único · $10 USD',
     'upgrade.featOnline': 'Juega con amigos en móviles separados, sincronizado en vivo',
     'upgrade.featAi': 'Escanea una foto de dados en vez de escribir',
     'upgrade.emailLabel': 'Correo (para tu recibo y código)',
@@ -702,7 +727,22 @@ const I18N = {
     'upgrade.checkEmail': 'Compra recibida — revisa tu correo para tu código Pro.',
     'upgrade.redeemOk': '¡Código Pro aplicado!',
     'upgrade.redeemBad': 'Ese código no corresponde a ninguna compra.',
+    'upgrade.redeemRetired': 'Este código ya está vinculado a una cuenta — inicia sesión abajo.',
     'upgrade.billingOff': 'Los pagos aún no están disponibles — intenta más tarde.',
+    'ph.password': 'Contraseña',
+    'auth.saveAccount': 'Guarda tu correo y una contraseña para iniciar sesión en cualquier dispositivo',
+    'auth.createBtn': 'Crear cuenta',
+    'auth.login': '¿Ya tienes cuenta? Inicia sesión',
+    'auth.loginBtn': 'Iniciar sesión',
+    'auth.logoutBtn': 'Cerrar sesión',
+    'auth.loggedInAs': 'Sesión iniciada como {email}',
+    'auth.emailTaken': 'Ya existe una cuenta con ese correo — inicia sesión en su lugar.',
+    'auth.invalidCode': 'Ese código no es válido.',
+    'auth.invalidCredentials': 'Correo o contraseña incorrectos.',
+    'auth.passwordShort': 'La contraseña debe tener al menos 8 caracteres.',
+    'auth.accountCreated': 'Cuenta creada — sesión iniciada.',
+    'auth.loggedIn': 'Sesión iniciada.',
+    'auth.loggedOut': 'Sesión cerrada.',
   },
   de: {
     'title2': 'Punktezähler',
@@ -740,6 +780,9 @@ const I18N = {
     'players': 'Spieler',
     'ph.addPlayer': 'Spieler hinzufügen',
     'add': 'Hinzu',
+    'local.diceHint': 'Jeder Spieler startet mit 1 gelben Würfel. Bei {n} Spielern {p} rosa (Trost-)Würfel bereithalten.',
+    'local.newMatch': 'Neue Partie starten',
+    'local.reorder': 'Zum Sortieren ziehen',
     'enterDice': 'Würfel eintragen',
     'waiting': 'wartet',
     'enterMyDice': 'Meine Würfel für Runde {n} eintragen',
@@ -785,7 +828,7 @@ const I18N = {
     't.gameEnded': 'Dieses Spiel ist beendet.',
     't.updated': 'Aktualisiert',
     't.savedNext': 'Gespeichert. Weiter: {name}',
-    't.roundComplete': 'Runde {n} komplett',
+    't.roundLeader': '👑 {name} führt Runde {r} mit {n}!',
     't.roundSaved': 'Runde {n} gespeichert',
     't.linkCopied': 'Einladungslink kopiert',
     't.scoresCleared': 'Punkte zurückgesetzt',
@@ -802,7 +845,7 @@ const I18N = {
     'upgrade.blurb': 'Eine einmalige Freischaltung für Online-Mehrspieler und Fotoscan — einmal zahlen, für immer nutzen, auf jedem Gerät.',
     'upgrade.reasonOnline': 'Auf getrennten Handys spielen erfordert eine einmalige Pro-Freischaltung.',
     'upgrade.reasonAi': 'Ein Würfelfoto scannen erfordert eine einmalige Pro-Freischaltung.',
-    'upgrade.price': 'Einmalzahlung · genauer Preis an der Kasse',
+    'upgrade.price': 'Einmalzahlung · 10 USD',
     'upgrade.featOnline': 'Mit Freunden auf getrennten Handys spielen, live synchronisiert',
     'upgrade.featAi': 'Ein Würfelfoto scannen statt eintippen',
     'upgrade.emailLabel': 'E-Mail (für Beleg und Code)',
@@ -816,7 +859,22 @@ const I18N = {
     'upgrade.checkEmail': 'Kauf erhalten — prüfe deine E-Mails für deinen Pro-Code.',
     'upgrade.redeemOk': 'Pro-Code angewendet!',
     'upgrade.redeemBad': 'Dieser Code passt zu keinem Kauf.',
+    'upgrade.redeemRetired': 'Dieser Code ist jetzt an ein Konto gebunden — bitte unten anmelden.',
     'upgrade.billingOff': 'Käufe sind noch nicht eingerichtet — versuch es bald wieder.',
+    'ph.password': 'Passwort',
+    'auth.saveAccount': 'Speichere E-Mail & Passwort, um dich auf jedem Gerät anzumelden',
+    'auth.createBtn': 'Konto erstellen',
+    'auth.login': 'Schon ein Konto? Anmelden',
+    'auth.loginBtn': 'Anmelden',
+    'auth.logoutBtn': 'Abmelden',
+    'auth.loggedInAs': 'Angemeldet als {email}',
+    'auth.emailTaken': 'Für diese E-Mail existiert bereits ein Konto — bitte anmelden.',
+    'auth.invalidCode': 'Dieser Code ist ungültig.',
+    'auth.invalidCredentials': 'E-Mail oder Passwort falsch.',
+    'auth.passwordShort': 'Das Passwort muss mindestens 8 Zeichen haben.',
+    'auth.accountCreated': 'Konto erstellt — du bist angemeldet.',
+    'auth.loggedIn': 'Angemeldet.',
+    'auth.loggedOut': 'Abgemeldet.',
   },
   fr: {
     'title2': 'Marqueur',
@@ -854,6 +912,9 @@ const I18N = {
     'players': 'Joueurs',
     'ph.addPlayer': 'Ajouter un joueur',
     'add': 'Ajouter',
+    'local.diceHint': 'Chaque joueur commence avec 1 dé jaune. Avec {n} joueurs, gardez {p} dés roses (de pitié) dans la boîte.',
+    'local.newMatch': 'Nouvelle partie',
+    'local.reorder': 'Glisser pour réorganiser',
     'enterDice': 'Saisir les dés',
     'waiting': 'en attente',
     'enterMyDice': 'Saisir mes dés de la manche {n}',
@@ -899,7 +960,7 @@ const I18N = {
     't.gameEnded': 'Cette partie est terminée.',
     't.updated': 'Actualisé',
     't.savedNext': 'Enregistré. Suivant : {name}',
-    't.roundComplete': 'Manche {n} terminée',
+    't.roundLeader': '👑 {name} mène la manche {r} avec {n} !',
     't.roundSaved': 'Manche {n} enregistrée',
     't.linkCopied': "Lien d'invitation copié",
     't.scoresCleared': 'Scores réinitialisés',
@@ -916,7 +977,7 @@ const I18N = {
     'upgrade.blurb': 'Un paiement unique pour débloquer le multijoueur en ligne et la lecture de photos — payez une fois, utilisez pour toujours, sur n’importe quel appareil.',
     'upgrade.reasonOnline': 'Jouer sur des téléphones séparés nécessite un déblocage Pro à paiement unique.',
     'upgrade.reasonAi': 'Scanner une photo de dés nécessite un déblocage Pro à paiement unique.',
-    'upgrade.price': 'Paiement unique · prix exact au paiement',
+    'upgrade.price': 'Paiement unique · 10 USD',
     'upgrade.featOnline': 'Jouez avec des amis sur des téléphones séparés, synchronisé en direct',
     'upgrade.featAi': 'Scannez une photo de dés au lieu de saisir',
     'upgrade.emailLabel': 'E-mail (pour votre reçu et votre code)',
@@ -930,7 +991,22 @@ const I18N = {
     'upgrade.checkEmail': 'Achat reçu — vérifiez vos e-mails pour votre code Pro.',
     'upgrade.redeemOk': 'Code Pro appliqué !',
     'upgrade.redeemBad': 'Ce code ne correspond à aucun achat.',
+    'upgrade.redeemRetired': 'Ce code est maintenant lié à un compte — connectez-vous ci-dessous.',
     'upgrade.billingOff': "Les achats ne sont pas encore disponibles — réessayez bientôt.",
+    'ph.password': 'Mot de passe',
+    'auth.saveAccount': 'Enregistrez votre e-mail et un mot de passe pour vous connecter sur n’importe quel appareil',
+    'auth.createBtn': 'Créer un compte',
+    'auth.login': 'Déjà un compte ? Connectez-vous',
+    'auth.loginBtn': 'Se connecter',
+    'auth.logoutBtn': 'Se déconnecter',
+    'auth.loggedInAs': 'Connecté en tant que {email}',
+    'auth.emailTaken': 'Un compte existe déjà pour cet e-mail — connectez-vous plutôt.',
+    'auth.invalidCode': "Ce code n'est pas valide.",
+    'auth.invalidCredentials': 'E-mail ou mot de passe incorrect.',
+    'auth.passwordShort': 'Le mot de passe doit comporter au moins 8 caractères.',
+    'auth.accountCreated': 'Compte créé — vous êtes connecté.',
+    'auth.loggedIn': 'Connecté.',
+    'auth.loggedOut': 'Déconnecté.',
   },
   pt: {
     'title2': 'Marcador',
@@ -968,6 +1044,9 @@ const I18N = {
     'players': 'Jogadores',
     'ph.addPlayer': 'Adicionar jogador',
     'add': 'Adicionar',
+    'local.diceHint': 'Cada jogador começa com 1 dado amarelo. Com {n} jogadores, mantenha {p} dados rosa (de piedade) na caixa.',
+    'local.newMatch': 'Começar nova partida',
+    'local.reorder': 'Arraste para reordenar',
     'enterDice': 'Registrar dados',
     'waiting': 'aguardando',
     'enterMyDice': 'Registrar meus dados da rodada {n}',
@@ -1013,7 +1092,7 @@ const I18N = {
     't.gameEnded': 'Esse jogo terminou.',
     't.updated': 'Atualizado',
     't.savedNext': 'Salvo. Próximo: {name}',
-    't.roundComplete': 'Rodada {n} completa',
+    't.roundLeader': '👑 {name} lidera a rodada {r} com {n}!',
     't.roundSaved': 'Rodada {n} salva',
     't.linkCopied': 'Link de convite copiado',
     't.scoresCleared': 'Pontos zerados',
@@ -1030,7 +1109,7 @@ const I18N = {
     'upgrade.blurb': 'Um pagamento único para desbloquear o multiplayer online e a leitura de fotos — pague uma vez, use para sempre, em qualquer aparelho.',
     'upgrade.reasonOnline': 'Jogar em celulares separados precisa de um desbloqueio Pro de pagamento único.',
     'upgrade.reasonAi': 'Escanear uma foto de dados precisa de um desbloqueio Pro de pagamento único.',
-    'upgrade.price': 'Pagamento único · preço exato no checkout',
+    'upgrade.price': 'Pagamento único · $10 USD',
     'upgrade.featOnline': 'Jogue com amigos em celulares separados, sincronizado ao vivo',
     'upgrade.featAi': 'Escaneie uma foto dos dados em vez de digitar',
     'upgrade.emailLabel': 'E-mail (para seu recibo e código)',
@@ -1044,7 +1123,22 @@ const I18N = {
     'upgrade.checkEmail': 'Compra recebida — confira seu e-mail para o código Pro.',
     'upgrade.redeemOk': 'Código Pro aplicado!',
     'upgrade.redeemBad': 'Esse código não corresponde a nenhuma compra.',
+    'upgrade.redeemRetired': 'Esse código agora está vinculado a uma conta — entre abaixo.',
     'upgrade.billingOff': 'As compras ainda não estão disponíveis — tente novamente em breve.',
+    'ph.password': 'Senha',
+    'auth.saveAccount': 'Salve seu e-mail e uma senha para entrar em qualquer aparelho',
+    'auth.createBtn': 'Criar conta',
+    'auth.login': 'Já tem conta? Entrar',
+    'auth.loginBtn': 'Entrar',
+    'auth.logoutBtn': 'Sair',
+    'auth.loggedInAs': 'Conectado como {email}',
+    'auth.emailTaken': 'Já existe uma conta com esse e-mail — entre em vez disso.',
+    'auth.invalidCode': 'Esse código não é válido.',
+    'auth.invalidCredentials': 'E-mail ou senha incorretos.',
+    'auth.passwordShort': 'A senha deve ter pelo menos 8 caracteres.',
+    'auth.accountCreated': 'Conta criada — você está conectado.',
+    'auth.loggedIn': 'Conectado.',
+    'auth.loggedOut': 'Desconectado.',
   },
 };
 
@@ -1103,8 +1197,21 @@ const FIELD_KEYS = ['yellow','purple','blue','blueGlitter','redWhite','redBlack'
 const emptyFields = () => Object.fromEntries(FIELD_KEYS.map(k => [k, '']));
 
 const AVATAR_COLORS = ['var(--c-yellow)','var(--c-purple)','var(--c-blue)','var(--c-red)','var(--c-green)','var(--c-pink)','var(--c-clear)'];
-function avatarColor(id){ let h=0; for(const ch of String(id)) h += ch.charCodeAt(0); return AVATAR_COLORS[h % AVATAR_COLORS.length]; }
+function avatarColorIndex(id){ let h=0; for(const ch of String(id)) h += ch.charCodeAt(0); return h % AVATAR_COLORS.length; }
+function avatarColor(id){ return AVATAR_COLORS[avatarColorIndex(id)]; }
+// Local-mode players can tap their avatar to pick a clan color explicitly
+// (p.colorIndex); everyone else (online players, or before a tap) falls
+// back to the deterministic hash so avatars are still consistent by default.
+function playerColor(p){ return AVATAR_COLORS[(p.colorIndex ?? avatarColorIndex(p.id)) % AVATAR_COLORS.length]; }
 function genId(){ return 'p_' + Math.random().toString(36).slice(2,10) + Date.now().toString(36).slice(-3); }
+// Pity (pink) dice available for the box, by player count — 2-3:1, 4-6:2, 7-9:3, 10+:4.
+function pinkDiceFor(n){
+  if(n <= 1) return 0;
+  if(n <= 3) return 1;
+  if(n <= 6) return 2;
+  if(n <= 9) return 3;
+  return 4;
+}
 
 /* ------------------------------------------------------------------ *
  * fields <-> dice
@@ -1242,14 +1349,18 @@ let state = {
   flags: { paywallEnabled:false, onlinePaywalled:false, aiPaywalled:false },
   upgradeFrom: 'home',                             // screen to return to from the upgrade screen
   upgradeReason: null,                             // 'online' | 'ai' | null — why the upgrade screen opened
+  loggedIn: false,                                 // set from GET /api/billing?op=me on boot
+  showRegisterForm: false,
+  showLoginForm: false,
 };
 let pollTimer = null;
+let dragState = null; // in-flight local-mode player drag (see bind()'s pointer handlers)
 
 function setState(patch){ state = { ...state, ...patch }; render(); }
-function toast(msg){
+function toast(msg, ms){
   setState({ toast: msg });
   clearTimeout(toast._t);
-  toast._t = setTimeout(() => { if(state.toast === msg) setState({ toast:null }); }, 2400);
+  toast._t = setTimeout(() => { if(state.toast === msg) setState({ toast:null }); }, ms || 2400);
 }
 function saveMe(name){
   state.me = { id: state.me.id, name: (name ?? state.me.name).trim() };
@@ -1350,6 +1461,26 @@ function removeLocalPlayer(id){
   }
   setState({ local: { ...state.local, players, scores } }); persistLocal();
 }
+function cycleLocalPlayerColor(id){
+  const players = state.local.players.map(p => p.id === id
+    ? { ...p, colorIndex: ((p.colorIndex ?? avatarColorIndex(p.id)) + 1) % AVATAR_COLORS.length }
+    : p);
+  setState({ local: { ...state.local, players } }); persistLocal();
+}
+function reorderLocalPlayer(id, toIndex){
+  const players = [...state.local.players];
+  const from = players.findIndex(p => p.id === id);
+  if(from === -1 || from === toIndex) return;
+  const [p] = players.splice(from, 1);
+  players.splice(Math.max(0, Math.min(toIndex, players.length)), 0, p);
+  setState({ local: { ...state.local, players } }); persistLocal();
+}
+// "Play again": clears every round's scores but keeps the roster (names,
+// ids, colors) exactly as they were — per the pass-and-play rematch flow.
+function resetLocalMatch(){
+  setState({ local: { ...state.local, scores: {} }, entryRound: 1, screen:'lobby' });
+  persistLocal();
+}
 
 function leaveGame(msg, kind){
   stopPoll();
@@ -1388,7 +1519,19 @@ async function saveEntry(){
     setState({ local, screen:'lobby' });
     persistLocal();
     const nextUnscored = local.players.find(p => !(scores[round] && scores[round][p.id]));
-    toast(nextUnscored ? t('t.savedNext', { name: nextUnscored.name }) : t('t.roundComplete', { n: round }));
+    if(nextUnscored){
+      toast(t('t.savedNext', { name: nextUnscored.name }));
+    } else {
+      // Every player has entered this round — announce the leader. A
+      // completed final round gets the bigger "game over" toast instead.
+      const totals = totalsFor({ players: local.players, scores: local.scores });
+      const top = totals[0];
+      if(round === ROUNDS){
+        toast(t('board.winner', { name: top.name, n: top.total }), 5000);
+      } else {
+        toast(t('t.roundLeader', { name: top.name, n: top.total, r: round }), 5000);
+      }
+    }
     return;
   }
   try {
@@ -1561,13 +1704,29 @@ function renderLobby(){
   const me = state.me.id;
   const round = state.entryRound;
 
-  const playerList = v.players.length ? v.players.map(p => {
+  // Local mode: rank by current standings once real scores exist (crown the
+  // leader(s), ribbon the players currently holding the pity die), otherwise
+  // show the roster in seating/drag order.
+  const totals = v.isLocal ? totalsFor(v) : null;
+  const showRankings = !!(totals && totals.some(p => p.total > 0));
+  const pinkCount = v.isLocal ? pinkDiceFor(v.players.length) : 0;
+  const bottomIds = showRankings ? new Set(totals.slice(Math.max(0, totals.length - pinkCount)).map(p => p.id)) : new Set();
+  const topTotal = showRankings ? totals[0].total : null;
+  const orderedPlayers = showRankings ? totals : v.players;
+  const started = v.isLocal && Object.keys(v.scores).length > 0;
+
+  const playerList = orderedPlayers.length ? orderedPlayers.map(p => {
     const done = v.scores[round] && v.scores[round][p.id];
     const isMe = !v.isLocal && p.id === me;
+    const rankTag = v.isLocal && showRankings
+      ? (p.total === topTotal ? ' <span class="rank-tag" title="Leading">👑</span>'
+        : bottomIds.has(p.id) ? ' <span class="rank-tag" title="Pity die">🎀</span>' : '')
+      : '';
     return `
-      <div class="player-row">
-        <div class="avatar" style="background:${avatarColor(p.id)}">${esc((p.name || '?')[0].toUpperCase())}</div>
-        <div class="name">${esc(p.name)}${isMe ? `<span class="you-tag">${esc(t('you'))}</span>` : ''}</div>
+      <div class="player-row" data-pid="${p.id}">
+        ${v.isLocal ? `<span class="drag-handle" data-id="${p.id}" aria-label="${esc(t('local.reorder'))}">⠿</span>` : ''}
+        <div class="avatar" ${v.isLocal ? `data-a="cycle-color" data-id="${p.id}"` : ''} style="background:${playerColor(p)}">${esc((p.name || '?')[0].toUpperCase())}</div>
+        <div class="name">${esc(p.name)}${rankTag}${isMe ? `<span class="you-tag">${esc(t('you'))}</span>` : ''}</div>
         ${v.isLocal
           ? `<button class="pill-btn ${done ? 'done' : ''}" data-a="score-player" data-id="${p.id}">${done ? `✓ ${done.total}` : esc(t('enterDice'))}</button>
              <button class="icon-btn" data-a="rm-player" data-id="${p.id}">✕</button>`
@@ -1595,15 +1754,17 @@ function renderLobby(){
       <button data-a="round-next">+</button>
     </div>
 
+    ${v.isLocal && v.players.length >= 2 ? `<p class="small-note">${esc(t('local.diceHint', { n: v.players.length, p: pinkCount }))}</p>` : ''}
+
     <div class="section-title">${esc(v.isLocal ? t('players.tap') : t('players'))}</div>
     <div class="card" style="padding:4px 14px;">${playerList}</div>
 
-    ${v.isLocal ? `
+    ${v.isLocal ? (started ? '' : `
       <div class="add-row">
         <input class="text-input" id="addPlayer" placeholder="${esc(t('ph.addPlayer'))}" autocomplete="off" />
         <button class="btn btn-secondary" data-a="add-player">${esc(t('add'))}</button>
       </div>
-    ` : `
+    `) : `
       <button class="btn btn-primary" data-a="score-self">
         ${esc(myEntry ? t('editMyRound', { n: round }) : t('enterMyDice', { n: round }))}
       </button>
@@ -1699,11 +1860,13 @@ function renderBoard(){
   const totals = totalsFor(v);
   const top = totals.length ? totals[0].total : 0;
   const now = state.entryRound;
-  const gameOver = !v.isLocal && state.game && state.game.finished && totals.length && top > 0;
+  const localFinished = v.isLocal && v.players.every(p => v.scores[ROUNDS] && v.scores[ROUNDS][p.id]);
+  const gameOver = (localFinished || (!v.isLocal && state.game && state.game.finished)) && totals.length && top > 0;
 
   return `
     <h2 style="font-size:1.2rem;">${esc(t('tab.board'))}</h2>
     ${gameOver ? `<div class="banner info">${esc(t('board.winner', { name: totals[0].name, n: top }))}</div>` : ''}
+    ${gameOver && v.isLocal ? `<button class="btn btn-primary" data-a="new-match">${esc(t('local.newMatch'))}</button>` : ''}
     <div style="overflow-x:auto; -webkit-overflow-scrolling:touch;">
       <table class="board">
         <thead>
@@ -1783,6 +1946,25 @@ function renderUpgrade(){
 
       ${state.pro ? `<p class="small-note upgrade-active">${esc(t('upgrade.currentlyPro', { email: state.pro.email || '' }))}</p>` : ''}
 
+      ${state.loggedIn ? `
+        <div class="divider">${esc(t('auth.loggedInAs', { email: state.pro?.email || '' }))}</div>
+        <button class="btn btn-ghost" data-a="logout-account">${esc(t('auth.logoutBtn'))}</button>
+      ` : `
+        ${state.pro ? (state.showRegisterForm ? `
+          <div class="divider">${esc(t('auth.saveAccount'))}</div>
+          <input class="text-input" id="registerEmail" type="email" placeholder="${esc(t('ph.email'))}" autocomplete="email" value="${esc(state.pro.email || '')}" />
+          <input class="text-input" id="registerPassword" type="password" placeholder="${esc(t('ph.password'))}" autocomplete="new-password" />
+          <button class="btn btn-secondary" data-a="register-account">${esc(t('auth.createBtn'))}</button>
+        ` : `<button class="btn btn-ghost" data-a="show-register">${esc(t('auth.saveAccount'))}</button>`) : ''}
+
+        ${state.showLoginForm ? `
+          <div class="divider">${esc(t('auth.login'))}</div>
+          <input class="text-input" id="loginEmail" type="email" placeholder="${esc(t('ph.email'))}" autocomplete="email" />
+          <input class="text-input" id="loginPassword" type="password" placeholder="${esc(t('ph.password'))}" autocomplete="current-password" />
+          <button class="btn btn-secondary" data-a="login-account">${esc(t('auth.loginBtn'))}</button>
+        ` : `<button class="btn btn-ghost" data-a="show-login">${esc(t('auth.login'))}</button>`}
+      `}
+
       <button class="btn btn-ghost" data-a="upgrade-back">${esc(t('back'))}</button>
     </div>
   `;
@@ -1841,10 +2023,60 @@ function bind(){
           LS.set('pr.pro', state.pro);
           toast(t('upgrade.redeemOk'));
           setState({ screen: state.upgradeFrom || 'home' });
+        } else if(data.error === 'retired'){
+          toast(t('upgrade.redeemRetired'));
+          setState({ showLoginForm: true });
         } else {
           toast(t('upgrade.redeemBad'));
         }
       } catch { toast(t('t.wrong')); }
+    }
+    else if(a === 'show-register') setState({ showRegisterForm: true });
+    else if(a === 'show-login') setState({ showLoginForm: true });
+    else if(a === 'register-account'){
+      const email = (document.getElementById('registerEmail')?.value || '').trim();
+      const password = document.getElementById('registerPassword')?.value || '';
+      if(password.length < 8){ toast(t('auth.passwordShort')); return; }
+      try {
+        const r = await fetch('/api/billing', {
+          method:'POST', headers:{ 'content-type':'application/json' },
+          body: JSON.stringify({ op:'register', email, code: state.pro?.code, password }),
+        });
+        const data = await r.json().catch(() => ({}));
+        if(r.ok && data.ok){
+          state.pro = { code: data.code, email: data.email };
+          LS.set('pr.pro', state.pro);
+          setState({ loggedIn: true, showRegisterForm: false });
+          toast(t('auth.accountCreated'));
+        } else if(data.error === 'email_taken'){ toast(t('auth.emailTaken')); }
+        else if(data.error === 'invalid_code'){ toast(t('auth.invalidCode')); }
+        else { toast(t('t.wrong')); }
+      } catch { toast(t('t.wrong')); }
+    }
+    else if(a === 'login-account'){
+      const email = (document.getElementById('loginEmail')?.value || '').trim();
+      const password = document.getElementById('loginPassword')?.value || '';
+      try {
+        const r = await fetch('/api/billing', {
+          method:'POST', headers:{ 'content-type':'application/json' },
+          body: JSON.stringify({ op:'login', email, password }),
+        });
+        const data = await r.json().catch(() => ({}));
+        if(r.ok && data.ok){
+          state.pro = { code: data.code, email: data.email };
+          LS.set('pr.pro', state.pro);
+          setState({ loggedIn: true, showLoginForm: false });
+          toast(t('auth.loggedIn'));
+        } else {
+          toast(t('auth.invalidCredentials'));
+        }
+      } catch { toast(t('t.wrong')); }
+    }
+    else if(a === 'logout-account'){
+      try { await fetch('/api/billing', { method:'POST', headers:{ 'content-type':'application/json' }, body: JSON.stringify({ op:'logout' }) }); }
+      catch {}
+      setState({ loggedIn: false });
+      toast(t('auth.loggedOut'));
     }
     else if(a === 'refresh'){ await refreshOnline(); toast(t('t.updated')); }
     else if(a === 'round-prev') setState({ entryRound: Math.max(1, state.entryRound - 1) });
@@ -1854,6 +2086,8 @@ function bind(){
       addLocalPlayer(inp.value); inp.value = '';
     }
     else if(a === 'rm-player') removeLocalPlayer(id);
+    else if(a === 'cycle-color') cycleLocalPlayerColor(id);
+    else if(a === 'new-match') resetLocalMatch();
     else if(a === 'score-player') openEntry(id, state.entryRound);
     else if(a === 'score-self') openEntry(state.me.id, state.entryRound);
     else if(a === 'save-entry') saveEntry();
@@ -1892,6 +2126,61 @@ function bind(){
     const inp = e.target.closest('[data-field]');
     if(inp) inp.select();
   };
+
+  // Enter tabs to the next dice-entry field, or to Save once past the last one.
+  app.onkeydown = (e) => {
+    if(e.key !== 'Enter') return;
+    const inp = e.target.closest('[data-field]');
+    if(!inp) return;
+    e.preventDefault();
+    const fields = [...document.querySelectorAll('.entry-grid [data-field]')];
+    const i = fields.indexOf(inp);
+    const next = fields[i + 1];
+    if(next) next.focus();
+    else document.querySelector('[data-a="save-entry"]')?.focus();
+  };
+
+  // Local-mode player reordering: pointer-based drag (native HTML5 drag
+  // doesn't work reliably on mobile touch, and this app lives on a phone
+  // at the table). Drag the handle; drop position is resolved once, at
+  // release, against each row's pre-drag position — simpler and more
+  // reliable than live-reflowing every sibling mid-drag.
+  app.onpointerdown = (e) => {
+    const handle = e.target.closest('.drag-handle');
+    if(!handle) return;
+    const row = handle.closest('.player-row');
+    const rows = [...row.parentElement.querySelectorAll('.player-row')];
+    dragState = {
+      id: handle.dataset.id,
+      row,
+      pointerId: e.pointerId,
+      startY: e.clientY,
+      rowHeight: row.getBoundingClientRect().height,
+      rects: rows.map(r => r.getBoundingClientRect()),
+    };
+    row.classList.add('dragging');
+    handle.setPointerCapture(e.pointerId);
+  };
+  app.onpointermove = (e) => {
+    if(!dragState || e.pointerId !== dragState.pointerId) return;
+    dragState.row.style.transform = `translateY(${e.clientY - dragState.startY}px)`;
+  };
+  const endDrag = (e) => {
+    if(!dragState || e.pointerId !== dragState.pointerId) return;
+    const dy = e.clientY - dragState.startY;
+    dragState.row.style.transform = '';
+    dragState.row.classList.remove('dragging');
+    const draggedIndex = [...dragState.row.parentElement.querySelectorAll('.player-row')].indexOf(dragState.row);
+    const draggedCenterY = dragState.rects[draggedIndex].top + dragState.rowHeight / 2 + dy;
+    let toIndex = dragState.rects.length - 1;
+    for(let i = 0; i < dragState.rects.length; i++){
+      if(draggedCenterY < dragState.rects[i].top + dragState.rowHeight / 2){ toIndex = i; break; }
+    }
+    reorderLocalPlayer(dragState.id, toIndex);
+    dragState = null;
+  };
+  app.onpointerup = endDrag;
+  app.onpointercancel = endDrag;
 
   const photo = document.getElementById('photoInput');
   if(photo){
@@ -1988,6 +2277,17 @@ async function boot(){
   // paywall feature flags — everything defaults to free until these say otherwise
   fetch('/api/flags').then(r => r.json()).then(d => {
     if(d && typeof d === 'object'){ state.flags = { ...state.flags, ...d }; render(); }
+  }).catch(() => {});
+  // returning Pro login: if this browser carries a session cookie, recover
+  // the Pro code without the user re-entering anything (works even if
+  // localStorage was cleared but cookies weren't)
+  fetch('/api/billing?op=me').then(r => r.json()).then(d => {
+    if(d && d.loggedIn && d.code){
+      state.pro = { code: d.code, email: d.email || null };
+      LS.set('pr.pro', state.pro);
+      state.loggedIn = true;
+      render();
+    }
   }).catch(() => {});
 
   const params = new URLSearchParams(location.search);
