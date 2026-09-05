@@ -2326,13 +2326,14 @@ async function boot(){
 
   const session = LS.get('pr.session', null);
   if(deepCode){
+    // Always land on the join screen instead of auto-joining with whatever
+    // name is cached on this device — the same person joining several
+    // phones/devices from one invite link needs the chance to give each one
+    // its own name, not silently rejoin as a stale/shared one. The name
+    // field still pre-fills with the last-used name as a convenience; it's
+    // just no longer submitted without the player seeing and confirming it.
     state.homeTab = 'online';
     state._prefillCode = deepCode;
-    if(state.me.name){
-      render();
-      await joinOnline(state.me.name, deepCode);
-      return;
-    }
   } else if(session && session.mode === 'local'){
     const local = LS.get('pr.local', null);
     if(local && local.players){ state.mode = 'local'; state.local = local; state.code = 'PASS & PLAY'; state.screen = 'lobby'; }
