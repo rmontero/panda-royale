@@ -2022,7 +2022,9 @@ function bind(){
           state.pro = { code, email: data.email || null };
           LS.set('pr.pro', state.pro);
           toast(t('upgrade.redeemOk'));
-          setState({ screen: state.upgradeFrom || 'home' });
+          // Stay put (rather than auto-navigating away) so the "save an
+          // account" offer below is actually reachable right after redeeming.
+          render();
         } else if(data.error === 'retired'){
           toast(t('upgrade.redeemRetired'));
           setState({ showLoginForm: true });
@@ -2251,6 +2253,10 @@ async function handleCheckoutReturn(sessionId){
           LS.set('pr.pro', state.pro);
           history.replaceState({}, '', location.pathname);
           toast(t('upgrade.unlocked'));
+          // Land on the upgrade screen so the "save an account" offer is
+          // visible right after a purchase, not just after a manual redeem.
+          state.screen = 'upgrade';
+          state.upgradeFrom = 'home';
           render();
           return;
         }

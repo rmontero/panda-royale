@@ -6,30 +6,80 @@ structure, and the pass-and-play guidance it displays. It is written for a
 coding agent that needs to modify or extend the scoring/game logic without
 re-deriving it from the UI code.
 
-**Scope disclaimer** (same one `llms.txt` gives humans): this app does not
-implement or teach the *full* physical rulebook — it has no drafting/market
-mechanics, no die-acquisition rules, and doesn't know the box's physical die
-counts. It only encodes **scoring arithmetic**, **round structure**, and a
-few **pass-and-play conveniences** (starting-dice guidance, pity-die
-tracking) that were added on top. Every rule below is traceable to a
-specific file/function — if it's not listed here with a source, this app
-doesn't implement it, full stop. See "Not covered" at the end.
+**Scope disclaimer**: this document has two kinds of claims, marked
+throughout —
+- **[APP]** — implemented by this codebase, traceable to a specific
+  file/function. If a rule is marked [APP], you can go read the code.
+- **[OFFICIAL]** — from Last Night Games' own official game description
+  (publisher website), included here for context because a coding agent
+  working on this app should know the real game even where the app doesn't
+  model it. These are **not** implemented by this app — no code enforces
+  them, and there's nothing to point at.
+
+The app only encodes **scoring arithmetic**, **round structure**, and a few
+**pass-and-play conveniences** (starting-dice guidance, pity-die tracking)
+that were added on top — it does not implement drafting, stealing, or turn
+order. See "Not implemented by this app" at the end for the full list of
+official mechanics this app is silent on.
+
+## Theme [OFFICIAL]
+
+Each player is a panda Elder recruiting pandas onto their team from seven
+clans, one clan per dice color. Each clan/color has its own quirk (see the
+color table below) — picking which clans to invest in is the game's core
+strategic tension. None of the theme (Elders, clans, recruitment) has any
+mechanical presence in this app beyond flavor.
 
 ## Players and rounds
 
-- **2–10 players** per game.
-- **Exactly 10 rounds**, numbered 1–10. Constant: `ROUNDS = 10` in
+- **2–10 players** per game. [APP] — enforced only implicitly (no explicit
+  min/max check found in `api/game.js`'s create/join; this is a UI/social
+  convention, not a coded limit).
+- **Exactly 10 rounds**, numbered 1–10. [APP] Constant: `ROUNDS = 10` in
   `index.html:475` (client) and `TOTAL_ROUNDS = 10` in `api/_lib/store.js`
   (server, authoritative for online games).
+- **Dice pool grows by one die per round** [OFFICIAL]: players begin round 1
+  with a single starter die (yellow) and draft one additional die of their
+  choice each round, so by round 10 every player rolls 10 dice total. **The
+  app does not enforce this** — it only special-cases round 1 (see below);
+  rounds 2–10 accept however many dice of any color a player reports, with
+  no check that the count matches "rounds played so far."
 - **Round 1 is special**: every player rolls only their single starting
-  yellow die — no other colors are in play yet. Enforced in two places:
+  yellow die — no other colors are in play yet. [APP] Enforced in two
+  places:
   - Client UI: `renderEntry()` in `index.html` only shows the yellow row
     when `state.entryRound === 1` (`visibleRows = isR1 ? ENTRY_ROWS.filter(r
     => r.color === 'yellow') : ENTRY_ROWS`).
   - Client scoring: `diceForRound(fields, round)` (`index.html:1248`)
     discards every non-yellow value and keeps at most the first yellow value
     when `round === 1`, before the dice ever reach the scoring engine.
-- Rounds 2–10: all seven colors are in play.
+- Rounds 2–10: all seven colors are in play (per the app's input UI); per
+  the official rules, the player's actual dice count that round should equal
+  the round number, growing by exactly one drafted die each round.
+
+## The round structure — four steps [OFFICIAL]
+
+The official rules run each round in four steps. **This app only assists
+with step 1** (recording the outcome of rolling+scoring); steps 2–4 are
+pure tabletop play the app has no visibility into:
+
+1. **Roll & score.** Everyone rolls their current dice pool and tallies
+   their round score (originally via a paper score sheet — this app's
+   entry screen replaces that sheet). This is the only step this app
+   models — see "The seven dice colors" and "Entering a round's dice"
+   below.
+2. **Steal (optional).** Any player holding a clear/"rogue" die may use it
+   to steal a die from another player. See the Clear row in the color table
+   — the publisher explicitly calls out removing clear dice from the game
+   entirely for a kid-friendlier session, "so no one gets their feelings
+   hurt."
+3. **Draft.** Each player adds one new die to their hand for next round.
+4. **Draft order.** Turn order for drafting is set by each player's
+   **cumulative yellow-dice score** (highest yellow total drafts first) —
+   this makes yellow a dual-purpose resource: it scores like any other
+   color *and* buys drafting priority. A player can lean into yellow early
+   for draft-order control, or skip it entirely to leave room in their
+   hand for higher-scoring colors.
 
 ## The seven dice colors
 
@@ -39,15 +89,15 @@ what the physical dice look like) and its exact scoring rule (from
 `lib/score.js`, the canonical scoring engine — run on both client for live
 preview and server as the authoritative re-score):
 
-| Color | What it looks like | Scoring formula |
-|---|---|---|
-| **Yellow** | Solid yellow, pipped (dots) | Sum of face values |
-| **Purple** | Solid purple, pipped | Sum of face values, **×2** |
-| **Blue** | Solid blue, pipped. Most have plain white pips; a few are the **glitter** variant (sparkly gold/metallic pips) | Sum of face values; if **any** blue die rolled this round is glitter, the **entire blue sum** is doubled (not just the glitter die's own value) |
-| **Red** | Solid red. Each die mixes white-ink and black-ink numerals across its faces — read whichever ink color is face-up | White-numeral dice add, black-numeral dice subtract; sum the signed values, then **multiply by the count of red dice rolled** (not by anything else) |
-| **Green** | Usually one large 20-sided die showing a printed number (not dots), 1–20 | Sum of face values |
-| **Clear** | Colorless translucent/frosted plastic, pipped — easy to miss against a light table | Sum of face values |
-| **Pink** | Solid pink, pipped. Usually zero or one per player per round (the "pity die" — see below) | Face value of the pity die, if the player has one |
+| Color | What it looks like | Scoring formula [APP] | Special property [OFFICIAL, not implemented by the app] |
+|---|---|---|---|
+| **Yellow** | Solid yellow, pipped (dots) | Sum of face values | Cumulative yellow score sets **drafting turn order** each round (highest drafts first) — see round-structure step 4 above |
+| **Purple** | Solid purple, pipped | Sum of face values, **×2** | None beyond scoring |
+| **Blue** | Solid blue, pipped. Most have plain white pips; a few are the **glitter** variant (sparkly gold/metallic pips) | Sum of face values; if **any** blue die rolled this round is glitter, the **entire blue sum** is doubled (not just the glitter die's own value) | None beyond scoring — glitter blue is drafted as its own die type (see dice distribution below), not a random property of a plain blue die |
+| **Red** | Solid red. Each die mixes white-ink and black-ink numerals across its faces — read whichever ink color is face-up | White-numeral dice add, black-numeral dice subtract; sum the signed values, then **multiply by the count of red dice rolled** (not by anything else) | None beyond scoring |
+| **Green** | Usually one large 20-sided die showing a printed number (not dots), 1–20 | Sum of face values | None beyond scoring |
+| **Clear** | Colorless translucent/frosted plastic, pipped — easy to miss against a light table | Sum of face values | Also called the **"rogue" die**: a player holding one may **steal a die from any other player** (round-structure step 2). Publisher's own suggestion: **remove clear dice entirely for kid-friendly play** so no one's feelings get hurt over a steal — the app has no toggle for this today, but it's a natural candidate for a future "kid mode" |
+| **Pink** | Solid pink, pipped/D12. Usually zero or one per player per round (the "pity die" — see below) | Face value of the pity die, if the player has one | Fixed, scarce supply (only 4 exist in the whole box, regardless of player count — see dice distribution below); who's entitled to hold one is a table-negotiated "pity" convention the official rules don't spell out mechanically |
 
 Round total = sum of all seven colors' scores. Source: `scoreRound(dice)` in
 [`lib/score.js`](lib/score.js):
@@ -70,28 +120,62 @@ on red (white numeral = positive, black numeral = negative). See
 `sanitizeDie()` in `lib/score.js` for the exact validation (values clamped
 to `0..99`, unknown colors default to yellow, at most 80 dice per round).
 
+## Official dice distribution [OFFICIAL]
+
+The physical box's full die inventory, per the publisher's product page.
+Not modeled by the app at all — the app takes a face value per die and
+never asks about die size or which specific die was rolled:
+
+| Die type | Quantity |
+|---|---|
+| Yellow D6 (starter dice) | 10 |
+| Yellow D8 | 7 |
+| Purple D8 | 7 |
+| Purple D12 | 7 |
+| Blue D6 | 10 |
+| Blue D8 | 9 |
+| Blue D12 | 9 |
+| Glitter Blue D6 | 7 |
+| Red D6 | 10 |
+| Red D8 | 9 |
+| Green D20 | 10 |
+| Clear/White D6 | 7 |
+| Pink D12 (pity dice) | 4 |
+
+Notable implications, none enforced by the app:
+- Most colors come in **multiple sizes** (yellow/purple/blue/red span
+  D6→D8→D12), implying a die-size upgrade path through drafting — a bigger
+  die drafted later presumably rolls higher on average. The app just
+  accepts whatever value is typed in; it has no concept of die size or
+  tier.
+- **Pink is fixed at 4 dice total in the box**, full stop — it does not
+  scale with player count officially.
+
 ## Starting setup and the pity (pink) die
 
-Two pieces of setup guidance the app surfaces in the pass-and-play lobby
-(`index.html`'s `renderLobby()`), not stored per-game state — just derived
-from the player count each render:
+- **Every player starts with exactly 1 yellow D6** [OFFICIAL, matches
+  round 1's app behavior] — this is what round 1 scores.
+- **App-only pity-dice guidance** [APP]: the pass-and-play lobby
+  (`renderLobby()` in `index.html`) shows a suggested pink-dice count that
+  *scales with player count*, via `pinkDiceFor(n)` (`index.html:1208`):
 
-- **Every player starts with exactly 1 yellow die** (this is what round 1
-  scores).
-- **Pity (pink) dice available in the box**, by player count — helper
-  `pinkDiceFor(n)` in `index.html:1208`:
-
-  | Players | Pink dice |
+  | Players | Pink dice (app's suggestion) |
   |---|---|
   | 2–3 | 1 |
   | 4–6 | 2 |
   | 7–9 | 3 |
   | 10 | 4 |
 
-  This count is *only* the app's UI guidance for how many physical pink dice
-  to keep in the box for the group size — it is not itself a scoring rule
-  (pink dice score exactly like any other color, per the table above; the
-  count just tells you how many exist to be picked up as pity dice).
+  **This diverges from the official box, which fixes pink dice at exactly 4
+  regardless of player count** (see above). This table was a deliberate
+  app-level house-rule addition (requested and specified exactly as shown,
+  independent of the official count) to give smaller groups fewer pity dice
+  in circulation rather than handing out all 4 regardless of table size — it
+  is not a claim about the physical game. If this app is ever changed to
+  match the official rules exactly, `pinkDiceFor()` should return a
+  constant `4` instead of scaling. In both cases, pink dice score identically
+  (per the color table above) — this only affects the app's UI hint and the
+  pity-ribbon cutoff (see next section), never the arithmetic.
 
 ## Standings and the pity-die indicator (pass-and-play)
 
@@ -181,16 +265,28 @@ scoring/game-mechanics one.
 | Online end-of-game + Hall of Fame | `api/workflows/finalize.js`, `api/_lib/store.js` | `finalizeGame()` |
 | Physical die appearance (for photo-scan) | `api/analyze.js` | `SYSTEM_PROMPT` |
 
-## Not covered by this app (and therefore not in this document)
+## Not implemented by this app
 
-- How dice are drafted, traded, or otherwise acquired during physical play
-  (the "roll-and-write... dice-drafting" part of the game's own tagline) —
-  this app only scores whatever dice a player reports having at the end of
-  a round.
-- Physical box contents/quantities beyond the derived pity-die guidance
-  above.
-- Any win condition beyond "highest cumulative total after round 10" — the
-  app doesn't model tiebreak rules, bonus objectives, or end-game triggers
-  besides round count.
-- Official publisher rules text. For that, see Last Night Games' own rules
-  for *Panda Royale* — this app is an unaffiliated fan-made companion tool.
+These are real, official mechanics (documented above, tagged [OFFICIAL])
+that this app has **zero code for** — no state, no UI, no enforcement. If a
+future feature wants to model any of these, there is nothing to extend;
+they'd be built from scratch:
+
+- **Drafting**: choosing and adding one new die per round. The app never
+  asks "which die did you draft" — it only asks "what did you roll," each
+  round independently.
+- **Stealing** via a clear/rogue die. The app has no concept of one
+  player's die moving to another player's hand.
+- **Draft turn order** by cumulative yellow score. The app tracks yellow's
+  *score* (it's just another color in `scoreRound()`) but never uses it to
+  order anything.
+- **Die size/tier** (D6 vs. D8 vs. D12 vs. D20). The app only ever sees a
+  face value (`0..99`); it has no idea what die produced it.
+- Any win condition beyond "highest cumulative total after round 10" — no
+  tiebreak rules, bonus objectives, or end-game triggers besides round
+  count.
+
+For the official rules in full (including anything not summarized here),
+see Last Night Games' own product page and rulebook for *Panda Royale* —
+this app is an unaffiliated fan-made companion tool and does not reproduce
+the rulebook verbatim.
