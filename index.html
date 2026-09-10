@@ -345,23 +345,34 @@
   .score-strip .ss-total{ background:rgba(246,197,103,0.16); border-color:rgba(246,197,103,0.4); }
   .score-strip .ss-total .ss-lab{ color:var(--lantern-bright); font-weight:700; }
   .score-strip .ss-total .ss-val{ color:var(--lantern-bright); font-weight:700; }
+  /* empty-column dashes centered in their cell */
+  .score-strip .ss-col.empty .ss-val{ color:var(--muted); text-align:center; }
+  .sheet-table td{ text-align:center; vertical-align:middle; }
 
   /* ---- entry accordion (one color open at a time) ---- */
-  .acc{ margin-top:14px; border:1px solid var(--panel-line); border-radius:var(--radius); overflow:hidden; }
-  .acc-row{ border-bottom:1px solid var(--panel-line); background:var(--panel); }
-  .acc-row:last-child{ border-bottom:none; }
-  .acc-row.open{ background:var(--panel-2); }
-  .acc-head{
-    display:flex; align-items:center; gap:10px; width:100%; padding:13px 14px;
-    background:none; border:none; cursor:pointer; color:var(--ink); text-align:left;
+  /* ---- entry dice row: 7 colored dice in a single row, name below ---- */
+  .dice-row{ display:flex; gap:6px; margin-top:14px; }
+  .dcell{
+    flex:1 1 0; min-width:0; display:flex; flex-direction:column; align-items:center; gap:5px;
+    background:none; border:none; cursor:pointer; padding:4px 0; border-radius:10px;
   }
-  .acc-head .dot{ width:16px; height:16px; border-radius:5px; flex-shrink:0; border:1px solid rgba(0,0,0,0.25); }
-  .acc-head .acc-lab{ font-size:0.95rem; font-weight:600; flex-shrink:0; min-width:56px; }
-  .acc-head .acc-lab small{ display:block; color:var(--muted); font-weight:500; font-size:0.68rem; }
-  .acc-head .er-sum{ flex:1; text-align:right; font-family:'Baloo 2', monospace; font-size:0.9rem; color:var(--ink-dim); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-  .acc-head .er-empty{ font-family:inherit; color:var(--muted); font-size:0.8rem; font-style:italic; }
-  .acc-head .acc-caret{ color:var(--muted); font-size:0.9rem; flex-shrink:0; }
-  .acc-body{ padding:2px 14px 15px; }
+  .dcell.open{ background:var(--panel-2); }
+  .dcell .dface{
+    width:100%; max-width:44px; aspect-ratio:1/1; border-radius:11px; border:1px solid rgba(0,0,0,0.25);
+    display:flex; align-items:center; justify-content:center; color:#241a06;
+    font-family:'Baloo 2', monospace; font-weight:700; font-size:1.05rem; box-shadow:0 2px 6px rgba(0,0,0,0.25);
+  }
+  .dcell.open .dface{ outline:2px solid var(--lantern-bright); outline-offset:2px; }
+  .dcell .dname{ font-size:0.66rem; color:var(--ink-dim); text-align:center; line-height:1.05; }
+
+  /* expanded panel below the dice row for the selected color */
+  .dexpand{
+    margin-top:10px; padding:14px; border-radius:var(--radius);
+    background:var(--panel-2); border:1px solid var(--panel-line);
+  }
+  .dexpand-head{ display:flex; align-items:center; gap:9px; margin-bottom:10px; }
+  .dexpand-head .dot{ width:16px; height:16px; border-radius:5px; border:1px solid rgba(0,0,0,0.25); }
+  .dexpand-head .acc-lab{ font-size:1rem; font-weight:700; }
   .acc-ins{ display:flex; gap:10px; }
   .acc-field{ flex:1; display:flex; flex-direction:column; gap:4px; }
   .acc-flab{ font-size:0.7rem; color:var(--ink-dim); }
@@ -376,7 +387,9 @@
     margin-top:10px; text-align:center; font-family:'Baloo 2', monospace;
     font-size:1.05rem; color:var(--lantern-bright);
   }
-  .acc-math .er-empty{ color:var(--muted); font-size:0.85rem; font-style:italic; }
+  .acc-math .er-empty{ color:var(--muted); font-size:0.85rem; font-style:italic; font-family:inherit; }
+  .dcalc{ margin-top:8px; font-size:0.76rem; color:var(--muted); line-height:1.5; text-align:center; }
+  @media (max-width: 360px){ .dcell .dname{ font-size:0.58rem; } }
 
   /* ---- current-round score row (tap to expand full sheet) ---- */
   .round-row{
@@ -736,6 +749,13 @@ const I18N = {
     'sheet.green': 'Green', 'sheet.white': 'White', 'sheet.pink': 'Pink', 'sheet.rowTotal': 'Row Total',
     'sheet.grandTotal': 'Grand total', 'entry.tapToAdd': 'tap to add', 'entry.mathHint': 'enter values above',
     'entry.fullSheet': 'Full sheet', 'board.round': 'R',
+    'calc.yellow': 'Add up the face values of your yellow dice.',
+    'calc.purple': 'Add up your purple dice, then double the total (×2).',
+    'calc.blue': 'Add up your blue dice. If any die is a sparkly glitter die, double the whole blue total.',
+    'calc.red': 'White numerals add, black numerals subtract. Sum them, then multiply by how many red dice you rolled.',
+    'calc.green': 'Add up the face values of your green dice.',
+    'calc.clear': 'Add up the face values of your clear (white) dice.',
+    'calc.pink': 'The face value of your pity pink die.',
     'note.x2': '×2', 'note.xcount': '× count',
     'ph.values': 'e.g. 1 2 3', 'ph.plain': 'plain', 'ph.glitter': '✨ glitter',
     'ph.whitePlus': 'white +', 'ph.blackMinus': 'black −', 'ph.pityDie': 'pity pink', 'ph.egN': 'e.g. 4', 'ph.eg356': 'e.g. 3 5 6',
@@ -890,6 +910,13 @@ const I18N = {
     'sheet.green': 'Verde', 'sheet.white': 'Blanco', 'sheet.pink': 'Rosa', 'sheet.rowTotal': 'Total fila',
     'sheet.grandTotal': 'Total general', 'entry.tapToAdd': 'toca para añadir', 'entry.mathHint': 'ingresa valores arriba',
     'entry.fullSheet': 'Hoja completa', 'board.round': 'R',
+    'calc.yellow': 'Suma los valores de tus dados amarillos.',
+    'calc.purple': 'Suma tus dados morados y duplica el total (×2).',
+    'calc.blue': 'Suma tus dados azules. Si hay un dado glitter (brillante), duplica todo el total azul.',
+    'calc.red': 'Los números blancos suman, los negros restan. Súmalos y multiplica por la cantidad de dados rojos.',
+    'calc.green': 'Suma los valores de tus dados verdes.',
+    'calc.clear': 'Suma los valores de tus dados transparentes (blancos).',
+    'calc.pink': 'El valor de tu dado rosa de compasión.',
     'note.x2': '×2', 'note.xcount': '× cantidad',
     'ph.values': 'p. ej. 1 2 3', 'ph.plain': 'normal', 'ph.glitter': '✨ glitter',
     'ph.whitePlus': 'blanco +', 'ph.blackMinus': 'negro −', 'ph.pityDie': 'rosa de consuelo', 'ph.egN': 'p. ej. 4', 'ph.eg356': 'p. ej. 3 5 6',
@@ -1044,6 +1071,13 @@ const I18N = {
     'sheet.green': 'Grün', 'sheet.white': 'Weiß', 'sheet.pink': 'Pink', 'sheet.rowTotal': 'Zeilensumme',
     'sheet.grandTotal': 'Gesamtsumme', 'entry.tapToAdd': 'zum Eintragen tippen', 'entry.mathHint': 'oben Werte eingeben',
     'entry.fullSheet': 'Ganzer Bogen', 'board.round': 'R',
+    'calc.yellow': 'Addiere die Augen deiner gelben Würfel.',
+    'calc.purple': 'Addiere deine lila Würfel und verdopple die Summe (×2).',
+    'calc.blue': 'Addiere deine blauen Würfel. Ist ein Glitzerwürfel dabei, verdopple die ganze blaue Summe.',
+    'calc.red': 'Weiße Zahlen addieren, schwarze subtrahieren. Summieren, dann mit der Anzahl roter Würfel multiplizieren.',
+    'calc.green': 'Addiere die Augen deiner grünen Würfel.',
+    'calc.clear': 'Addiere die Augen deiner klaren (weißen) Würfel.',
+    'calc.pink': 'Der Wert deines rosa Trostwürfels.',
     'note.x2': '×2', 'note.xcount': '× Anzahl',
     'ph.values': 'z. B. 1 2 3', 'ph.plain': 'normal', 'ph.glitter': '✨ Glitter',
     'ph.whitePlus': 'weiß +', 'ph.blackMinus': 'schwarz −', 'ph.pityDie': 'Trost-Pink', 'ph.egN': 'z. B. 4', 'ph.eg356': 'z. B. 3 5 6',
@@ -1198,6 +1232,13 @@ const I18N = {
     'sheet.green': 'Vert', 'sheet.white': 'Blanc', 'sheet.pink': 'Rose', 'sheet.rowTotal': 'Total ligne',
     'sheet.grandTotal': 'Total général', 'entry.tapToAdd': 'toucher pour ajouter', 'entry.mathHint': 'saisir les valeurs ci-dessus',
     'entry.fullSheet': 'Feuille complète', 'board.round': 'R',
+    'calc.yellow': 'Additionnez les valeurs de vos dés jaunes.',
+    'calc.purple': 'Additionnez vos dés violets, puis doublez le total (×2).',
+    'calc.blue': 'Additionnez vos dés bleus. Si un dé est pailleté (glitter), doublez tout le total bleu.',
+    'calc.red': 'Les chiffres blancs ajoutent, les noirs soustraient. Faites la somme, puis multipliez par le nombre de dés rouges.',
+    'calc.green': 'Additionnez les valeurs de vos dés verts.',
+    'calc.clear': 'Additionnez les valeurs de vos dés transparents (blancs).',
+    'calc.pink': 'La valeur de votre dé rose de consolation.',
     'note.x2': '×2', 'note.xcount': '× nombre',
     'ph.values': 'p. ex. 1 2 3', 'ph.plain': 'normal', 'ph.glitter': '✨ glitter',
     'ph.whitePlus': 'blanc +', 'ph.blackMinus': 'noir −', 'ph.pityDie': 'rose de consolation', 'ph.egN': 'p. ex. 4', 'ph.eg356': 'p. ex. 3 5 6',
@@ -1352,6 +1393,13 @@ const I18N = {
     'sheet.green': 'Verde', 'sheet.white': 'Branco', 'sheet.pink': 'Rosa', 'sheet.rowTotal': 'Total linha',
     'sheet.grandTotal': 'Total geral', 'entry.tapToAdd': 'toque para adicionar', 'entry.mathHint': 'insira valores acima',
     'entry.fullSheet': 'Planilha completa', 'board.round': 'R',
+    'calc.yellow': 'Some os valores dos seus dados amarelos.',
+    'calc.purple': 'Some seus dados roxos e dobre o total (×2).',
+    'calc.blue': 'Some seus dados azuis. Se houver um dado glitter (brilhante), dobre todo o total azul.',
+    'calc.red': 'Números brancos somam, pretos subtraem. Some tudo e multiplique pela quantidade de dados vermelhos.',
+    'calc.green': 'Some os valores dos seus dados verdes.',
+    'calc.clear': 'Some os valores dos seus dados transparentes (brancos).',
+    'calc.pink': 'O valor do seu dado rosa de consolação.',
     'note.x2': '×2', 'note.xcount': '× quantidade',
     'ph.values': 'ex. 1 2 3', 'ph.plain': 'normal', 'ph.glitter': '✨ glitter',
     'ph.whitePlus': 'branco +', 'ph.blackMinus': 'preto −', 'ph.pityDie': 'rosa de consolação', 'ph.egN': 'ex. 4', 'ph.eg356': 'ex. 3 5 6',
@@ -2340,48 +2388,53 @@ function renderEntry(){
       ${state.analyzeError ? `<div class="banner">${esc(state.analyzeError)}</div>` : ''}
     </div>` : '';
 
-  // Accordion: one color open at a time. Each collapsed row shows the color
-  // chip + name + a compact summary of what's entered (its running score, or
-  // a hint to tap). The open row reveals the input(s) + live math.
+  // Single row of colored dice — one per color, no stacking. Tap a die to
+  // select that color; its input(s) + calc description expand BELOW the row.
+  // The die face shows that color's running score (— when nothing entered).
   const openColor = state.entryOpenColor;
-  const accordion = visibleRows.map(r => {
+  const diceRow = visibleRows.map(r => {
     const isOpen = openColor === r.color;
-    const math = colorMath(r.color, state.fields);
     const anyEntered = r.fields.some(f => (state.fields[f.key] || '').trim());
-    const summary = anyEntered
-      ? `<span class="er-sum">${esc(math || '')}</span>`
-      : `<span class="er-sum er-empty">${esc(t('entry.tapToAdd'))}</span>`;
+    const cell = pdfColumns(dice, scored).find(c => c.color === r.color);
+    const face = anyEntered && cell ? cell.val : '';
     return `
-      <div class="acc-row ${isOpen ? 'open' : ''}" data-color="${r.color}">
-        <button class="acc-head" data-a="acc-toggle" data-color="${r.color}" aria-expanded="${isOpen ? 'true' : 'false'}">
-          <span class="dot" style="background:${COLOR_HEX[r.color]}"></span>
-          <span class="acc-lab">${esc(t('color.' + r.color))}${(r.noteKey && !isR1) ? `<small>${esc(t(r.noteKey))}</small>` : ''}</span>
-          ${summary}
-          <span class="acc-caret">${isOpen ? '▾' : '▸'}</span>
-        </button>
-        ${isOpen ? `
-          <div class="acc-body">
-            <div class="acc-ins">
-              ${r.fields.map(f => `
-                <label class="acc-field">
-                  ${r.fields.length > 1 ? `<span class="acc-flab">${esc(t(f.phKey))}</span>` : ''}
-                  <input data-field="${f.key}" value="${esc(state.fields[f.key] || '')}"
-                         placeholder="${esc(isR1 ? t('ph.egN') : t(f.phKey))}" class="${f.accent ? 'accent' : ''}"
-                         type="text" inputmode="numeric" pattern="[0-9 ,]*" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />
-                </label>`).join('')}
-            </div>
-            <div class="acc-math">${math ? esc(math) : `<span class="er-empty">${esc(t('entry.mathHint'))}</span>`}</div>
-          </div>
-        ` : ''}
-      </div>`;
+      <button class="dcell ${isOpen ? 'open' : ''}" data-a="acc-toggle" data-color="${r.color}"
+              aria-expanded="${isOpen ? 'true' : 'false'}" aria-label="${esc(t('color.' + r.color))}">
+        <span class="dface" style="background:${COLOR_HEX[r.color]}">${anyEntered ? face : ''}</span>
+        <span class="dname">${esc(t('color.' + r.color))}</span>
+      </button>`;
   }).join('');
+
+  // The expanded panel for the currently-selected color: its input(s) plus a
+  // plain-language description of how that color is scored (replaces the old
+  // stranded Blue/Red legend, which now shows only when that color is open).
+  const openRow = visibleRows.find(r => r.color === openColor);
+  const openMath = openRow ? colorMath(openRow.color, state.fields) : '';
+  const expandPanel = openRow ? `
+    <div class="dexpand">
+      <div class="dexpand-head">
+        <span class="dot" style="background:${COLOR_HEX[openRow.color]}"></span>
+        <span class="acc-lab">${esc(t('color.' + openRow.color))}</span>
+      </div>
+      <div class="acc-ins">
+        ${openRow.fields.map(f => `
+          <label class="acc-field">
+            ${openRow.fields.length > 1 ? `<span class="acc-flab">${esc(t(f.phKey))}</span>` : ''}
+            <input data-field="${f.key}" value="${esc(state.fields[f.key] || '')}"
+                   placeholder="${esc(isR1 ? t('ph.egN') : t(f.phKey))}" class="${f.accent ? 'accent' : ''}"
+                   type="text" inputmode="numeric" pattern="[0-9 ,]*" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />
+          </label>`).join('')}
+      </div>
+      <div class="acc-math">${openMath ? esc(openMath) : `<span class="er-empty">${esc(t('calc.' + openRow.color))}</span>`}</div>
+      <p class="dcalc">${esc(t('calc.' + openRow.color))}</p>
+    </div>` : '';
 
   return `
     <h2 style="font-size:1.2rem;">${esc(p ? t('entry.titleWho', { n: state.entryRound, name: p.name }) : t('entry.title', { n: state.entryRound }))}</h2>
     <p class="small-note" style="margin-top:4px;">${esc(isR1 ? t('entry.r1note') : t('entry.note'))}</p>
 
-    <div class="acc">${accordion}</div>
-    ${isR1 ? '' : `<p class="entry-hint">${esc(t('entry.hint'))}</p>`}
+    <div class="dice-row">${diceRow}</div>
+    ${expandPanel}
 
     <!-- current round's score row — tap to expand the full PDF scorecard -->
     <button class="round-row" data-a="sheet-toggle" aria-expanded="${state.sheetExpanded ? 'true' : 'false'}">
@@ -2843,8 +2896,7 @@ function bind(){
     else if(a === 'acc-toggle'){
       const color = el.dataset.color;
       setState({ entryOpenColor: state.entryOpenColor === color ? null : color });
-      // focus the first input of the freshly-opened color
-      const first = document.querySelector('.acc-row.open .acc-ins input');
+      const first = document.querySelector('.dexpand .acc-ins input');
       if(first){ first.focus(); }
     }
     else if(a === 'sheet-toggle') setState({ sheetExpanded: !state.sheetExpanded });
@@ -3014,21 +3066,24 @@ function updateEntryTotals(){
   if(rrTotal) rrTotal.textContent = scored.total;
   const strip = document.querySelector('.round-row .score-strip');
   if(strip) strip.outerHTML = scoreStripHtml(dice, scored);
-  // open color's live math + its collapsed-summary sibling text
+  // open color's live math + its die face in the dice row
   if(state.entryOpenColor){
     const math = colorMath(state.entryOpenColor, state.fields);
-    const mathEl = document.querySelector(`.acc-row.open .acc-math`);
-    if(mathEl) mathEl.innerHTML = math ? esc(math) : `<span class="er-empty">${esc(t('entry.mathHint'))}</span>`;
+    const mathEl = document.querySelector('.dexpand .acc-math');
+    if(mathEl){
+      mathEl.innerHTML = math ? esc(math) : `<span class="er-empty">${esc(t('calc.' + state.entryOpenColor))}</span>`;
+    }
+    const cell = pdfColumns(dice, scored).find(c => c.color === state.entryOpenColor);
+    const face = document.querySelector(`.dcell[data-color="${state.entryOpenColor}"] .dface`);
+    if(face) face.textContent = (cell && cell.has) ? cell.val : '';
   }
   // if the full sheet is open, keep its current-round row live too
   if(state.sheetExpanded){
     const sheet = document.querySelector('.sheet');
     if(sheet){
       const v = view();
-      const fresh = renderScoreSheet(v);
-      // replace just the table body/foot to avoid closing the sheet
       const tmp = document.createElement('div');
-      tmp.innerHTML = fresh;
+      tmp.innerHTML = renderScoreSheet(v);
       const newTable = tmp.querySelector('.sheet-table');
       const curTable = sheet.querySelector('.sheet-table');
       if(newTable && curTable) curTable.innerHTML = newTable.innerHTML;
@@ -3116,18 +3171,30 @@ async function boot(){
 
   const session = LS.get('pr.session', null);
   if(deepCode){
-    // Joining via an invite URL / QR code. If we already know this device's
-    // player name, join straight into the game; otherwise land on home (which
-    // shows the name field) and remember the code to join once a name is set.
-    if((state.me.name || '').trim()){
+    // Joining/resuming via an invite URL or QR code. The seat is keyed on this
+    // device's durable UUID, so if this device was already in the game its
+    // scores are preserved server-side and we rejoin the SAME seat. Recover
+    // the player's name from that existing seat if the local name was lost.
+    let name = (state.me.name || '').trim();
+    if(!name){
       try {
-        const game = await api('join', { code: deepCode, playerId: state.me.id, name: state.me.name });
+        const g = await api('get', { code: deepCode });
+        const mine = g && g.players && g.players.find(p => p.id === state.me.id);
+        if(mine && mine.name){ name = mine.name; saveMe(name); }
+      } catch {}
+    }
+    if(name){
+      try {
+        const game = await api('join', { code: deepCode, playerId: state.me.id, name });
         LS.set('pr.session', { mode:'online', code: game.code });
         state.mode = 'online'; state.code = game.code; state.game = game;
         state.entryRound = LS.get(roundKey(game.code), 1);
         state.screen = 'lobby';
+        try { history.replaceState({}, '', location.pathname); } catch {}
       } catch { state.pendingJoinCode = deepCode; state.screen = 'home'; }
     } else {
+      // brand-new device with no name yet: ask for it, then join (createOnline
+      // routes to join when pendingJoinCode is set)
       state.pendingJoinCode = deepCode;
       state.screen = 'home';
     }
