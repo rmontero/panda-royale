@@ -41,10 +41,19 @@ every submission).
 
 ## Manual entry
 
-The entry screen shows every color at once as plain number fields. Type the face values
-space-separated (`3 5 6`), tab to the next color, and the round total updates on every
-keystroke. Blue has a separate "glitter" box; red has separate white (+) and black (−)
-boxes. No dropdowns, no steppers.
+The entry screen is a **one-color-open-at-a-time accordion**: a row of colored dice
+across the top, and tapping a color expands its input(s) below with a live per-color
+calculation. Type face values space-separated (`3 5 6`); **Tab / Enter** move forward to
+the next color (opening it and focusing its input), **Shift+Tab** moves backward, and past
+the last color focus lands on Save. Blue has a separate "glitter" box; red has separate
+white (+) and black (−) boxes. No dropdowns, no steppers.
+
+Input is validated as you go: out-of-range values (above a color's largest die — see
+[`GAME_RULES.md`](GAME_RULES.md)) are dropped on blur with a toast, and focusing **Save**
+validates the whole round's dice count early. Submitting enforces a **hard dice-count
+rule** — round N needs exactly N dice (N+1 when a pink pity die is held), round 1 exactly
+one yellow — blocking both too-few and too-many. All of this lives in `lib/rules.js`
+(`validateRoundDice`, `expectedDiceCount`), shared with the test suite.
 
 ## Architecture
 

@@ -2,7 +2,7 @@
 // vars are missing the functions degrade to no-ops and the app keeps working
 // (games just don't get an archived final snapshot or a hall-of-fame entry).
 
-import { Client as QStashClient, Receiver } from '@upstash/qstash';
+import { Receiver } from '@upstash/qstash';
 import { Client as WorkflowClient } from '@upstash/workflow';
 
 export function qstashToken() {
@@ -15,14 +15,6 @@ export function appBaseUrl() {
   const host =
     process.env.VERCEL_PROJECT_PRODUCTION_URL || process.env.VERCEL_URL || 'localhost:3000';
   return `https://${host}`;
-}
-
-let qstash;
-export function getQStash() {
-  const token = qstashToken();
-  if (!token) return null;
-  if (!qstash) qstash = new QStashClient({ token });
-  return qstash;
 }
 
 let workflow;

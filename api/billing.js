@@ -30,6 +30,7 @@ import {
   getPrefs,
   setPrefs,
 } from './_lib/entitlements.js';
+import { appBaseUrl } from './_lib/upstash.js';
 
 function send(res, status, body) {
   res.status(status).setHeader('content-type', 'application/json');
@@ -72,12 +73,6 @@ function setSessionCookie(res, token) {
 
 function clearSessionCookie(res) {
   res.setHeader('Set-Cookie', `${SESSION_COOKIE}=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0`);
-}
-
-function appBaseUrl() {
-  if (process.env.APP_URL) return process.env.APP_URL.replace(/\/$/, '');
-  const host = process.env.VERCEL_PROJECT_PRODUCTION_URL || process.env.VERCEL_URL || 'localhost:3000';
-  return `https://${host}`;
 }
 
 // The one and only thing for sale: a single $10 one-time unlock. Defined

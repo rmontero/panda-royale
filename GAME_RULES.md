@@ -32,18 +32,19 @@ mechanical presence in this app beyond flavor.
 
 ## Players and rounds
 
-- **2–10 players** per game. [APP] — enforced only implicitly (no explicit
-  min/max check found in `api/game.js`'s create/join; this is a UI/social
-  convention, not a coded limit).
+- **2–10 players** per game. [APP] — the maximum is enforced (`MAX_PLAYERS = 10`
+  in `lib/rules.js`; the add-player control hides at the cap). The minimum of 2
+  (`MIN_PLAYERS`) is a social convention, not a hard block.
 - **Exactly 10 rounds**, numbered 1–10. [APP] Constant: `ROUNDS = 10` in
   `index.html:475` (client) and `TOTAL_ROUNDS = 10` in `api/_lib/store.js`
   (server, authoritative for online games).
 - **Dice pool grows by one die per round** [OFFICIAL]: players begin round 1
   with a single starter die (yellow) and draft one additional die of their
   choice each round, so by round 10 every player rolls 10 dice total. **The
-  app does not enforce this** — it only special-cases round 1 (see below);
-  rounds 2–10 accept however many dice of any color a player reports, with
-  no check that the count matches "rounds played so far."
+  app now enforces this** via a hard dice-count rule (`validateRoundDice` in
+  `lib/rules.js`): round N requires exactly N dice — **N+1 when a pink pity die
+  is held** — and submitting a round with too few or too many dice is blocked
+  with a toast (see "Pity dice" below for why pink adds one).
 - **Round 1 is special**: every player rolls only their single starting
   yellow die — no other colors are in play yet. [APP] Enforced in two
   places:
@@ -254,6 +255,8 @@ scoring/game-mechanics one.
 |---|---|---|
 | Scoring formulas | `lib/score.js` | `scoreRound()` |
 | Die validation/clamping | `lib/score.js` | `sanitizeDie()`, `sanitizeDice()` |
+| Per-color max face value + player cap | `lib/rules.js` | `COLOR_MAX_VALUE`, `MAX_PLAYERS`, `MIN_PLAYERS` |
+| Dice-count rule (round N = N dice, +1 for pink) | `lib/rules.js` | `validateRoundDice()`, `expectedDiceCount()` |
 | Round count | `index.html`, `api/_lib/store.js` | `ROUNDS`, `TOTAL_ROUNDS` |
 | Round 1 special case | `index.html` | `diceForRound()` |
 | Input field layout | `index.html` | `ENTRY_ROWS`, `FIELD_KEYS` |

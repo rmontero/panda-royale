@@ -1,7 +1,10 @@
 node_modules/
 .vercel/
 .env
-.env*.local
-.DS_Store
-.vercel
 .env*
+.DS_Store
+
+# test + audit artifacts
+test-results/
+playwright-report/
+_axe-audit.mjs
