@@ -1817,9 +1817,9 @@ function toggleTheme(){
   const next = state.theme === 'light' ? 'dark' : 'light';
   state.theme = next;
   LS.set('pr.theme', next);
-  applyTheme(next);
+  applyTheme(next);          // recolors the whole page via CSS vars on <html>
   savePrefsRemote({ theme: next });
-  render();
+  updateMenu();              // repaint just the menu (its theme label); keep it open
 }
 
 /* ------------------------------------------------------------------ *
@@ -1884,7 +1884,16 @@ async function refreshOnline(){
   if(state.mode !== 'online' || !state.code) return;
   try {
     const game = await api('get', { code: state.code });
-    if(JSON.stringify(game) !== JSON.stringify(state.game)) setState({ game });
+    if(JSON.stringify(game) !== JSON.stringify(state.game)){
+      // While an overlay is open (menu / back-menu / full sheet), a full
+      // re-render would tear it down and flash the screen. Update state
+      // quietly; the next natural render (or overlay close) repaints.
+      if(state.menuOpen || state.backMenuOpen || state.sheetExpanded){
+        state.game = game;
+      } else {
+        setState({ game });
+      }
+    }
   } catch(e){
     if(e.status === 404){ leaveGame(t('t.gameEnded'), 'info'); }
   }
@@ -2079,11 +2088,22 @@ function render(){
     ${renderTopbar()}
     <div class="screen">${body}</div>
     ${state.toast ? `<div class="toast">${esc(state.toast)}</div>` : ''}
-    ${renderTabbar()}
+    <div id="menuMount">${renderTabbar()}</div>
     ${state.backMenuOpen ? renderBackMenu() : ''}
   `;
   bind();
   syncPolling();
+}
+
+// Toggle/repaint ONLY the top-right menu overlay, leaving the screen body
+// untouched. Full render() rebuilds app.innerHTML and visibly flashes the
+// current screen (and restarts the menu's own enter animation); the menu is a
+// pure overlay, so we mutate its state and repaint just #menuMount instead.
+function updateMenu(patch){
+  if(patch) state = { ...state, ...patch };
+  const mount = document.getElementById('menuMount');
+  if(mount) mount.innerHTML = renderTabbar();
+  else render();
 }
 
 function langSelect(){
@@ -2782,12 +2802,12 @@ function bind(){
     const id = el.dataset.id;
 
     if(a === 'lang'){ return; }
-    if(a === 'menu-toggle'){ setState({ menuOpen: !state.menuOpen }); return; }
+    if(a === 'menu-toggle'){ updateMenu({ menuOpen: !state.menuOpen }); return; }
     if(a === 'back-cancel'){ setState({ backMenuOpen: false }); return; }
     if(a === 'back-new'){ setState({ backMenuOpen: false }); hostNewGame(); return; }
     if(a === 'back-leave'){ setState({ backMenuOpen: false }); leaveGame(); return; }
-    if(a === 'menu-close'){ setState({ menuOpen: false }); return; }
-    if(a === 'menu-theme'){ toggleTheme(); setState({ menuOpen: false }); return; }
+    if(a === 'menu-close'){ updateMenu({ menuOpen: false }); return; }
+    if(a === 'menu-theme'){ toggleTheme(); return; }
     if(a === 'menu-login'){ setState({ screen:'upgrade', upgradeFrom: state.screen, showLoginForm:true, menuOpen:false }); return; }
     if(a === 'menu-procode'){ setState({ screen:'upgrade', upgradeFrom: state.screen, menuOpen:false }); return; }
     if(a === 'menu-hof'){ setState({ screen:'hof', menuOpen:false }); return; }
