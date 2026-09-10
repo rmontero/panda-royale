@@ -260,8 +260,6 @@
 
   .player-row{ display:flex; align-items:center; gap:10px; padding:10px 2px; border-bottom:1px solid var(--panel-line); position:relative; }
   .player-row:last-child{ border-bottom:none; }
-  .player-row.dragging{ z-index:5; background:var(--panel-2); box-shadow:0 8px 20px rgba(0,0,0,0.4); border-radius:10px; opacity:0.95; }
-  .drag-handle{ cursor:grab; color:var(--muted); font-size:1rem; padding:4px 2px; touch-action:none; flex-shrink:0; }
   .avatar{
     width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center;
     font-weight:700; font-size:0.85rem; color:#241a06; flex-shrink:0;
@@ -736,7 +734,7 @@ const I18N = {
     'ph.addPlayer': 'Add a player',
     'add': 'Add',
     'done': 'Done',
-    'local.diceHint': 'Each player starts with 1 yellow die. With {n} players, keep {p} pink (pity) dice in the box.',
+    'local.diceHint': 'With {n} players, keep {p} pink (pity) dice in the box for the lowest scorers.',
     'local.newMatch': 'Start new match',
     'local.reorder': 'Drag to reorder',
     'enterDice': 'Enter dice',
@@ -745,7 +743,7 @@ const I18N = {
     'editMyRound': 'Edit my round {n}',
     'refreshPlayers': 'Refresh players',
     'resetScores': 'Reset all scores (host)',
-    'lobby.note': 'Roll and photograph or type your whole dice pool for the round before you trade or draft a new die.',
+    'lobby.note': "Type each color's face values for the round, then hand off or move to the next round.",
     'noPlayers': 'No players yet.',
     'entry.title': 'Round {n}',
     'entry.titleWho': 'Round {n} — {name}',
@@ -903,7 +901,7 @@ const I18N = {
     'ph.addPlayer': 'Añadir jugador',
     'add': 'Añadir',
     'done': 'Listo',
-    'local.diceHint': 'Cada jugador empieza con 1 dado amarillo. Con {n} jugadores, ten {p} dados rosas (de compasión) en la caja.',
+    'local.diceHint': 'Con {n} jugadores, ten {p} dados rosas (de compasión) en la caja para los de menor puntaje.',
     'local.newMatch': 'Empezar otra partida',
     'local.reorder': 'Arrastra para reordenar',
     'enterDice': 'Anotar dados',
@@ -912,7 +910,7 @@ const I18N = {
     'editMyRound': 'Editar mi ronda {n}',
     'refreshPlayers': 'Actualizar jugadores',
     'resetScores': 'Reiniciar todo (anfitrión)',
-    'lobby.note': 'Tira y fotografía o escribe todos tus dados de la ronda antes de intercambiar o robar un dado nuevo.',
+    'lobby.note': 'Escribe los valores de cada color de la ronda y luego pasa el turno o avanza a la siguiente ronda.',
     'noPlayers': 'Aún no hay jugadores.',
     'entry.title': 'Ronda {n}',
     'entry.titleWho': 'Ronda {n} — {name}',
@@ -1070,7 +1068,7 @@ const I18N = {
     'ph.addPlayer': 'Spieler hinzufügen',
     'add': 'Hinzu',
     'done': 'Fertig',
-    'local.diceHint': 'Jeder Spieler startet mit 1 gelben Würfel. Bei {n} Spielern {p} rosa (Trost-)Würfel bereithalten.',
+    'local.diceHint': 'Bei {n} Spielern {p} rosa (Trost-)Würfel für die Schlechtesten bereithalten.',
     'local.newMatch': 'Neue Partie starten',
     'local.reorder': 'Zum Sortieren ziehen',
     'enterDice': 'Würfel eintragen',
@@ -1079,7 +1077,7 @@ const I18N = {
     'editMyRound': 'Meine Runde {n} bearbeiten',
     'refreshPlayers': 'Spieler aktualisieren',
     'resetScores': 'Alle Punkte zurücksetzen (Host)',
-    'lobby.note': 'Würfle und fotografiere oder tippe deinen ganzen Würfelvorrat der Runde ein, bevor du tauschst oder einen neuen Würfel ziehst.',
+    'lobby.note': 'Tippe die Augenwerte jeder Farbe für die Runde ein und gib dann weiter oder gehe zur nächsten Runde.',
     'noPlayers': 'Noch keine Spieler.',
     'entry.title': 'Runde {n}',
     'entry.titleWho': 'Runde {n} — {name}',
@@ -1237,7 +1235,7 @@ const I18N = {
     'ph.addPlayer': 'Ajouter un joueur',
     'add': 'Ajouter',
     'done': 'Terminé',
-    'local.diceHint': 'Chaque joueur commence avec 1 dé jaune. Avec {n} joueurs, gardez {p} dés roses (de pitié) dans la boîte.',
+    'local.diceHint': 'Avec {n} joueurs, gardez {p} dés roses (de pitié) dans la boîte pour les moins bien classés.',
     'local.newMatch': 'Nouvelle partie',
     'local.reorder': 'Glisser pour réorganiser',
     'enterDice': 'Saisir les dés',
@@ -1246,7 +1244,7 @@ const I18N = {
     'editMyRound': 'Modifier ma manche {n}',
     'refreshPlayers': 'Actualiser les joueurs',
     'resetScores': 'Réinitialiser les scores (hôte)',
-    'lobby.note': 'Lancez puis photographiez ou saisissez tout votre pool de dés de la manche avant d’échanger ou de piocher un nouveau dé.',
+    'lobby.note': 'Saisissez les valeurs de chaque couleur pour la manche, puis passez le téléphone ou avancez à la manche suivante.',
     'noPlayers': 'Aucun joueur pour l’instant.',
     'entry.title': 'Manche {n}',
     'entry.titleWho': 'Manche {n} — {name}',
@@ -1404,7 +1402,7 @@ const I18N = {
     'ph.addPlayer': 'Adicionar jogador',
     'add': 'Adicionar',
     'done': 'Concluído',
-    'local.diceHint': 'Cada jogador começa com 1 dado amarelo. Com {n} jogadores, mantenha {p} dados rosa (de piedade) na caixa.',
+    'local.diceHint': 'Com {n} jogadores, mantenha {p} dados rosa (de piedade) na caixa para os de menor pontuação.',
     'local.newMatch': 'Começar nova partida',
     'local.reorder': 'Arraste para reordenar',
     'enterDice': 'Registrar dados',
@@ -1413,7 +1411,7 @@ const I18N = {
     'editMyRound': 'Editar minha rodada {n}',
     'refreshPlayers': 'Atualizar jogadores',
     'resetScores': 'Zerar todos os pontos (anfitrião)',
-    'lobby.note': 'Role e fotografe ou digite todo o seu conjunto de dados da rodada antes de trocar ou comprar um dado novo.',
+    'lobby.note': 'Digite os valores de cada cor da rodada e então passe o celular ou avance para a próxima rodada.',
     'noPlayers': 'Ainda não há jogadores.',
     'entry.title': 'Rodada {n}',
     'entry.titleWho': 'Rodada {n} — {name}',
@@ -1789,7 +1787,6 @@ let state = {
   editPlayers: false,                              // pass-and-play edit-players mode
 };
 let pollTimer = null;
-let dragState = null; // in-flight local-mode player drag (see bind()'s pointer handlers)
 
 function setState(patch){ state = { ...state, ...patch }; render(); }
 function toast(msg, ms){
@@ -1978,14 +1975,6 @@ function cycleLocalPlayerColor(id){
   const players = state.local.players.map(p => p.id === id
     ? { ...p, colorIndex: ((p.colorIndex ?? avatarColorIndex(p.id)) + 1) % AVATAR_COLORS.length }
     : p);
-  setState({ local: { ...state.local, players } }); persistLocal();
-}
-function reorderLocalPlayer(id, toIndex){
-  const players = [...state.local.players];
-  const from = players.findIndex(p => p.id === id);
-  if(from === -1 || from === toIndex) return;
-  const [p] = players.splice(from, 1);
-  players.splice(Math.max(0, Math.min(toIndex, players.length)), 0, p);
   setState({ local: { ...state.local, players } }); persistLocal();
 }
 // "Play again": clears every round's scores but keeps the roster (names,
@@ -2361,7 +2350,6 @@ function renderLobby(){
     const pityTag = bottomIds.has(p.id) ? ` <span class="rank-tag" title="${esc(t('badge.pity'))}">🎀</span>` : '';
     return `
       <div class="player-row" data-pid="${p.id}">
-        ${v.isLocal ? `<span class="drag-handle" data-id="${p.id}" aria-label="${esc(t('local.reorder'))}">⠿</span>` : ''}
         <div class="avatar" ${v.isLocal ? `data-a="cycle-color" data-id="${p.id}"` : ''} style="background:${playerColor(p)}">${esc((p.name || '?')[0].toUpperCase())}</div>
         <div class="name">${pandaTag}${esc(p.name)}${rankTag}${pityTag}${isMe ? `<span class="you-tag">${esc(t('you'))}</span>` : ''}</div>
         ${v.isLocal
@@ -3072,48 +3060,6 @@ function bind(){
     if(next) next.focus();
     else document.querySelector('[data-a="save-entry"]')?.focus();
   };
-
-  // Local-mode player reordering: pointer-based drag (native HTML5 drag
-  // doesn't work reliably on mobile touch, and this app lives on a phone
-  // at the table). Drag the handle; drop position is resolved once, at
-  // release, against each row's pre-drag position — simpler and more
-  // reliable than live-reflowing every sibling mid-drag.
-  app.onpointerdown = (e) => {
-    const handle = e.target.closest('.drag-handle');
-    if(!handle) return;
-    const row = handle.closest('.player-row');
-    const rows = [...row.parentElement.querySelectorAll('.player-row')];
-    dragState = {
-      id: handle.dataset.id,
-      row,
-      pointerId: e.pointerId,
-      startY: e.clientY,
-      rowHeight: row.getBoundingClientRect().height,
-      rects: rows.map(r => r.getBoundingClientRect()),
-    };
-    row.classList.add('dragging');
-    handle.setPointerCapture(e.pointerId);
-  };
-  app.onpointermove = (e) => {
-    if(!dragState || e.pointerId !== dragState.pointerId) return;
-    dragState.row.style.transform = `translateY(${e.clientY - dragState.startY}px)`;
-  };
-  const endDrag = (e) => {
-    if(!dragState || e.pointerId !== dragState.pointerId) return;
-    const dy = e.clientY - dragState.startY;
-    dragState.row.style.transform = '';
-    dragState.row.classList.remove('dragging');
-    const draggedIndex = [...dragState.row.parentElement.querySelectorAll('.player-row')].indexOf(dragState.row);
-    const draggedCenterY = dragState.rects[draggedIndex].top + dragState.rowHeight / 2 + dy;
-    let toIndex = dragState.rects.length - 1;
-    for(let i = 0; i < dragState.rects.length; i++){
-      if(draggedCenterY < dragState.rects[i].top + dragState.rowHeight / 2){ toIndex = i; break; }
-    }
-    reorderLocalPlayer(dragState.id, toIndex);
-    dragState = null;
-  };
-  app.onpointerup = endDrag;
-  app.onpointercancel = endDrag;
 
   const photo = document.getElementById('photoInput');
   if(photo){
