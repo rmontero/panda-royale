@@ -1995,7 +1995,8 @@ function startLocal(){
     : { players: [], scores: {}, createdAt: Date.now() };
   LS.set('pr.local', local);
   LS.set('pr.session', { mode:'local' });
-  setState({ mode:'local', local, screen:'lobby', entryRound:1, code:'PASS & PLAY', banner:null });
+  state.pendingJoinCode = null;
+  setState({ mode:'local', local, screen:'lobby', entryRound:1, code:'PASS & PLAY', banner:null, editPlayers:false });
 }
 function persistLocal(){ if(state.local) LS.set('pr.local', state.local); }
 function addLocalPlayer(name){
@@ -2041,6 +2042,9 @@ function leaveGame(msg, kind){
   setState({
     screen:'home', mode:null, code:null, game:null, local:null,
     fields: emptyFields(), photo:null, analyzeError:null,
+    // clear transient per-session UI so nothing leaks into the next game
+    editPlayers:false, sheetExpanded:false, entryOpenColor:null, boardOpenPid:null,
+    menuOpen:false, backMenuOpen:false, pendingJoinCode:null,
     banner: msg || null, bannerKind: kind || 'info',
   });
 }
@@ -2915,7 +2919,6 @@ function bind(){
     else if(a === 'tab-board') setState({ screen:'board', menuOpen:false });
     else if(a === 'tab-credits') setState({ screen:'credits', menuOpen:false });
     else if(a === 'credits-back') setState({ screen: state.mode ? 'lobby' : 'home' });
-    else if(a === 'go-credits') setState({ screen:'credits' });
     else if(a === 'upgrade-back') setState({ screen: state.upgradeFrom || 'home' });
     else if(a === 'checkout'){
       const email = (document.getElementById('upgradeEmail')?.value || '').trim();
@@ -3004,7 +3007,6 @@ function bind(){
       setState({ loggedIn: false });
       toast(t('auth.loggedOut'));
     }
-    else if(a === 'refresh'){ await refreshOnline(); toast(t('t.updated')); }
     else if(a === 'round-prev') setState({ entryRound: Math.max(1, state.entryRound - 1) });
     else if(a === 'round-next') setState({ entryRound: Math.min(ROUNDS, state.entryRound + 1) });
     else if(a === 'add-player'){
