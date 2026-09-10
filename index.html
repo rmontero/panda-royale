@@ -403,6 +403,7 @@
   }
   .acc-math .er-empty{ color:var(--muted); font-size:0.85rem; font-style:italic; font-family:inherit; }
   .dcalc{ margin-top:8px; font-size:0.76rem; color:var(--muted); line-height:1.5; text-align:center; }
+  .dcalc .dcalc-range{ color:var(--ink-dim); white-space:nowrap; }
   @media (max-width: 360px){ .dcell .dname{ font-size:0.58rem; } }
 
   /* ---- current-round score row (tap to expand full sheet) ---- */
@@ -791,6 +792,9 @@ const I18N = {
     't.enterCode': 'Enter the game code',
     't.noGame': 'No game with that code',
     't.wrong': 'Something went wrong',
+    't.maxPlayers': 'Up to {n} players — that\'s the max.',
+    't.badValue': '{color} dice only go up to {max} — removed {n}.',
+    'entry.range': '(values 1–{max})',
     't.gameEnded': 'That game has ended.',
     't.updated': 'Updated',
     't.savedNext': 'Saved. Next: {name}',
@@ -954,6 +958,9 @@ const I18N = {
     't.enterCode': 'Escribe el código de la partida',
     't.noGame': 'No hay ninguna partida con ese código',
     't.wrong': 'Algo salió mal',
+    't.maxPlayers': 'Hasta {n} jugadores — es el máximo.',
+    't.badValue': 'Los dados {color} llegan hasta {max} — se quitó {n}.',
+    'entry.range': '(valores 1–{max})',
     't.gameEnded': 'Esa partida ha terminado.',
     't.updated': 'Actualizado',
     't.savedNext': 'Guardado. Siguiente: {name}',
@@ -1117,6 +1124,9 @@ const I18N = {
     't.enterCode': 'Gib den Spielcode ein',
     't.noGame': 'Kein Spiel mit diesem Code',
     't.wrong': 'Etwas ist schiefgelaufen',
+    't.maxPlayers': 'Bis zu {n} Spieler — das ist das Maximum.',
+    't.badValue': '{color}-Würfel gehen nur bis {max} — {n} entfernt.',
+    'entry.range': '(Werte 1–{max})',
     't.gameEnded': 'Dieses Spiel ist beendet.',
     't.updated': 'Aktualisiert',
     't.savedNext': 'Gespeichert. Weiter: {name}',
@@ -1280,6 +1290,9 @@ const I18N = {
     't.enterCode': 'Saisissez le code de la partie',
     't.noGame': 'Aucune partie avec ce code',
     't.wrong': 'Un problème est survenu',
+    't.maxPlayers': 'Jusqu\'à {n} joueurs — c\'est le maximum.',
+    't.badValue': 'Les dés {color} vont jusqu\'à {max} — {n} retiré(s).',
+    'entry.range': '(valeurs 1–{max})',
     't.gameEnded': 'Cette partie est terminée.',
     't.updated': 'Actualisé',
     't.savedNext': 'Enregistré. Suivant : {name}',
@@ -1443,6 +1456,9 @@ const I18N = {
     't.enterCode': 'Digite o código do jogo',
     't.noGame': 'Nenhum jogo com esse código',
     't.wrong': 'Algo deu errado',
+    't.maxPlayers': 'Até {n} jogadores — é o máximo.',
+    't.badValue': 'Dados {color} vão até {max} — {n} removido(s).',
+    'entry.range': '(valores 1–{max})',
     't.gameEnded': 'Esse jogo terminou.',
     't.updated': 'Atualizado',
     't.savedNext': 'Salvo. Próximo: {name}',
@@ -1579,6 +1595,17 @@ const ENTRY_ROWS = [
 const FIELD_KEYS = ['yellow','purple','blue','blueGlitter','redWhite','redBlack','green','clear','pink'];
 const emptyFields = () => Object.fromEntries(FIELD_KEYS.map(k => [k, '']));
 
+// Player cap — Panda Royale is 2–10 players.
+const MAX_PLAYERS = 10;
+
+// Largest die each color comes in (rulebook dice distribution) → the max face
+// value a value in that color's field can legitimately be. Yellow D6/D8 -> 8;
+// Purple D8/D12 -> 12; Blue D6/D8/D12 -> 12; Red D6/D8 -> 8; Green D20 -> 20;
+// Clear/White D6 -> 6; Pink D12 -> 12. Values must be 1..max.
+const COLOR_MAX_VALUE = { yellow:8, purple:12, blue:12, red:8, green:20, clear:6, pink:12 };
+// Which entry field maps to which color (for range validation).
+const FIELD_COLOR = { yellow:'yellow', purple:'purple', blue:'blue', blueGlitter:'blue', redWhite:'red', redBlack:'red', green:'green', clear:'clear', pink:'pink' };
+
 const AVATAR_COLORS = ['var(--c-yellow)','var(--c-purple)','var(--c-blue)','var(--c-red)','var(--c-green)','var(--c-pink)','var(--c-clear)'];
 function avatarColorIndex(id){ let h=0; for(const ch of String(id)) h += ch.charCodeAt(0); return h % AVATAR_COLORS.length; }
 function avatarColor(id){ return AVATAR_COLORS[avatarColorIndex(id)]; }
@@ -1629,7 +1656,10 @@ function diceToFields(dice){
 }
 // Round 1: every player rolls only their single starting yellow die.
 function diceForRound(fields, round){
-  const dice = fieldsToDice(fields);
+  const dice = fieldsToDice(fields)
+    // enforce per-color face-value ranges (a color's largest die) — drop any
+    // value outside 1..max so an unblurred out-of-range entry never scores
+    .filter(d => { const m = COLOR_MAX_VALUE[d.color] || 99; return d.value >= 1 && d.value <= m; });
   if(round === 1){
     const y = dice.find(d => d.color === 'yellow');
     return y ? [{ color:'yellow', value:y.value }] : [];
@@ -1921,6 +1951,7 @@ function persistLocal(){ if(state.local) LS.set('pr.local', state.local); }
 function addLocalPlayer(name){
   name = (name || '').trim().slice(0, 24);
   if(!name) return;
+  if(state.local.players.length >= MAX_PLAYERS){ toast(t('t.maxPlayers', { n: MAX_PLAYERS })); return; }
   const local = { ...state.local, players: [...state.local.players, { id: genId(), name }] };
   setState({ local }); persistLocal();
 }
@@ -2372,12 +2403,13 @@ function renderLobby(){
     <div class="card" style="padding:4px 14px;">${playerList}</div>
     ${(v.isLocal && state.editPlayers) ? `<p class="small-note">${esc(t('menu.editPlayersHint'))}</p>` : ''}
 
-    ${v.isLocal ? ((state.editPlayers || !anyScored) ? `
+    ${v.isLocal ? ((state.editPlayers || !anyScored) ? (
+      v.players.length < MAX_PLAYERS ? `
       <div class="add-row">
         <input class="text-input" id="addPlayer" placeholder="${esc(t('ph.addPlayer'))}" autocomplete="off" />
         <button class="btn btn-secondary" data-a="add-player">${esc(t('add'))}</button>
       </div>
-    ` : '') : `
+    ` : `<p class="small-note">${esc(t('t.maxPlayers', { n: MAX_PLAYERS }))}</p>`) : '') : `
       <button class="btn btn-primary" data-a="score-self">
         ${esc(myEntry ? t('editMyRound', { n: round }) : t('enterMyDice', { n: round }))}
       </button>
@@ -2456,7 +2488,7 @@ function renderEntry(){
           </label>`).join('')}
       </div>
       <div class="acc-math">${openMath ? esc(openMath) : `<span class="er-empty">${esc(t('calc.' + openRow.color))}</span>`}</div>
-      <p class="dcalc">${esc(t('calc.' + openRow.color))}</p>
+      <p class="dcalc">${esc(t('calc.' + openRow.color))} <span class="dcalc-range">${esc(t('entry.range', { max: COLOR_MAX_VALUE[openRow.color] }))}</span></p>
     </div>` : '';
 
   return `
@@ -2990,8 +3022,16 @@ function bind(){
   app.onfocusout = (e) => {
     const inp = e.target.closest('[data-field]');
     if(!inp) return;
-    const tidy = parseValues(inp.value).join(' ');
-    if(tidy !== inp.value){ inp.value = tidy; state.fields[inp.dataset.field] = tidy; }
+    const key = inp.dataset.field;
+    const max = COLOR_MAX_VALUE[FIELD_COLOR[key]] || 99;
+    const parsed = parseValues(inp.value);
+    const valid = parsed.filter(n => n >= 1 && n <= max);
+    const rejected = parsed.filter(n => !(n >= 1 && n <= max));
+    if(rejected.length){
+      toast(t('t.badValue', { n: rejected.join(', '), color: t('color.' + FIELD_COLOR[key]), max }));
+    }
+    const tidy = valid.join(' ');
+    if(tidy !== inp.value){ inp.value = tidy; state.fields[key] = tidy; }
     updateEntryTotals();
   };
   app.onfocusin = (e) => {
