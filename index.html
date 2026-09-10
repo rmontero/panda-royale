@@ -687,6 +687,7 @@
 <script src="/vendor/qrcode.js"></script>
 <script type="module">
 import { scoreRound, DICE_COLORS } from './lib/score.js';
+import { COLOR_MAX_VALUE, MAX_PLAYERS, validateRoundDice } from './lib/rules.js';
 
 /* ------------------------------------------------------------------ *
  * constants
@@ -1529,15 +1530,8 @@ const ENTRY_ROWS = [
 const FIELD_KEYS = ['yellow','purple','blue','blueGlitter','redWhite','redBlack','green','clear','pink'];
 const emptyFields = () => Object.fromEntries(FIELD_KEYS.map(k => [k, '']));
 
-// Player cap — Panda Royale is 2–10 players.
-const MAX_PLAYERS = 10;
-
-// Largest die each color comes in (rulebook dice distribution) → the max face
-// value a value in that color's field can legitimately be. Yellow D6/D8 -> 8;
-// Purple D8/D12 -> 12; Blue D6/D8/D12 -> 12; Red D6/D8 -> 8; Green D20 -> 20;
-// Clear/White D6 -> 6; Pink D12 -> 12. Values must be 1..max.
-const COLOR_MAX_VALUE = { yellow:8, purple:12, blue:12, red:8, green:20, clear:6, pink:12 };
-// Which entry field maps to which color (for range validation).
+// MAX_PLAYERS and COLOR_MAX_VALUE are imported from lib/rules.js (shared with
+// the test suite). FIELD_COLOR maps entry fields to their color for range checks.
 const FIELD_COLOR = { yellow:'yellow', purple:'purple', blue:'blue', blueGlitter:'blue', redWhite:'red', redBlack:'red', green:'green', clear:'clear', pink:'pink' };
 
 const AVATAR_COLORS = ['var(--c-yellow)','var(--c-purple)','var(--c-blue)','var(--c-red)','var(--c-green)','var(--c-pink)','var(--c-clear)'];
@@ -1588,30 +1582,19 @@ function diceToFields(dice){
   });
   return f;
 }
-// Validate the number of dice entered for a round on submit.
-//   • Each space/comma value in any color field is one die.
-//   • Round 1: exactly 1 die, yellow only.
-//   • Rounds 2–10: exactly N dice, where N = round number — PLUS one extra
-//     when a pink pity die is entered (so N+1 with a pink). One of the N+1 is
-//     the pink itself.
-// Returns { key, vars } describing the problem, or null when the count is OK.
+// Validate the number of dice entered for a round on submit — delegates to the
+// shared rule in lib/rules.js (also exercised by the test suite) and maps the
+// result to a toast key. Returns { key, vars } or null when the count is OK.
 function validateEntryCount(fields, round){
-  // in-range dice only (out-of-range values are dropped/warned elsewhere)
-  const all = fieldsToDice(fields).filter(d => { const m = COLOR_MAX_VALUE[d.color] || 99; return d.value >= 1 && d.value <= m; });
-  const count = all.length;
-  const nonYellow = all.filter(d => d.color !== 'yellow').length;
-  const hasPink = all.some(d => d.color === 'pink');
-
-  if(round === 1){
-    if(count === 0) return { key:'t.needDice', vars:{ n:1 } };
-    if(nonYellow > 0) return { key:'t.r1Yellow', vars:{} };
-    if(count > 1) return { key:'t.tooMany', vars:{ max:1 } };
-    return null;
+  const r = validateRoundDice(round, fieldsToDice(fields));
+  if(r.ok) return null;
+  switch(r.code){
+    case 'need_dice': return { key:'t.needDice', vars:{ n: r.n } };
+    case 'r1_yellow': return { key:'t.r1Yellow', vars:{} };
+    case 'too_few':   return { key:'t.tooFew', vars:{ have: r.have, need: r.need } };
+    case 'too_many':  return { key:'t.tooMany', vars:{ max: r.max } };
+    default:          return null;
   }
-  const expected = round + (hasPink ? 1 : 0);
-  if(count < expected) return { key:'t.tooFew', vars:{ have:count, need:expected } };
-  if(count > expected) return { key:'t.tooMany', vars:{ max:expected } };
-  return null;
 }
 
 // Round 1: every player rolls only their single starting yellow die.
@@ -2270,16 +2253,6 @@ function renderLobby(){
 
   // Overall rank number per player, competition-style (ties share a rank;
   // the next distinct total skips accordingly).
-  const rankOf = new Map();
-  if(showRankings){
-    let rank = 0, seen = 0, prevTotal = null;
-    for(const p of totals){
-      seen++;
-      if(p.total !== prevTotal){ rank = seen; prevTotal = p.total; }
-      rankOf.set(p.id, rank);
-    }
-  }
-
   const prevRound = round - 1;
   const orderedPlayers = prevRound >= 1
     ? [...v.players].sort((a, b) => {
@@ -2309,12 +2282,11 @@ function renderLobby(){
     const done = v.scores[round] && v.scores[round][p.id];
     const isMe = !v.isLocal && p.id === me;
     const pandaTag = lastLeaderIds.has(p.id) ? ` <span class="rank-tag" title="${esc(t('badge.panda'))}">🐼</span>` : '';
-    const rankTag = rankOf.has(p.id) ? ` <span class="rank-tag" title="Overall rank">#${rankOf.get(p.id)}</span>` : '';
     const pityTag = bottomIds.has(p.id) ? ` <span class="rank-tag" title="${esc(t('badge.pity'))}">🎀</span>` : '';
     return `
       <div class="player-row" data-pid="${p.id}">
         <div class="avatar" ${v.isLocal ? `data-a="cycle-color" data-id="${p.id}"` : ''} style="background:${playerColor(p)}">${esc((p.name || '?')[0].toUpperCase())}</div>
-        <div class="name">${pandaTag}${esc(p.name)}${rankTag}${pityTag}${isMe ? `<span class="you-tag">${esc(t('you'))}</span>` : ''}</div>
+        <div class="name">${esc(p.name)}${isMe ? `<span class="you-tag">${esc(t('you'))}</span>` : ''}${pandaTag}${pityTag}</div>
         ${v.isLocal
           ? `<button class="pill-btn ${done ? 'done' : ''}" data-a="score-player" data-id="${p.id}">${done ? `✓ ${done.total}` : esc(t('enterDice'))}</button>
              ${state.editPlayers ? `<button class="icon-btn" data-a="rm-player" data-id="${p.id}">✕</button>` : ''}`
