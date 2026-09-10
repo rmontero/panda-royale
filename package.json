@@ -21,7 +21,9 @@
     "stripe": "^22.6.1"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
     "@playwright/test": "^1.63.0",
+    "axe-core": "^4.13.0",
     "vercel": "^59.11.2"
   }
 }
