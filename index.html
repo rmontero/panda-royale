@@ -163,12 +163,23 @@
   .screen{ padding:20px 18px 12px; }
 
   .topbar{
-    display:flex; align-items:center; justify-content:space-between;
-    padding:14px 18px; border-bottom:1px solid var(--panel-line);
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+    padding:12px 18px; border-bottom:1px solid var(--panel-line);
     padding-right:70px; /* clear the fixed top-right menu FAB */
   }
-  .topbar .code{ font-family:'Baloo 2', monospace; letter-spacing:0.12em; font-size:1.05rem; color:var(--lantern-bright); }
-  .topbar .sub{ font-size:0.8rem; color:var(--ink-dim); }
+  .brand{ display:flex; align-items:center; gap:9px; min-width:0; }
+  .brand-lanterns{ display:inline-flex; gap:4px; flex-shrink:0; }
+  .brand-lanterns span{ width:8px; height:8px; border-radius:50%; display:inline-block; }
+  .brand-name{ font-family:'Baloo 2', system-ui, sans-serif; font-weight:800; font-size:1.02rem; color:var(--lantern-bright); white-space:nowrap; }
+  .topbar-right{ display:flex; align-items:center; margin-left:auto; }
+  .brand-meta{ display:flex; flex-direction:column; align-items:flex-end; gap:1px; }
+  .brand-code{
+    background:none; border:none; cursor:pointer; padding:0; color:var(--ink);
+    font-family:'Baloo 2', monospace; letter-spacing:0.1em; font-size:0.98rem; font-weight:700;
+    display:inline-flex; align-items:center; gap:5px;
+  }
+  .brand-code .brand-copy{ color:var(--lantern-bright); font-size:0.8rem; }
+  .brand-round{ font-size:0.72rem; color:var(--ink-dim); }
   .link-btn{ background:none; border:none; color:var(--ink-dim); font-size:0.85rem; padding:6px 4px; cursor:pointer; }
 
   .hero{ text-align:left; padding-top:12px; margin-bottom:6px; }
@@ -243,6 +254,9 @@
   .code-display .code-big{ font-family:'Baloo 2', monospace; font-size:2.4rem; letter-spacing:0.16em; color:var(--lantern-bright); margin-top:2px; }
 
   .section-title{ font-size:0.78rem; color:var(--ink-dim); margin:22px 0 8px; text-transform:uppercase; letter-spacing:0.06em; }
+  .section-head{ display:flex; align-items:center; justify-content:space-between; margin:22px 0 8px; }
+  .section-head .section-title{ margin:0; }
+  .section-head .section-action{ font-size:0.78rem; }
 
   .player-row{ display:flex; align-items:center; gap:10px; padding:10px 2px; border-bottom:1px solid var(--panel-line); position:relative; }
   .player-row:last-child{ border-bottom:none; }
@@ -719,6 +733,7 @@ const I18N = {
     'players': 'Players',
     'ph.addPlayer': 'Add a player',
     'add': 'Add',
+    'done': 'Done',
     'local.diceHint': 'Each player starts with 1 yellow die. With {n} players, keep {p} pink (pity) dice in the box.',
     'local.newMatch': 'Start new match',
     'local.reorder': 'Drag to reorder',
@@ -880,6 +895,7 @@ const I18N = {
     'players': 'Jugadores',
     'ph.addPlayer': 'Añadir jugador',
     'add': 'Añadir',
+    'done': 'Listo',
     'local.diceHint': 'Cada jugador empieza con 1 dado amarillo. Con {n} jugadores, ten {p} dados rosas (de compasión) en la caja.',
     'local.newMatch': 'Empezar otra partida',
     'local.reorder': 'Arrastra para reordenar',
@@ -1041,6 +1057,7 @@ const I18N = {
     'players': 'Spieler',
     'ph.addPlayer': 'Spieler hinzufügen',
     'add': 'Hinzu',
+    'done': 'Fertig',
     'local.diceHint': 'Jeder Spieler startet mit 1 gelben Würfel. Bei {n} Spielern {p} rosa (Trost-)Würfel bereithalten.',
     'local.newMatch': 'Neue Partie starten',
     'local.reorder': 'Zum Sortieren ziehen',
@@ -1202,6 +1219,7 @@ const I18N = {
     'players': 'Joueurs',
     'ph.addPlayer': 'Ajouter un joueur',
     'add': 'Ajouter',
+    'done': 'Terminé',
     'local.diceHint': 'Chaque joueur commence avec 1 dé jaune. Avec {n} joueurs, gardez {p} dés roses (de pitié) dans la boîte.',
     'local.newMatch': 'Nouvelle partie',
     'local.reorder': 'Glisser pour réorganiser',
@@ -1363,6 +1381,7 @@ const I18N = {
     'players': 'Jogadores',
     'ph.addPlayer': 'Adicionar jogador',
     'add': 'Adicionar',
+    'done': 'Concluído',
     'local.diceHint': 'Cada jogador começa com 1 dado amarelo. Com {n} jogadores, mantenha {p} dados rosa (de piedade) na caixa.',
     'local.newMatch': 'Começar nova partida',
     'local.reorder': 'Arraste para reordenar',
@@ -1726,6 +1745,7 @@ let state = {
   backMenuOpen: false,                             // back-button intercept menu
   pendingJoinCode: null,                           // invite code awaiting a name
   boardOpenPid: null,                              // scoreboard row expanded to show dice
+  editPlayers: false,                              // pass-and-play edit-players mode
 };
 let pollTimer = null;
 let dragState = null; // in-flight local-mode player drag (see bind()'s pointer handlers)
@@ -2047,11 +2067,10 @@ function render(){
   else if(state.screen === 'upgrade') body = renderUpgrade();
   else if(state.screen === 'hof') body = renderHof();
 
-  const chrome = state.screen !== 'home';
   app.dataset.screen = state.screen;
   app.dataset.tabs = 'y';
   app.innerHTML = `
-    ${chrome ? renderTopbar() : ''}
+    ${renderTopbar()}
     <div class="screen">${body}</div>
     ${state.toast ? `<div class="toast">${esc(state.toast)}</div>` : ''}
     ${renderTabbar()}
@@ -2069,46 +2088,27 @@ function langSelect(){
 
 function renderTopbar(){
   const v = view();
-  if(state.screen === 'credits'){
-    return `
-    <div class="topbar">
-      <div>
-        <div class="code">Panda Royale</div>
-        <div class="sub">${esc(t('credits.tab'))}</div>
-      </div>
-      <button class="link-btn" data-a="credits-back">${esc(state.mode ? t('back') : t('home'))}</button>
-    </div>`;
+  const lanterns = `<span class="brand-lanterns">${Object.values(COLOR_HEX).map(c => `<span style="background:${c}"></span>`).join('')}</span>`;
+  const brand = `<div class="brand">${lanterns}<span class="brand-name">Panda Royale</span></div>`;
+
+  // Right side: context that belongs next to the brand.
+  let right = '';
+  if(state.screen === 'credits' || state.screen === 'hof'){
+    right = `<button class="link-btn" data-a="${state.screen === 'hof' ? 'hof-back' : 'credits-back'}">${esc(state.mode ? t('back') : t('home'))}</button>`;
+  } else if(state.screen === 'upgrade'){
+    right = `<button class="link-btn" data-a="upgrade-back">${esc(t('back'))}</button>`;
+  } else if(state.mode === 'online' && v){
+    // Share code (click to copy the invite link) + current round.
+    right = `
+      <div class="brand-meta">
+        <button class="brand-code" data-a="copy-link" title="${esc(t('copyLink'))}">${esc(v.code)} <span class="brand-copy">⧉</span></button>
+        <span class="brand-round">${esc(t('topbar.round', { n: state.entryRound, total: ROUNDS }))}</span>
+      </div>`;
+  } else if(state.mode === 'local'){
+    right = `<div class="brand-meta"><span class="brand-round">${esc(t('topbar.players', { n: state.local?.players.length || 0 }))}</span></div>`;
   }
-  if(state.screen === 'upgrade'){
-    return `
-    <div class="topbar">
-      <div>
-        <div class="code">Panda Royale</div>
-        <div class="sub">${esc(t('upgrade.title'))}</div>
-      </div>
-      <button class="link-btn" data-a="upgrade-back">${esc(t('back'))}</button>
-    </div>`;
-  }
-  if(state.screen === 'hof'){
-    return `
-    <div class="topbar">
-      <div>
-        <div class="code">Panda Royale</div>
-        <div class="sub">${esc(t('hof.title'))}</div>
-      </div>
-      <button class="link-btn" data-a="hof-back">${esc(state.mode ? t('back') : t('home'))}</button>
-    </div>`;
-  }
-  const code = state.mode === 'local' ? t('passPlay') : (v ? v.code : '');
-  return `
-    <div class="topbar">
-      <div>
-        <div class="code">${esc(code)}</div>
-        <div class="sub">${state.mode === 'local'
-          ? esc(t('topbar.players', { n: state.local?.players.length || 0 }))
-          : esc(t('topbar.round', { n: state.entryRound, total: ROUNDS }))}</div>
-      </div>
-    </div>`;
+
+  return `<div class="topbar">${brand}${right ? `<div class="topbar-right">${right}</div>` : ''}</div>`;
 }
 function renderTabbar(){
   const open = state.menuOpen;
@@ -2169,11 +2169,6 @@ function renderHome(){
   const onlineNeedsPro = state.flags.paywallEnabled && state.flags.onlinePaywalled && !state.pro;
   const knowName = !!(state.me.name || '').trim();
   return `
-    <div class="home-top">
-      <div class="lanterns">
-        ${Object.values(COLOR_HEX).map(c => `<span style="background:${c}"></span>`).join('')}
-      </div>
-    </div>
     <div class="hero">
       <h1>Panda Royale<br/>${esc(t('title2'))}</h1>
       <p class="sub">${esc(t('home.sub'))}</p>
@@ -2221,9 +2216,6 @@ function renderBackMenu(){
 function renderHof(){
   return `
     <div class="hof-screen">
-      <div class="lanterns" style="margin-bottom:14px;">
-        ${Object.values(COLOR_HEX).map(c => `<span style="background:${c}"></span>`).join('')}
-      </div>
       <h2 style="font-size:1.3rem;">${esc(t('hof.title'))}</h2>
       ${state.hof.length ? `
         <div class="hof" style="margin-top:14px;">
@@ -2288,7 +2280,7 @@ function renderLobby(){
         <div class="name">${esc(p.name)}${rankTag}${pityTag}${isMe ? `<span class="you-tag">${esc(t('you'))}</span>` : ''}</div>
         ${v.isLocal
           ? `<button class="pill-btn ${done ? 'done' : ''}" data-a="score-player" data-id="${p.id}">${done ? `✓ ${done.total}` : esc(t('enterDice'))}</button>
-             <button class="icon-btn" data-a="rm-player" data-id="${p.id}">✕</button>`
+             ${state.editPlayers ? `<button class="icon-btn" data-a="rm-player" data-id="${p.id}">✕</button>` : ''}`
           : `<span class="status ${done ? 'done' : ''}">${done ? `✓ ${done.total}` : esc(t('waiting'))}</span>`}
       </div>`;
   }).join('') : `<div class="player-row"><span class="small-note">${esc(t('noPlayers'))}</span></div>`;
@@ -2339,15 +2331,19 @@ function renderLobby(){
       </div>
     ` : ''}
 
-    <div class="section-title">${esc(v.isLocal ? t('players.tap') : t('players'))}</div>
+    <div class="section-head">
+      <span class="section-title">${esc(v.isLocal ? t('players.tap') : t('players'))}</span>
+      ${v.isLocal ? `<button class="link-btn section-action" data-a="toggle-edit-players">${esc(state.editPlayers ? t('done') : t('menu.editPlayers'))}</button>` : ''}
+    </div>
     <div class="card" style="padding:4px 14px;">${playerList}</div>
+    ${(v.isLocal && state.editPlayers) ? `<p class="small-note">${esc(t('menu.editPlayersHint'))}</p>` : ''}
 
-    ${v.isLocal ? (anyScored ? '' : `
+    ${v.isLocal ? ((state.editPlayers || !anyScored) ? `
       <div class="add-row">
         <input class="text-input" id="addPlayer" placeholder="${esc(t('ph.addPlayer'))}" autocomplete="off" />
         <button class="btn btn-secondary" data-a="add-player">${esc(t('add'))}</button>
       </div>
-    `) : `
+    ` : '') : `
       <button class="btn btn-primary" data-a="score-self">
         ${esc(myEntry ? t('editMyRound', { n: round }) : t('enterMyDice', { n: round }))}
       </button>
@@ -2781,7 +2777,8 @@ function bind(){
     if(a === 'menu-hof'){ setState({ screen:'hof', menuOpen:false }); return; }
     if(a === 'hof-back'){ setState({ screen: state.mode ? 'lobby' : 'home' }); return; }
     if(a === 'menu-edit-name'){ promptEditName(); return; }
-    if(a === 'menu-edit-players'){ setState({ screen:'lobby', menuOpen:false }); toast(t('menu.editPlayersHint')); return; }
+    if(a === 'menu-edit-players'){ setState({ screen:'lobby', menuOpen:false, editPlayers:true }); return; }
+    if(a === 'toggle-edit-players'){ setState({ editPlayers: !state.editPlayers }); return; }
     if(a === 'menu-host-new'){ setState({ menuOpen:false }); hostNewGame(); return; }
     if(a === 'create-online'){ createOnline(readNameInput()); return; }
     else if(a === 'start-local'){ if(!ensureNameForLocal()) return; startLocal(); }
