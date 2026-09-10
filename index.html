@@ -503,6 +503,7 @@
   .flyout-lang{ justify-content:space-between; }
   .flyout-lang .lang-select{ margin-left:auto; }
   .flyout-sep{ height:1px; background:var(--panel-line); margin:4px 6px; }
+  .flyout-status{ padding:11px 14px; font-size:0.85rem; color:var(--good); font-weight:600; }
 
   .banner{
     margin-top:12px; padding:10px 12px; border-radius:10px; font-size:0.84rem; line-height:1.5;
@@ -813,6 +814,7 @@ const I18N = {
     'menu.hostNew': 'Start a new game (keep players)',
     'menu.endToHome': 'End game', 'menu.leave': 'Leave game',
     'menu.nameSaved': 'Name saved',
+    'menu.proActive': '⭐ Pro unlocked on this device',
     'mode.online': 'Online', 'mode.onlineHelp': 'Join a shared game session — each player on their own phone, scores synced live.',
     'mode.local': 'Pass and Play', 'mode.localHelp': 'Add your players and pass the phone around to play — no code, no internet.',
     'home.greet': "Playing as {name}.",
@@ -975,6 +977,7 @@ const I18N = {
     'menu.hostNew': 'Nueva partida (mantener jugadores)',
     'menu.endToHome': 'Terminar juego', 'menu.leave': 'Salir del juego',
     'menu.nameSaved': 'Nombre guardado',
+    'menu.proActive': '⭐ Pro activado en este dispositivo',
     'mode.online': 'En línea', 'mode.onlineHelp': 'Únete a una sesión compartida — cada jugador en su teléfono, puntajes sincronizados en vivo.',
     'mode.local': 'Pasar y jugar', 'mode.localHelp': 'Agrega a tus jugadores y pasa el teléfono para jugar — sin código, sin internet.',
     'home.greet': 'Jugando como {name}.',
@@ -1137,6 +1140,7 @@ const I18N = {
     'menu.hostNew': 'Neues Spiel (Spieler behalten)',
     'menu.endToHome': 'Spiel beenden', 'menu.leave': 'Spiel verlassen',
     'menu.nameSaved': 'Name gespeichert',
+    'menu.proActive': '⭐ Pro auf diesem Gerät freigeschaltet',
     'mode.online': 'Online', 'mode.onlineHelp': 'Tritt einer gemeinsamen Sitzung bei — jeder am eigenen Handy, Punkte live synchronisiert.',
     'mode.local': 'Weitergeben & spielen', 'mode.localHelp': 'Spieler hinzufügen und das Handy herumreichen — kein Code, kein Internet.',
     'home.greet': 'Du spielst als {name}.',
@@ -1299,6 +1303,7 @@ const I18N = {
     'menu.hostNew': 'Nouvelle partie (garder les joueurs)',
     'menu.endToHome': 'Terminer la partie', 'menu.leave': 'Quitter la partie',
     'menu.nameSaved': 'Nom enregistré',
+    'menu.proActive': '⭐ Pro débloqué sur cet appareil',
     'mode.online': 'En ligne', 'mode.onlineHelp': 'Rejoignez une session partagée — chacun sur son téléphone, scores synchronisés en direct.',
     'mode.local': 'Passer et jouer', 'mode.localHelp': 'Ajoutez vos joueurs et faites tourner le téléphone — sans code, sans internet.',
     'home.greet': 'Vous jouez en tant que {name}.',
@@ -1461,6 +1466,7 @@ const I18N = {
     'menu.hostNew': 'Novo jogo (manter jogadores)',
     'menu.endToHome': 'Encerrar jogo', 'menu.leave': 'Sair do jogo',
     'menu.nameSaved': 'Nome salvo',
+    'menu.proActive': '⭐ Pro ativado neste dispositivo',
     'mode.online': 'Online', 'mode.onlineHelp': 'Entre em uma sessão compartilhada — cada um no seu celular, placares sincronizados ao vivo.',
     'mode.local': 'Passar e jogar', 'mode.localHelp': 'Adicione seus jogadores e passe o celular para jogar — sem código, sem internet.',
     'home.greet': 'Jogando como {name}.',
@@ -2158,6 +2164,14 @@ function renderTabbar(){
         ` : ''}
 
         <div class="flyout-sep"></div>
+        ${(state.loggedIn || state.pro) ? `
+          <div class="flyout-status">${esc(state.loggedIn ? t('auth.loggedInAs', { email: state.pro?.email || '' }) : t('menu.proActive'))}</div>
+        ` : `
+          ${item('menu-login', false, '🔑', t('auth.login'))}
+          ${item('menu-procode', false, '⭐', t('upgrade.haveCode'))}
+        `}
+
+        <div class="flyout-sep"></div>
         ${item('tab-credits', state.screen === 'credits', '🎲', t('tab.credits'))}
         ${item('menu-hof', false, '🏆', t('hof.title'))}
       </nav>
@@ -2774,6 +2788,8 @@ function bind(){
     if(a === 'back-leave'){ setState({ backMenuOpen: false }); leaveGame(); return; }
     if(a === 'menu-close'){ setState({ menuOpen: false }); return; }
     if(a === 'menu-theme'){ toggleTheme(); setState({ menuOpen: false }); return; }
+    if(a === 'menu-login'){ setState({ screen:'upgrade', upgradeFrom: state.screen, showLoginForm:true, menuOpen:false }); return; }
+    if(a === 'menu-procode'){ setState({ screen:'upgrade', upgradeFrom: state.screen, menuOpen:false }); return; }
     if(a === 'menu-hof'){ setState({ screen:'hof', menuOpen:false }); return; }
     if(a === 'hof-back'){ setState({ screen: state.mode ? 'lobby' : 'home' }); return; }
     if(a === 'menu-edit-name'){ promptEditName(); return; }
