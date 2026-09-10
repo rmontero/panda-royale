@@ -828,6 +828,7 @@ const I18N = {
     'back.title': 'Leave the game?', 'back.body': "You're in a game — what would you like to do?",
     'back.new': 'Start a new game (keep players)', 'back.leave': 'Leave game', 'back.end': 'End game', 'back.keep': 'Keep playing',
     'board.noDice': 'No dice recorded.', 'board.tapRow': 'Tap a player to see the dice they entered each round.',
+    'badge.panda': 'Top scorer last round — drafts a die first', 'badge.pity': 'Lowest last round — earns a pity pink die',
     'pro.badge': 'PRO',
     'upgrade.title': 'Panda Royale Pro',
     'upgrade.blurb': 'A one-time unlock for online multiplayer and photo scanning — pay once, use forever, on any device.',
@@ -994,6 +995,7 @@ const I18N = {
     'back.title': '¿Salir del juego?', 'back.body': 'Estás en un juego — ¿qué quieres hacer?',
     'back.new': 'Nueva partida (mantener jugadores)', 'back.leave': 'Salir del juego', 'back.end': 'Terminar juego', 'back.keep': 'Seguir jugando',
     'board.noDice': 'Sin dados registrados.', 'board.tapRow': 'Toca a un jugador para ver los dados que ingresó cada ronda.',
+    'badge.panda': 'Mejor de la última ronda — elige dado primero', 'badge.pity': 'Más bajo la última ronda — recibe un dado rosa de compasión',
     'pro.badge': 'PRO',
     'upgrade.title': 'Panda Royale Pro',
     'upgrade.blurb': 'Un pago único para desbloquear el multijugador en línea y el escaneo de fotos — pagas una vez y lo usas siempre, en cualquier dispositivo.',
@@ -1160,6 +1162,7 @@ const I18N = {
     'back.title': 'Spiel verlassen?', 'back.body': 'Du bist in einem Spiel — was möchtest du tun?',
     'back.new': 'Neues Spiel (Spieler behalten)', 'back.leave': 'Spiel verlassen', 'back.end': 'Spiel beenden', 'back.keep': 'Weiterspielen',
     'board.noDice': 'Keine Würfel erfasst.', 'board.tapRow': 'Tippe einen Spieler an, um die Würfel jeder Runde zu sehen.',
+    'badge.panda': 'Beste letzte Runde — draftet zuerst', 'badge.pity': 'Schlechteste letzte Runde — erhält einen rosa Trostwürfel',
     'pro.badge': 'PRO',
     'upgrade.title': 'Panda Royale Pro',
     'upgrade.blurb': 'Eine einmalige Freischaltung für Online-Mehrspieler und Fotoscan — einmal zahlen, für immer nutzen, auf jedem Gerät.',
@@ -1326,6 +1329,7 @@ const I18N = {
     'back.title': 'Quitter la partie ?', 'back.body': 'Vous êtes dans une partie — que voulez-vous faire ?',
     'back.new': 'Nouvelle partie (garder les joueurs)', 'back.leave': 'Quitter la partie', 'back.end': 'Terminer la partie', 'back.keep': 'Continuer',
     'board.noDice': 'Aucun dé enregistré.', 'board.tapRow': 'Touchez un joueur pour voir les dés saisis à chaque manche.',
+    'badge.panda': 'Meilleur score de la dernière manche — draft en premier', 'badge.pity': 'Plus bas la dernière manche — reçoit un dé rose de consolation',
     'pro.badge': 'PRO',
     'upgrade.title': 'Panda Royale Pro',
     'upgrade.blurb': 'Un paiement unique pour débloquer le multijoueur en ligne et la lecture de photos — payez une fois, utilisez pour toujours, sur n’importe quel appareil.',
@@ -1492,6 +1496,7 @@ const I18N = {
     'back.title': 'Sair do jogo?', 'back.body': 'Você está em um jogo — o que deseja fazer?',
     'back.new': 'Novo jogo (manter jogadores)', 'back.leave': 'Sair do jogo', 'back.end': 'Encerrar jogo', 'back.keep': 'Continuar jogando',
     'board.noDice': 'Nenhum dado registrado.', 'board.tapRow': 'Toque em um jogador para ver os dados inseridos em cada rodada.',
+    'badge.panda': 'Melhor da última rodada — escolhe dado primeiro', 'badge.pity': 'Menor na última rodada — ganha um dado rosa de consolação',
     'pro.badge': 'PRO',
     'upgrade.title': 'Panda Royale Pro',
     'upgrade.blurb': 'Um pagamento único para desbloquear o multiplayer online e a leitura de fotos — pague uma vez, use para sempre, em qualquer aparelho.',
@@ -2333,16 +2338,32 @@ function renderLobby(){
     : (showRankings ? totals : v.players);
   const started = v.isLocal && Object.keys(v.scores).length > 0;
 
+  // 🐼 marks the top scorer of the LAST completed round — the player who
+  // drafts a new die first next round. Ties share the panda.
+  let lastDoneRound = 0;
+  for(let r = ROUNDS; r >= 1; r--){ if(v.scores[r] && Object.keys(v.scores[r]).length){ lastDoneRound = r; break; } }
+  const lastLeaderIds = new Set();
+  if(lastDoneRound){
+    const entries = v.players
+      .map(p => ({ id: p.id, s: (v.scores[lastDoneRound] && v.scores[lastDoneRound][p.id]) ? v.scores[lastDoneRound][p.id].total : null }))
+      .filter(e => e.s != null);
+    if(entries.length){
+      const top = Math.max(...entries.map(e => e.s));
+      entries.forEach(e => { if(e.s === top) lastLeaderIds.add(e.id); });
+    }
+  }
+
   const playerList = orderedPlayers.length ? orderedPlayers.map(p => {
     const done = v.scores[round] && v.scores[round][p.id];
     const isMe = !v.isLocal && p.id === me;
+    const pandaTag = lastLeaderIds.has(p.id) ? ` <span class="rank-tag" title="${esc(t('badge.panda'))}">🐼</span>` : '';
     const rankTag = rankOf.has(p.id) ? ` <span class="rank-tag" title="Overall rank">#${rankOf.get(p.id)}</span>` : '';
-    const pityTag = bottomIds.has(p.id) ? ' <span class="rank-tag" title="Pity die">🎀</span>' : '';
+    const pityTag = bottomIds.has(p.id) ? ` <span class="rank-tag" title="${esc(t('badge.pity'))}">🎀</span>` : '';
     return `
       <div class="player-row" data-pid="${p.id}">
         ${v.isLocal ? `<span class="drag-handle" data-id="${p.id}" aria-label="${esc(t('local.reorder'))}">⠿</span>` : ''}
         <div class="avatar" ${v.isLocal ? `data-a="cycle-color" data-id="${p.id}"` : ''} style="background:${playerColor(p)}">${esc((p.name || '?')[0].toUpperCase())}</div>
-        <div class="name">${esc(p.name)}${rankTag}${pityTag}${isMe ? `<span class="you-tag">${esc(t('you'))}</span>` : ''}</div>
+        <div class="name">${pandaTag}${esc(p.name)}${rankTag}${pityTag}${isMe ? `<span class="you-tag">${esc(t('you'))}</span>` : ''}</div>
         ${v.isLocal
           ? `<button class="pill-btn ${done ? 'done' : ''}" data-a="score-player" data-id="${p.id}">${done ? `✓ ${done.total}` : esc(t('enterDice'))}</button>
              ${state.editPlayers ? `<button class="icon-btn" data-a="rm-player" data-id="${p.id}">✕</button>` : ''}`
@@ -2717,7 +2738,7 @@ function renderBoard(){
             const expanded = state.boardOpenPid === p.id;
             return `
             <tr class="${aggTotal[p.id] === topAgg && topAgg !== 0 ? 'leader' : ''} brd-row" data-a="board-row" data-pid="${p.id}">
-              <td class="name-cell">${isTop ? '🐼 ' : ''}${isPity ? '🎀 ' : ''}${esc(p.name)}</td>
+              <td class="name-cell">${isTop ? `<span title="${esc(t('badge.panda'))}">🐼</span> ` : ''}${isPity ? `<span title="${esc(t('badge.pity'))}">🎀</span> ` : ''}${esc(p.name)}</td>
               ${Array.from({ length: ROUNDS }, (_, i) => {
                 const e = v.scores[i + 1] && v.scores[i + 1][p.id];
                 return `<td class="${i + 1 === now ? 'now' : ''}">${e ? e.total : '—'}</td>`;
