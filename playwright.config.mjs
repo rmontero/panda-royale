@@ -12,6 +12,10 @@ export default defineConfig({
   testDir: './tests',
   testMatch: /e2e\.spec\.mjs$/,
   timeout: 30_000,
+  // network-backed E2E: run serially with retries so live-service latency /
+  // parallel-context contention doesn't cause spurious failures.
+  workers: 1,
+  retries: 2,
   use: { ...devices['Pixel 7'], baseURL: process.env.E2E_BASE_URL || 'http://127.0.0.1:8799' },
   // Only spin up the static server when testing locally (pass-and-play).
   webServer: usingExternal ? undefined : {

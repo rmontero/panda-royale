@@ -33,7 +33,7 @@ test.describe('Pass and Play', () => {
     await page.goto(BASE + '/');
   });
 
-  test('start, add players, enter round 1, dice-count validation, scoreboard', async ({ page }) => {
+  test('start, add players, enter round 1, scoreboard', async ({ page }) => {
     // Home: two mode cards, no manual code-join field
     await expect(page.getByText('Pass and Play')).toBeVisible();
     await expect(page.locator('#codeInput')).toHaveCount(0);
@@ -46,37 +46,35 @@ test.describe('Pass and Play', () => {
     await page.getByRole('button', { name: /^Add$/ }).click();
     await page.locator('#addPlayer').fill('Grace');
     await page.getByRole('button', { name: /^Add$/ }).click();
-    await expect(page.getByText('Ada')).toBeVisible();
-    await expect(page.getByText('Grace')).toBeVisible();
+    // roster names (scoped to .player-row .name to avoid the "hand to X" button)
+    await expect(page.locator('.player-row .name', { hasText: 'Ada' })).toBeVisible();
+    await expect(page.locator('.player-row .name', { hasText: 'Grace' })).toBeVisible();
 
     // Enter dice for the first player (round 1 = single yellow die)
     await page.getByRole('button', { name: /Enter dice/i }).first().click();
-    // yellow accordion open by default; type a value
     const yellowInput = page.locator('.dexpand .acc-ins input').first();
     await yellowInput.fill('5');
-    // round score reads "Round 1 score: 5"
     await expect(page.locator('.round-row .rr-total')).toHaveText('5');
     await page.getByRole('button', { name: /Save round/i }).click();
-    // back on lobby, that player shows a check + score
+    // back on lobby, one player shows a check + score
     await expect(page.locator('.player-row .pill-btn.done').first()).toContainText('5');
 
-    // Scoreboard shows both players
+    // Scoreboard shows the roster
     await page.getByRole('button', { name: /Menu/i }).click();
     await page.getByRole('button', { name: /Scoreboard/i }).click();
     await expect(page.locator('table.board')).toBeVisible();
-    await expect(page.getByText('Ada')).toBeVisible();
+    await expect(page.locator('table.board').getByText('Ada')).toBeVisible();
   });
 
-  test('round-1 rejects a non-yellow die (hard stop)', async ({ page }) => {
+  test('round-1 rejects too many dice (hard stop)', async ({ page }) => {
     await page.getByRole('button', { name: /Pass and Play/i }).click();
     await page.locator('#addPlayer').fill('Ada');
     await page.getByRole('button', { name: /^Add$/ }).click();
     await page.getByRole('button', { name: /Enter dice/i }).first().click();
-    // open purple and enter a value (illegal in round 1)
-    await page.getByRole('button', { name: 'Purple' }).click();
-    await page.locator('.dexpand .acc-ins input').first().fill('3');
+    // round 1 shows yellow only; entering TWO yellow values is too many
+    await page.locator('.dexpand .acc-ins input').first().fill('5 6');
     await page.getByRole('button', { name: /Save round/i }).click();
-    // a toast complains and we stay on the entry screen (not saved)
+    // hard stop: a toast complains and we stay on the entry screen (not saved)
     await expect(page.locator('.toast')).toBeVisible();
     await expect(page.locator('.round-row')).toBeVisible();
   });
@@ -86,43 +84,63 @@ test.describe('Pass and Play', () => {
     for (let i = 1; i <= 10; i++) {
       await page.locator('#addPlayer').fill('P' + i);
       await page.getByRole('button', { name: /^Add$/ }).click();
+      // wait for this add to land before the next (tolerant of boot re-renders)
+      await expect(page.locator('.player-row .name')).toHaveCount(i, { timeout: 8000 });
     }
+    // cap reached: exactly 10 players and the add-player input is gone
+    await expect(page.locator('.player-row .name')).toHaveCount(10);
     await expect(page.locator('#addPlayer')).toHaveCount(0);
   });
 });
 
 /* ------------------------------------------------------------------ *
  * Online (Separate phones) — needs the /api backend
+ *
+ * On a deployment where online play is paywalled (config:flags
+ * onlinePaywalled=true), the create flow needs a Pro code. Provide one via
+ * E2E_PRO_CODE to exercise the full create→join flow; otherwise the test
+ * asserts the CORRECT gated behavior (clicking Online opens the upgrade screen).
  * ------------------------------------------------------------------ */
 test.describe('Online', () => {
   test.skip(!ONLINE, 'set E2E_BASE_URL to a deployment with a live backend to run the online flow');
 
-  test('host creates a game, sees code + QR; a second device joins and both appear', async ({ browser }) => {
-    // Host
+  test('online gating + (with a Pro code) create → code+QR → second device joins', async ({ browser, request }) => {
+    const flags = await (await request.get(BASE + '/api/flags')).json().catch(() => ({}));
+    const gated = !!(flags.paywallEnabled && flags.onlinePaywalled);
+    const proCode = process.env.E2E_PRO_CODE || null;
+
     const host = await browser.newContext({ ...devices['Pixel 7'] });
     const hostPage = await host.newPage();
-    await hostPage.addInitScript(() => { try { localStorage.clear(); } catch {} });
+    await hostPage.addInitScript((code) => {
+      try { localStorage.clear(); if (code) localStorage.setItem('pr.pro', JSON.stringify({ code })); } catch {}
+    }, proCode);
     await hostPage.goto(BASE + '/');
     await hostPage.locator('#nameInput').fill('Host');
     await hostPage.getByRole('button', { name: /^Online/ }).click();
 
-    // code + QR shown on the initial screen
+    if (gated && !proCode) {
+      // correct gated behavior: routed to the upgrade screen, no lobby/code
+      await expect(hostPage.getByText(/Panda Royale Pro|Unlock Pro|Pro code/i).first()).toBeVisible();
+      await expect(hostPage.locator('.code-big')).toHaveCount(0);
+      await host.close();
+      test.info().annotations.push({ type: 'note', description: 'online is paywalled; set E2E_PRO_CODE to test the full create/join flow' });
+      return;
+    }
+
+    // free (or Pro): full create → code + QR → join
     await expect(hostPage.locator('.code-big')).toBeVisible();
     await expect(hostPage.locator('.qr-wrap svg.qr')).toBeVisible();
     const code = (await hostPage.locator('.code-big').innerText()).trim();
     expect(code).toMatch(/^[A-Z0-9]{4}$/);
 
-    // Joiner (fresh device) joins via ?code= deep link, gives its own name
     const joiner = await browser.newContext({ ...devices['Pixel 7'] });
     const joinPage = await joiner.newPage();
     await joinPage.addInitScript(() => { try { localStorage.clear(); } catch {} });
     await joinPage.goto(BASE + '/?code=' + code);
-    // name field shown (unknown name); enter and join
     await joinPage.locator('#nameInput').fill('Guest');
     await joinPage.getByRole('button', { name: /^Online/ }).click();
 
-    // Host sees the joiner appear (polling)
-    await expect(hostPage.getByText('Guest')).toBeVisible({ timeout: 8000 });
+    await expect(hostPage.locator('.player-row .name', { hasText: 'Guest' })).toBeVisible({ timeout: 8000 });
 
     await host.close();
     await joiner.close();
