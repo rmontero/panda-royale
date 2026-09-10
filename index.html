@@ -342,7 +342,7 @@
   /* PDF-style horizontal score strip: one column per color (dash when empty)
      then the Row Total at the end, matching the printed score sheet. */
   .score-strip{
-    display:flex; gap:4px; margin-top:14px; overflow-x:auto;
+    display:flex; gap:4px; margin-top:14px; overflow-x:auto; align-items:stretch;
     -webkit-overflow-scrolling:touch; padding-bottom:2px;
   }
   .score-strip .ss-col{
@@ -350,10 +350,12 @@
     gap:4px; padding:7px 3px; border-radius:9px; background:rgba(0,0,0,0.16);
     border:1px solid var(--panel-line);
   }
-  .score-strip .ss-col.empty{ opacity:0.5; }
+  /* label takes the variable vertical space so the value/dash always sits at
+     the bottom edge, aligned across every column even when labels wrap */
   .score-strip .ss-dot{ width:11px; height:11px; border-radius:4px; border:1px solid rgba(0,0,0,0.3); }
-  .score-strip .ss-lab{ font-size:0.58rem; color:var(--ink-dim); text-align:center; line-height:1.1; letter-spacing:0.01em; }
-  .score-strip .ss-val{ font-family:'Baloo 2', monospace; font-size:1rem; color:var(--ink); }
+  .score-strip .ss-lab{ flex:1 1 auto; display:flex; align-items:center; justify-content:center; text-align:center; font-size:0.58rem; color:var(--ink-dim); line-height:1.1; letter-spacing:0.01em; }
+  .score-strip .ss-val{ margin-top:auto; font-family:'Baloo 2', monospace; font-size:1rem; color:var(--ink); }
+  .score-strip .ss-col.empty{ opacity:0.5; }
   .score-strip .ss-total{ background:rgba(246,197,103,0.16); border-color:rgba(246,197,103,0.4); }
   .score-strip .ss-total .ss-lab{ color:var(--lantern-bright); font-weight:700; }
   .score-strip .ss-total .ss-val{ color:var(--lantern-bright); font-weight:700; }
@@ -2496,7 +2498,7 @@ function renderEntry(){
                    type="text" inputmode="numeric" pattern="[0-9 ,]*" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />
           </label>`).join('')}
       </div>
-      <div class="acc-math">${openMath ? esc(openMath) : `<span class="er-empty">${esc(t('calc.' + openRow.color))}</span>`}</div>
+      <div class="acc-math">${openMath ? esc(openMath) : ''}</div>
       <p class="dcalc">${esc(t('calc.' + openRow.color))} <span class="dcalc-range">${esc(t('entry.range', { max: COLOR_MAX_VALUE[openRow.color] }))}</span></p>
     </div>` : '';
 
@@ -2507,17 +2509,17 @@ function renderEntry(){
     <div class="dice-row">${diceRow}</div>
     ${expandPanel}
 
+    <button class="btn btn-primary" data-a="save-entry">${esc(t('saveRound', { n: state.entryRound }))}</button>
+
     <!-- current round's score row — tap to expand the full PDF scorecard -->
     <button class="round-row" data-a="sheet-toggle" aria-expanded="${state.sheetExpanded ? 'true' : 'false'}">
       <div class="rr-top">
-        <span class="rr-total">${scored.total}</span>
-        <span class="rr-label">${esc(t('roundScore', { n: state.entryRound }))}</span>
+        <span class="rr-label">${esc(t('roundScore', { n: state.entryRound }))}: <span class="rr-total">${scored.total}</span></span>
         <span class="rr-caret">${esc(t('entry.fullSheet'))} ⤒</span>
       </div>
       ${scoreStripHtml(dice, scored)}
     </button>
 
-    <button class="btn btn-primary" data-a="save-entry">${esc(t('saveRound', { n: state.entryRound }))}</button>
     <button class="btn btn-ghost" data-a="tab-play">${esc(t('back'))}</button>
 
     ${photoSection}
@@ -3050,15 +3052,29 @@ function bind(){
 
   // Enter tabs to the next dice-entry field, or to Save once past the last one.
   app.onkeydown = (e) => {
-    if(e.key !== 'Enter') return;
-    const inp = e.target.closest('[data-field]');
+    if(e.key !== 'Enter' && e.key !== 'Tab') return;
+    const inp = e.target.closest('.dexpand [data-field]');
     if(!inp) return;
+    // Shift+Tab: let the browser move focus backwards naturally.
+    if(e.key === 'Tab' && e.shiftKey) return;
     e.preventDefault();
-    const fields = [...document.querySelectorAll('.entry-grid [data-field]')];
-    const i = fields.indexOf(inp);
-    const next = fields[i + 1];
-    if(next) next.focus();
-    else document.querySelector('[data-a="save-entry"]')?.focus();
+    // If the open color has another input (blue/red have 2), go to it first.
+    const ins = [...document.querySelectorAll('.dexpand .acc-ins [data-field]')];
+    const idx = ins.indexOf(inp);
+    if(idx > -1 && idx < ins.length - 1){ ins[idx + 1].focus(); return; }
+    // Otherwise advance to the NEXT color in the row (expand + focus its first
+    // input). Tabbing past a color you didn't draft is fine — no value needed.
+    const isR1 = state.entryRound === 1;
+    const rows = isR1 ? ENTRY_ROWS.filter(r => r.color === 'yellow') : ENTRY_ROWS;
+    const curIdx = rows.findIndex(r => r.color === state.entryOpenColor);
+    const nextRow = rows[curIdx + 1];
+    if(nextRow){
+      setState({ entryOpenColor: nextRow.color });
+      const first = document.querySelector('.dexpand .acc-ins input');
+      if(first) first.focus();
+    } else {
+      document.querySelector('[data-a="save-entry"]')?.focus();
+    }
   };
 
   const photo = document.getElementById('photoInput');
@@ -3110,9 +3126,7 @@ function updateEntryTotals(){
   if(state.entryOpenColor){
     const math = colorMath(state.entryOpenColor, state.fields);
     const mathEl = document.querySelector('.dexpand .acc-math');
-    if(mathEl){
-      mathEl.innerHTML = math ? esc(math) : `<span class="er-empty">${esc(t('calc.' + state.entryOpenColor))}</span>`;
-    }
+    if(mathEl){ mathEl.textContent = math || ''; }
     const cell = pdfColumns(dice, scored).find(c => c.color === state.entryOpenColor);
     const face = document.querySelector(`.dcell[data-color="${state.entryOpenColor}"] .dface`);
     if(face) face.textContent = (cell && cell.has) ? cell.val : '';
