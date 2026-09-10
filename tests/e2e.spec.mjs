@@ -91,6 +91,44 @@ test.describe('Pass and Play', () => {
     await expect(page.locator('.player-row .name')).toHaveCount(10);
     await expect(page.locator('#addPlayer')).toHaveCount(0);
   });
+
+  test('keyboard: Tab opens next color, Shift+Tab opens previous', async ({ page }) => {
+    // one player; bump to round 2 (via the round stepper) where every color is
+    // enterable and the accordion holds multiple colors.
+    await page.getByRole('button', { name: /Pass and Play/i }).click();
+    await page.locator('#addPlayer').fill('Ada');
+    await page.getByRole('button', { name: /^Add$/ }).click();
+    await page.locator('[data-a="round-next"]').click(); // round 1 → 2
+
+    // round 2: entry opens with the first color already expanded
+    await page.getByRole('button', { name: /Enter dice/i }).first().click();
+    const openColor = () => page.locator('.dexpand .acc-lab').innerText();
+    const firstColor = await openColor();
+
+    // FORWARD: Tab advances to the next color and focuses its first input
+    await page.locator('.dexpand .acc-ins input').first().focus();
+    await page.keyboard.press('Tab');
+    const secondColor = await openColor();
+    expect(secondColor).not.toBe(firstColor);
+    await expect(page.locator('.dexpand .acc-ins input').first()).toBeFocused();
+
+    // BACKWARD: Shift+Tab from the (single-input) second color reopens the first
+    await page.keyboard.press('Shift+Tab');
+    expect(await openColor()).toBe(firstColor);
+    await expect(page.locator('.dexpand .acc-ins input').last()).toBeFocused();
+
+    // From the first color, Tab through every color/input in turn; the step
+    // that leaves the last input lands focus on the Save button. Stop as soon
+    // as Save is focused (further Tabs would hand off to native tab order).
+    await page.locator('.dexpand .acc-ins input').first().focus();
+    const save = page.getByRole('button', { name: /Save round/i });
+    let landed = false;
+    for (let i = 0; i < 30; i++) {
+      await page.keyboard.press('Tab');
+      if (await save.evaluate(el => el === document.activeElement)) { landed = true; break; }
+    }
+    expect(landed).toBe(true);
+  });
 });
 
 /* ------------------------------------------------------------------ *

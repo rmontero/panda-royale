@@ -2983,29 +2983,56 @@ function bind(){
     if(inp) inp.select();
   };
 
-  // Enter tabs to the next dice-entry field, or to Save once past the last one.
+  // Keyboard navigation across the one-open-at-a-time color accordion.
+  // Tab / Enter move FORWARD; Shift+Tab moves BACKWARD. Within a color that
+  // has two inputs (blue: value+glitter, red: white+black) we step between
+  // them first; at a color's edge we open the adjacent color and focus its
+  // near edge (forward → first input, backward → last input). Past the last
+  // color, forward lands on Save; before the first color, Shift+Tab is left
+  // to the browser so focus escapes the dice section naturally.
   app.onkeydown = (e) => {
     if(e.key !== 'Enter' && e.key !== 'Tab') return;
     const inp = e.target.closest('.dexpand [data-field]');
     if(!inp) return;
-    // Shift+Tab: let the browser move focus backwards naturally.
-    if(e.key === 'Tab' && e.shiftKey) return;
-    e.preventDefault();
-    // If the open color has another input (blue/red have 2), go to it first.
-    const ins = [...document.querySelectorAll('.dexpand .acc-ins [data-field]')];
-    const idx = ins.indexOf(inp);
-    if(idx > -1 && idx < ins.length - 1){ ins[idx + 1].focus(); return; }
-    // Otherwise advance to the NEXT color in the row (expand + focus its first
-    // input). Tabbing past a color you didn't draft is fine — no value needed.
+    const back = e.key === 'Tab' && e.shiftKey;
+    // Enter never goes backward.
+    if(e.key === 'Enter' && e.shiftKey) return;
+
     const isR1 = state.entryRound === 1;
     const rows = isR1 ? ENTRY_ROWS.filter(r => r.color === 'yellow') : ENTRY_ROWS;
+    const ins = [...document.querySelectorAll('.dexpand .acc-ins [data-field]')];
+    const idx = ins.indexOf(inp);
     const curIdx = rows.findIndex(r => r.color === state.entryOpenColor);
-    const nextRow = rows[curIdx + 1];
-    if(nextRow){
-      setState({ entryOpenColor: nextRow.color });
-      const first = document.querySelector('.dexpand .acc-ins input');
-      if(first) first.focus();
-    } else {
+
+    // Move to an adjacent color: open it, then focus its first (forward) or
+    // last (backward) input. Returns true if it navigated.
+    const gotoColor = (nextIdx, edge) => {
+      const row = rows[nextIdx];
+      if(!row) return false;
+      setState({ entryOpenColor: row.color });
+      const fields = [...document.querySelectorAll('.dexpand .acc-ins input')];
+      const target = edge === 'last' ? fields[fields.length - 1] : fields[0];
+      if(target) target.focus();
+      return true;
+    };
+
+    if(back){
+      // Previous input within this color, else previous color's last input.
+      if(idx > 0){ e.preventDefault(); ins[idx - 1].focus(); return; }
+      // At the first input of the first color: let focus escape naturally.
+      if(curIdx <= 0) return;
+      e.preventDefault();
+      gotoColor(curIdx - 1, 'last');
+      return;
+    }
+
+    // Forward (Tab or Enter).
+    e.preventDefault();
+    // Next input within this color first (blue/red have two).
+    if(idx > -1 && idx < ins.length - 1){ ins[idx + 1].focus(); return; }
+    // Otherwise the next color, else Save. Tabbing past a color you didn't
+    // draft is fine — no value is required to move on.
+    if(!gotoColor(curIdx + 1, 'first')){
       document.querySelector('[data-a="save-entry"]')?.focus();
     }
   };
