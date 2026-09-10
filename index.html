@@ -793,6 +793,10 @@ const I18N = {
     't.noGame': 'No game with that code',
     't.wrong': 'Something went wrong',
     't.maxPlayers': 'Up to {n} players — that\'s the max.',
+    't.needDice': 'Enter {n} die for round 1 (yellow only).',
+    't.r1Yellow': 'Round 1 is your single yellow die only — remove the other colors.',
+    't.tooFew': 'Too few dice — you entered {have}, this round needs {need} (add one more per die you rolled; +1 if you have a pink).',
+    't.tooMany': 'Too many dice — this round allows at most {max} (that includes the pink pity die).',
     't.badValue': '{color} dice only go up to {max} — removed {n}.',
     'entry.range': '(values 1–{max})',
     't.gameEnded': 'That game has ended.',
@@ -960,6 +964,10 @@ const I18N = {
     't.noGame': 'No hay ninguna partida con ese código',
     't.wrong': 'Algo salió mal',
     't.maxPlayers': 'Hasta {n} jugadores — es el máximo.',
+    't.needDice': 'Ingresa {n} dado en la ronda 1 (solo amarillo).',
+    't.r1Yellow': 'La ronda 1 es solo tu dado amarillo — quita los otros colores.',
+    't.tooFew': 'Faltan dados — ingresaste {have}, esta ronda necesita {need} (uno por dado tirado; +1 si tienes rosa).',
+    't.tooMany': 'Demasiados dados — esta ronda permite como máximo {max} (incluye el dado rosa de compasión).',
     't.badValue': 'Los dados {color} llegan hasta {max} — se quitó {n}.',
     'entry.range': '(valores 1–{max})',
     't.gameEnded': 'Esa partida ha terminado.',
@@ -1127,6 +1135,10 @@ const I18N = {
     't.noGame': 'Kein Spiel mit diesem Code',
     't.wrong': 'Etwas ist schiefgelaufen',
     't.maxPlayers': 'Bis zu {n} Spieler — das ist das Maximum.',
+    't.needDice': 'Gib {n} Würfel für Runde 1 ein (nur Gelb).',
+    't.r1Yellow': 'Runde 1 ist nur dein gelber Würfel — entferne die anderen Farben.',
+    't.tooFew': 'Zu wenige Würfel — du hast {have}, diese Runde braucht {need} (einen pro gewürfeltem Würfel; +1 mit Rosa).',
+    't.tooMany': 'Zu viele Würfel — diese Runde erlaubt höchstens {max} (inkl. rosa Trostwürfel).',
     't.badValue': '{color}-Würfel gehen nur bis {max} — {n} entfernt.',
     'entry.range': '(Werte 1–{max})',
     't.gameEnded': 'Dieses Spiel ist beendet.',
@@ -1294,6 +1306,10 @@ const I18N = {
     't.noGame': 'Aucune partie avec ce code',
     't.wrong': 'Un problème est survenu',
     't.maxPlayers': 'Jusqu\'à {n} joueurs — c\'est le maximum.',
+    't.needDice': 'Saisissez {n} dé pour la manche 1 (jaune uniquement).',
+    't.r1Yellow': 'La manche 1 est votre seul dé jaune — retirez les autres couleurs.',
+    't.tooFew': 'Trop peu de dés — vous en avez {have}, cette manche en demande {need} (un par dé lancé ; +1 avec un rose).',
+    't.tooMany': 'Trop de dés — cette manche en autorise au plus {max} (dé rose de pitié inclus).',
     't.badValue': 'Les dés {color} vont jusqu\'à {max} — {n} retiré(s).',
     'entry.range': '(valeurs 1–{max})',
     't.gameEnded': 'Cette partie est terminée.',
@@ -1461,6 +1477,10 @@ const I18N = {
     't.noGame': 'Nenhum jogo com esse código',
     't.wrong': 'Algo deu errado',
     't.maxPlayers': 'Até {n} jogadores — é o máximo.',
+    't.needDice': 'Insira {n} dado na rodada 1 (apenas amarelo).',
+    't.r1Yellow': 'A rodada 1 é só o seu dado amarelo — remova as outras cores.',
+    't.tooFew': 'Poucos dados — você inseriu {have}, esta rodada precisa de {need} (um por dado rolado; +1 se tiver rosa).',
+    't.tooMany': 'Dados demais — esta rodada permite no máximo {max} (inclui o dado rosa de consolação).',
     't.badValue': 'Dados {color} vão até {max} — {n} removido(s).',
     'entry.range': '(valores 1–{max})',
     't.gameEnded': 'Esse jogo terminou.',
@@ -1659,6 +1679,32 @@ function diceToFields(dice){
   });
   return f;
 }
+// Validate the number of dice entered for a round on submit.
+//   • Each space/comma value in any color field is one die.
+//   • Round 1: exactly 1 die, yellow only.
+//   • Rounds 2–10: exactly N dice, where N = round number — PLUS one extra
+//     when a pink pity die is entered (so N+1 with a pink). One of the N+1 is
+//     the pink itself.
+// Returns { key, vars } describing the problem, or null when the count is OK.
+function validateEntryCount(fields, round){
+  // in-range dice only (out-of-range values are dropped/warned elsewhere)
+  const all = fieldsToDice(fields).filter(d => { const m = COLOR_MAX_VALUE[d.color] || 99; return d.value >= 1 && d.value <= m; });
+  const count = all.length;
+  const nonYellow = all.filter(d => d.color !== 'yellow').length;
+  const hasPink = all.some(d => d.color === 'pink');
+
+  if(round === 1){
+    if(count === 0) return { key:'t.needDice', vars:{ n:1 } };
+    if(nonYellow > 0) return { key:'t.r1Yellow', vars:{} };
+    if(count > 1) return { key:'t.tooMany', vars:{ max:1 } };
+    return null;
+  }
+  const expected = round + (hasPink ? 1 : 0);
+  if(count < expected) return { key:'t.tooFew', vars:{ have:count, need:expected } };
+  if(count > expected) return { key:'t.tooMany', vars:{ max:expected } };
+  return null;
+}
+
 // Round 1: every player rolls only their single starting yellow die.
 function diceForRound(fields, round){
   const dice = fieldsToDice(fields)
@@ -2018,6 +2064,8 @@ async function openEntry(playerId, round){
 
 async function saveEntry(){
   const round = state.entryRound;
+  const problem = validateEntryCount(state.fields, round);
+  if(problem){ toast(t(problem.key, problem.vars), 3600); return; }
   const dice = diceForRound(state.fields, round);
   if(state.mode === 'local'){
     const scored = scoreRound(dice);
