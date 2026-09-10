@@ -301,6 +301,78 @@
   .score-strip .ss-total .ss-lab{ color:var(--lantern-bright); font-weight:700; }
   .score-strip .ss-total .ss-val{ color:var(--lantern-bright); font-weight:700; }
 
+  /* ---- entry accordion (one color open at a time) ---- */
+  .acc{ margin-top:14px; border:1px solid var(--panel-line); border-radius:var(--radius); overflow:hidden; }
+  .acc-row{ border-bottom:1px solid var(--panel-line); background:var(--panel); }
+  .acc-row:last-child{ border-bottom:none; }
+  .acc-row.open{ background:var(--panel-2); }
+  .acc-head{
+    display:flex; align-items:center; gap:10px; width:100%; padding:13px 14px;
+    background:none; border:none; cursor:pointer; color:var(--ink); text-align:left;
+  }
+  .acc-head .dot{ width:16px; height:16px; border-radius:5px; flex-shrink:0; border:1px solid rgba(0,0,0,0.25); }
+  .acc-head .acc-lab{ font-size:0.95rem; font-weight:600; flex-shrink:0; min-width:56px; }
+  .acc-head .acc-lab small{ display:block; color:var(--muted); font-weight:500; font-size:0.68rem; }
+  .acc-head .er-sum{ flex:1; text-align:right; font-family:'Baloo 2', monospace; font-size:0.9rem; color:var(--ink-dim); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .acc-head .er-empty{ font-family:inherit; color:var(--muted); font-size:0.8rem; font-style:italic; }
+  .acc-head .acc-caret{ color:var(--muted); font-size:0.9rem; flex-shrink:0; }
+  .acc-body{ padding:2px 14px 15px; }
+  .acc-ins{ display:flex; gap:10px; }
+  .acc-field{ flex:1; display:flex; flex-direction:column; gap:4px; }
+  .acc-flab{ font-size:0.7rem; color:var(--ink-dim); }
+  .acc-ins input{
+    width:100%; min-width:0; padding:12px 12px; border-radius:10px; text-align:center;
+    border:1px solid var(--panel-line); background:var(--night); color:var(--ink);
+    font-size:1.1rem; font-family:'Baloo 2', monospace; letter-spacing:0.05em;
+  }
+  .acc-ins input:focus{ outline:2px solid var(--lantern); outline-offset:1px; }
+  .acc-ins input.accent::placeholder{ color:var(--lantern-bright); opacity:0.8; }
+  .acc-math{
+    margin-top:10px; text-align:center; font-family:'Baloo 2', monospace;
+    font-size:1.05rem; color:var(--lantern-bright);
+  }
+  .acc-math .er-empty{ color:var(--muted); font-size:0.85rem; font-style:italic; }
+
+  /* ---- current-round score row (tap to expand full sheet) ---- */
+  .round-row{
+    display:block; width:100%; text-align:left; margin-top:16px; padding:14px 16px;
+    border-radius:var(--radius); border:1px solid var(--panel-line); cursor:pointer;
+    background:linear-gradient(180deg, rgba(246,197,103,0.16), rgba(246,197,103,0.03)); color:var(--ink);
+  }
+  .round-row .rr-top{ display:flex; align-items:baseline; gap:10px; }
+  .round-row .rr-total{ font-family:'Baloo 2'; font-size:2rem; color:var(--lantern-bright); line-height:1; }
+  .round-row .rr-label{ color:var(--ink-dim); font-size:0.82rem; flex:1; }
+  .round-row .rr-caret{ color:var(--lantern-bright); font-size:0.78rem; font-weight:600; }
+  .round-row .score-strip{ margin-top:12px; }
+
+  /* ---- bottom-sheet full PDF-style scorecard ---- */
+  .sheet-backdrop{
+    position:fixed; inset:0; z-index:70; background:rgba(15,11,26,0.5);
+    -webkit-backdrop-filter:blur(4px); backdrop-filter:blur(4px); animation:flyfade 0.18s ease-out;
+  }
+  .sheet{
+    position:fixed; left:0; right:0; bottom:0; z-index:71; max-width:600px; margin:0 auto;
+    background:var(--panel); border-top-left-radius:20px; border-top-right-radius:20px;
+    border:1px solid var(--panel-line); box-shadow:0 -14px 50px rgba(0,0,0,0.55);
+    padding:8px 12px calc(16px + env(safe-area-inset-bottom));
+    max-height:82vh; display:flex; flex-direction:column; animation:sheetup 0.24s cubic-bezier(0.22,1,0.36,1);
+  }
+  @keyframes sheetup{ from{ transform:translateY(100%); } to{ transform:none; } }
+  .sheet-grab{
+    align-self:center; width:44px; height:5px; border-radius:3px; border:none;
+    background:var(--muted); margin:6px 0 12px; cursor:pointer; flex-shrink:0;
+  }
+  .sheet-scroll{ overflow:auto; -webkit-overflow-scrolling:touch; }
+  .sheet-table{ width:100%; border-collapse:collapse; font-size:0.8rem; }
+  .sheet-table th, .sheet-table td{ padding:7px 5px; text-align:center; border-bottom:1px solid var(--panel-line); }
+  .sheet-table th{ color:var(--ink-dim); font-weight:600; font-size:0.62rem; line-height:1.15; }
+  .sheet-table th .th-dot{ display:block; width:9px; height:9px; border-radius:3px; margin:0 auto 3px; border:1px solid rgba(0,0,0,0.3); }
+  .sheet-table td.rnum{ font-family:'Baloo 2'; color:var(--lantern-bright); font-weight:700; }
+  .sheet-table td.rtot{ font-family:'Baloo 2'; color:var(--lantern-bright); }
+  .sheet-table tr.dim td{ opacity:0.4; filter:blur(0.4px); }
+  .sheet-table tr.now-row td{ background:rgba(246,197,103,0.10); }
+  .sheet-table tfoot .grand-lab{ text-align:right; color:var(--ink-dim); font-weight:600; }
+
   table.board{ width:100%; border-collapse:collapse; margin-top:12px; font-size:0.85rem; }
   table.board th, table.board td{ padding:9px 5px; text-align:center; border-bottom:1px solid var(--panel-line); }
   table.board th{ color:var(--ink-dim); font-weight:600; font-size:0.72rem; }
@@ -578,6 +650,8 @@ const I18N = {
     'color.green': 'Green', 'color.clear': 'Clear', 'color.pink': 'Pink',
     'sheet.yellow': 'Yellow', 'sheet.purple': 'Purple ×2', 'sheet.blue': 'Blue ✨×2', 'sheet.red': 'Red ×#',
     'sheet.green': 'Green', 'sheet.white': 'White', 'sheet.pink': 'Pink', 'sheet.rowTotal': 'Row Total',
+    'sheet.grandTotal': 'Grand total', 'entry.tapToAdd': 'tap to add', 'entry.mathHint': 'enter values above',
+    'entry.fullSheet': 'Full sheet', 'board.round': 'R',
     'note.x2': '×2', 'note.xcount': '× count',
     'ph.values': 'e.g. 1 2 3', 'ph.plain': 'plain', 'ph.glitter': '✨ glitter',
     'ph.whitePlus': 'white +', 'ph.blackMinus': 'black −', 'ph.pityDie': 'pity pink', 'ph.egN': 'e.g. 4', 'ph.eg356': 'e.g. 3 5 6',
@@ -714,6 +788,8 @@ const I18N = {
     'color.green': 'Verde', 'color.clear': 'Transparente', 'color.pink': 'Rosa',
     'sheet.yellow': 'Amarillo', 'sheet.purple': 'Morado ×2', 'sheet.blue': 'Azul ✨×2', 'sheet.red': 'Rojo ×#',
     'sheet.green': 'Verde', 'sheet.white': 'Blanco', 'sheet.pink': 'Rosa', 'sheet.rowTotal': 'Total fila',
+    'sheet.grandTotal': 'Total general', 'entry.tapToAdd': 'toca para añadir', 'entry.mathHint': 'ingresa valores arriba',
+    'entry.fullSheet': 'Hoja completa', 'board.round': 'R',
     'note.x2': '×2', 'note.xcount': '× cantidad',
     'ph.values': 'p. ej. 1 2 3', 'ph.plain': 'normal', 'ph.glitter': '✨ glitter',
     'ph.whitePlus': 'blanco +', 'ph.blackMinus': 'negro −', 'ph.pityDie': 'rosa de consuelo', 'ph.egN': 'p. ej. 4', 'ph.eg356': 'p. ej. 3 5 6',
@@ -850,6 +926,8 @@ const I18N = {
     'color.green': 'Grün', 'color.clear': 'Klar', 'color.pink': 'Pink',
     'sheet.yellow': 'Gelb', 'sheet.purple': 'Lila ×2', 'sheet.blue': 'Blau ✨×2', 'sheet.red': 'Rot ×#',
     'sheet.green': 'Grün', 'sheet.white': 'Weiß', 'sheet.pink': 'Pink', 'sheet.rowTotal': 'Zeilensumme',
+    'sheet.grandTotal': 'Gesamtsumme', 'entry.tapToAdd': 'zum Eintragen tippen', 'entry.mathHint': 'oben Werte eingeben',
+    'entry.fullSheet': 'Ganzer Bogen', 'board.round': 'R',
     'note.x2': '×2', 'note.xcount': '× Anzahl',
     'ph.values': 'z. B. 1 2 3', 'ph.plain': 'normal', 'ph.glitter': '✨ Glitter',
     'ph.whitePlus': 'weiß +', 'ph.blackMinus': 'schwarz −', 'ph.pityDie': 'Trost-Pink', 'ph.egN': 'z. B. 4', 'ph.eg356': 'z. B. 3 5 6',
@@ -986,6 +1064,8 @@ const I18N = {
     'color.green': 'Vert', 'color.clear': 'Transparent', 'color.pink': 'Rose',
     'sheet.yellow': 'Jaune', 'sheet.purple': 'Violet ×2', 'sheet.blue': 'Bleu ✨×2', 'sheet.red': 'Rouge ×#',
     'sheet.green': 'Vert', 'sheet.white': 'Blanc', 'sheet.pink': 'Rose', 'sheet.rowTotal': 'Total ligne',
+    'sheet.grandTotal': 'Total général', 'entry.tapToAdd': 'toucher pour ajouter', 'entry.mathHint': 'saisir les valeurs ci-dessus',
+    'entry.fullSheet': 'Feuille complète', 'board.round': 'R',
     'note.x2': '×2', 'note.xcount': '× nombre',
     'ph.values': 'p. ex. 1 2 3', 'ph.plain': 'normal', 'ph.glitter': '✨ glitter',
     'ph.whitePlus': 'blanc +', 'ph.blackMinus': 'noir −', 'ph.pityDie': 'rose de consolation', 'ph.egN': 'p. ex. 4', 'ph.eg356': 'p. ex. 3 5 6',
@@ -1122,6 +1202,8 @@ const I18N = {
     'color.green': 'Verde', 'color.clear': 'Transparente', 'color.pink': 'Rosa',
     'sheet.yellow': 'Amarelo', 'sheet.purple': 'Roxo ×2', 'sheet.blue': 'Azul ✨×2', 'sheet.red': 'Verm. ×#',
     'sheet.green': 'Verde', 'sheet.white': 'Branco', 'sheet.pink': 'Rosa', 'sheet.rowTotal': 'Total linha',
+    'sheet.grandTotal': 'Total geral', 'entry.tapToAdd': 'toque para adicionar', 'entry.mathHint': 'insira valores acima',
+    'entry.fullSheet': 'Planilha completa', 'board.round': 'R',
     'note.x2': '×2', 'note.xcount': '× quantidade',
     'ph.values': 'ex. 1 2 3', 'ph.plain': 'normal', 'ph.glitter': '✨ glitter',
     'ph.whitePlus': 'branco +', 'ph.blackMinus': 'preto −', 'ph.pityDie': 'rosa de consolação', 'ph.egN': 'ex. 4', 'ph.eg356': 'ex. 3 5 6',
@@ -1390,6 +1472,8 @@ let state = {
 
   entryRound: 1,
   entryPlayerId: null,
+  entryOpenColor: null,       // single open accordion color on the entry screen
+  sheetExpanded: false,       // full PDF scorecard bottom-sheet open?
   fields: emptyFields(),
   photo: null,
   analyzing: false,
@@ -1553,11 +1637,16 @@ function leaveGame(msg, kind){
 async function openEntry(playerId, round){
   const v = view();
   const existing = v.scores[round] && v.scores[round][playerId];
+  const fields = existing ? diceToFields(existing.dice) : emptyFields();
+  // Open the first color accordion by default (yellow), so there's always an
+  // input ready without a tap; round 1 only has yellow anyway.
   setState({
     screen:'entry',
     entryPlayerId: playerId,
     entryRound: round,
-    fields: existing ? diceToFields(existing.dice) : emptyFields(),
+    fields,
+    entryOpenColor: 'yellow',
+    sheetExpanded: false,
     photo: null, analyzeError: null, photoCount: 0,
   });
 }
@@ -1869,11 +1958,13 @@ function renderEntry(){
   const isR1 = state.entryRound === 1;
   const dice = diceForRound(state.fields, state.entryRound);
   const scored = scoreRound(dice);
-  const b = scored.breakdown, c = scored.counts;
   const visibleRows = isR1 ? ENTRY_ROWS.filter(r => r.color === 'yellow') : ENTRY_ROWS;
 
+  // Photo scanning: hidden entirely unless the aiEnabled flag is on (it's a
+  // Pro feature still being worked on). When shown, it's Pro-gated.
+  const aiShown = aiAvailable && state.flags.aiEnabled !== false && !isR1;
   const aiNeedsPro = state.flags.paywallEnabled && state.flags.aiPaywalled && !state.pro;
-  const photoSection = (aiAvailable && !isR1) ? `
+  const photoSection = aiShown ? `
     <div class="photo-section">
       <div class="section-title">${esc(t('photo.section'))}${aiNeedsPro ? ` <span class="pro-badge">${esc(t('pro.badge'))}</span>` : ''}</div>
       <label class="capture-zone" for="photoInput">
@@ -1892,37 +1983,164 @@ function renderEntry(){
       ${state.analyzeError ? `<div class="banner">${esc(state.analyzeError)}</div>` : ''}
     </div>` : '';
 
+  // Accordion: one color open at a time. Each collapsed row shows the color
+  // chip + name + a compact summary of what's entered (its running score, or
+  // a hint to tap). The open row reveals the input(s) + live math.
+  const openColor = state.entryOpenColor;
+  const accordion = visibleRows.map(r => {
+    const isOpen = openColor === r.color;
+    const math = colorMath(r.color, state.fields);
+    const anyEntered = r.fields.some(f => (state.fields[f.key] || '').trim());
+    const summary = anyEntered
+      ? `<span class="er-sum">${esc(math || '')}</span>`
+      : `<span class="er-sum er-empty">${esc(t('entry.tapToAdd'))}</span>`;
+    return `
+      <div class="acc-row ${isOpen ? 'open' : ''}" data-color="${r.color}">
+        <button class="acc-head" data-a="acc-toggle" data-color="${r.color}" aria-expanded="${isOpen ? 'true' : 'false'}">
+          <span class="dot" style="background:${COLOR_HEX[r.color]}"></span>
+          <span class="acc-lab">${esc(t('color.' + r.color))}${(r.noteKey && !isR1) ? `<small>${esc(t(r.noteKey))}</small>` : ''}</span>
+          ${summary}
+          <span class="acc-caret">${isOpen ? '▾' : '▸'}</span>
+        </button>
+        ${isOpen ? `
+          <div class="acc-body">
+            <div class="acc-ins">
+              ${r.fields.map(f => `
+                <label class="acc-field">
+                  ${r.fields.length > 1 ? `<span class="acc-flab">${esc(t(f.phKey))}</span>` : ''}
+                  <input data-field="${f.key}" value="${esc(state.fields[f.key] || '')}"
+                         placeholder="${esc(isR1 ? t('ph.egN') : t(f.phKey))}" class="${f.accent ? 'accent' : ''}"
+                         type="text" inputmode="numeric" pattern="[0-9 ,]*" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />
+                </label>`).join('')}
+            </div>
+            <div class="acc-math">${math ? esc(math) : `<span class="er-empty">${esc(t('entry.mathHint'))}</span>`}</div>
+          </div>
+        ` : ''}
+      </div>`;
+  }).join('');
+
   return `
     <h2 style="font-size:1.2rem;">${esc(p ? t('entry.titleWho', { n: state.entryRound, name: p.name }) : t('entry.title', { n: state.entryRound }))}</h2>
     <p class="small-note" style="margin-top:4px;">${esc(isR1 ? t('entry.r1note') : t('entry.note'))}</p>
 
-    <div class="entry-grid">
-      ${visibleRows.map(r => `
-        <div class="entry-r">
-          <span class="dot" style="background:${COLOR_HEX[r.color]}"></span>
-          <span class="lab">${esc(t('color.' + r.color))}${(r.noteKey && !isR1) ? `<small>${esc(t(r.noteKey))}</small>` : ''}</span>
-          <span class="ins">
-            ${r.fields.map(f => `
-              <input data-field="${f.key}" value="${esc(state.fields[f.key] || '')}"
-                     placeholder="${esc(isR1 ? t('ph.egN') : t(f.phKey))}" class="${f.accent ? 'accent' : ''}"
-                     type="text" inputmode="numeric" pattern="[0-9 ,]*" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />
-            `).join('')}
-          </span>
-        </div>`).join('')}
-    </div>
+    <div class="acc">${accordion}</div>
     ${isR1 ? '' : `<p class="entry-hint">${esc(t('entry.hint'))}</p>`}
 
-    <div class="total-banner">
-      <div class="n">${scored.total}</div>
-      <div class="l">${esc(t('roundScore', { n: state.entryRound }))}</div>
+    <!-- current round's score row — tap to expand the full PDF scorecard -->
+    <button class="round-row" data-a="sheet-toggle" aria-expanded="${state.sheetExpanded ? 'true' : 'false'}">
+      <div class="rr-top">
+        <span class="rr-total">${scored.total}</span>
+        <span class="rr-label">${esc(t('roundScore', { n: state.entryRound }))}</span>
+        <span class="rr-caret">${esc(t('entry.fullSheet'))} ⤒</span>
+      </div>
       ${scoreStripHtml(dice, scored)}
-    </div>
+    </button>
 
     <button class="btn btn-primary" data-a="save-entry">${esc(t('saveRound', { n: state.entryRound }))}</button>
     <button class="btn btn-ghost" data-a="tab-play">${esc(t('back'))}</button>
 
     ${photoSection}
+
+    ${state.sheetExpanded ? renderScoreSheet(v) : ''}
   `;
+}
+
+// Full PDF-style scorecard as a bottom sheet — all 10 rounds × 8 columns for
+// the current player, current round highlighted, other rounds dimmed/blurred.
+function renderScoreSheet(v){
+  const pid = state.entryPlayerId;
+  const now = state.entryRound;
+  const cols = [
+    { color:'yellow', k:'yellowSum', label:t('sheet.yellow') },
+    { color:'purple', k:'purpleSum', label:t('sheet.purple') },
+    { color:'blue',   k:'blueScore', label:t('sheet.blue') },
+    { color:'red',    k:'redScore',  label:t('sheet.red') },
+    { color:'green',  k:'greenSum',  label:t('sheet.green') },
+    { color:'clear',  k:'clearSum',  label:t('sheet.white') },
+    { color:'pink',   k:'pinkSum',   label:t('sheet.pink') },
+  ];
+  // For the currently-open round, reflect the in-progress (unsaved) entry so
+  // the sheet is live; other rounds read from saved scores.
+  const liveDice = diceForRound(state.fields, now);
+  const liveScored = scoreRound(liveDice);
+  let grand = 0;
+  const rowsHtml = Array.from({ length: ROUNDS }, (_, i) => {
+    const rn = i + 1;
+    const saved = v.scores[rn] && v.scores[rn][pid];
+    const bd = rn === now ? liveScored.breakdown : (saved ? saved.breakdown : null);
+    const total = rn === now ? liveScored.total : (saved ? saved.total : null);
+    if(total != null) grand += total;
+    const dim = rn !== now ? 'dim' : '';
+    const cells = cols.map(col => {
+      const val = bd ? bd[col.k] : null;
+      return `<td class="${rn === now ? 'now' : ''}">${bd ? (val ?? 0) : '—'}</td>`;
+    }).join('');
+    return `<tr class="${dim} ${rn === now ? 'now-row' : ''}">
+      <td class="rnum">${rn}</td>${cells}
+      <td class="rtot">${total != null ? total : '—'}</td>
+    </tr>`;
+  }).join('');
+  return `
+    <div class="sheet-backdrop" data-a="sheet-close"></div>
+    <div class="sheet" role="dialog" aria-label="${esc(t('entry.fullSheet'))}">
+      <button class="sheet-grab" data-a="sheet-close" aria-label="${esc(t('menu.close'))}"></button>
+      <div class="sheet-scroll">
+        <table class="sheet-table">
+          <thead>
+            <tr>
+              <th>${esc(t('board.round') || 'R')}</th>
+              ${cols.map(c => `<th><span class="th-dot" style="background:${COLOR_HEX[c.color]}"></span>${esc(c.label)}</th>`).join('')}
+              <th>${esc(t('sheet.rowTotal'))}</th>
+            </tr>
+          </thead>
+          <tbody>${rowsHtml}</tbody>
+          <tfoot>
+            <tr><td colspan="${cols.length + 1}" class="grand-lab">${esc(t('sheet.grandTotal'))}</td><td class="rtot">${grand}</td></tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>`;
+}
+
+// Human-readable math for one color, from the current field values — shown
+// directly below that color's open input on the entry accordion.
+//   yellow/green/clear/pink : a + b + c = sum
+//   purple                  : (a + b) ×2 = n
+//   blue                    : (a + b) [✨×2] = n   (doubled if any glitter die)
+//   red                     : (+a + b − c) × N = n  (signed, ×count of red dice)
+function colorMath(color, fields){
+  const vals = (k) => parseValues(fields[k] || '');
+  if(color === 'blue'){
+    const plain = vals('blue'), glit = vals('blueGlitter');
+    const all = [...plain, ...glit];
+    if(!all.length) return '';
+    const sum = all.reduce((s, n) => s + n, 0);
+    const doubled = glit.length > 0;
+    const inner = all.join(' + ');
+    const base = all.length > 1 ? `(${inner})` : `${inner}`;
+    return doubled ? `${base} ✨×2 = ${sum * 2}` : `${inner} = ${sum}`;
+  }
+  if(color === 'red'){
+    const white = vals('redWhite'), black = vals('redBlack');
+    const count = white.length + black.length;
+    if(!count) return '';
+    const signed = white.reduce((s, n) => s + n, 0) - black.reduce((s, n) => s + n, 0);
+    const parts = [
+      ...white.map(n => `+ ${n}`),
+      ...black.map(n => `− ${n}`),
+    ].join(' ').replace(/^\+ /, '');
+    const inner = count > 1 ? `(${parts})` : `${parts}`;
+    return `${inner} × ${count} = ${signed * count}`;
+  }
+  const v = vals(color);
+  if(!v.length) return '';
+  const sum = v.reduce((s, n) => s + n, 0);
+  if(color === 'purple'){
+    const inner = v.join(' + ');
+    const base = v.length > 1 ? `(${inner})` : `${inner}`;
+    return `${base} ×2 = ${sum * 2}`;
+  }
+  return `${v.join(' + ')} = ${sum}`;
 }
 
 // The eight scoreboard columns, in the exact order of the printed score
@@ -2208,6 +2426,15 @@ function bind(){
     else if(a === 'score-player') openEntry(id, state.entryRound);
     else if(a === 'score-self') openEntry(state.me.id, state.entryRound);
     else if(a === 'save-entry') saveEntry();
+    else if(a === 'acc-toggle'){
+      const color = el.dataset.color;
+      setState({ entryOpenColor: state.entryOpenColor === color ? null : color });
+      // focus the first input of the freshly-opened color
+      const first = document.querySelector('.acc-row.open .acc-ins input');
+      if(first){ first.focus(); }
+    }
+    else if(a === 'sheet-toggle') setState({ sheetExpanded: !state.sheetExpanded });
+    else if(a === 'sheet-close') setState({ sheetExpanded: false });
     else if(a === 'copy-link'){
       const link = `${location.origin}/?code=${view().code}`;
       try { await navigator.clipboard.writeText(link); toast(t('t.linkCopied')); }
@@ -2348,14 +2575,31 @@ function mergeFields(cur, found){
 function updateEntryTotals(){
   const dice = diceForRound(state.fields, state.entryRound);
   const scored = scoreRound(dice);
-  const n = document.querySelector('.total-banner .n');
-  if(n) n.textContent = scored.total;
-  const banner = document.querySelector('.total-banner');
-  if(!banner) return;
-  const stripHtml = scoreStripHtml(dice, scored);
-  const existing = banner.querySelector('.score-strip');
-  if(existing) existing.outerHTML = stripHtml;
-  else banner.insertAdjacentHTML('beforeend', stripHtml);
+  // round-row total + strip
+  const rrTotal = document.querySelector('.round-row .rr-total');
+  if(rrTotal) rrTotal.textContent = scored.total;
+  const strip = document.querySelector('.round-row .score-strip');
+  if(strip) strip.outerHTML = scoreStripHtml(dice, scored);
+  // open color's live math + its collapsed-summary sibling text
+  if(state.entryOpenColor){
+    const math = colorMath(state.entryOpenColor, state.fields);
+    const mathEl = document.querySelector(`.acc-row.open .acc-math`);
+    if(mathEl) mathEl.innerHTML = math ? esc(math) : `<span class="er-empty">${esc(t('entry.mathHint'))}</span>`;
+  }
+  // if the full sheet is open, keep its current-round row live too
+  if(state.sheetExpanded){
+    const sheet = document.querySelector('.sheet');
+    if(sheet){
+      const v = view();
+      const fresh = renderScoreSheet(v);
+      // replace just the table body/foot to avoid closing the sheet
+      const tmp = document.createElement('div');
+      tmp.innerHTML = fresh;
+      const newTable = tmp.querySelector('.sheet-table');
+      const curTable = sheet.querySelector('.sheet-table');
+      if(newTable && curTable) curTable.innerHTML = newTable.innerHTML;
+    }
+  }
 }
 
 /* ------------------------------------------------------------------ *
