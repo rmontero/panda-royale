@@ -125,7 +125,7 @@
     margin:0 auto;
     min-height:100vh;
     min-height:100svh;
-    padding-bottom:calc(80px + env(safe-area-inset-bottom));
+    padding-bottom:env(safe-area-inset-bottom);
     position:relative;
     display:flex;
     flex-direction:column;
@@ -142,6 +142,7 @@
   .topbar{
     display:flex; align-items:center; justify-content:space-between;
     padding:14px 18px; border-bottom:1px solid var(--panel-line);
+    padding-right:70px; /* clear the fixed top-right menu FAB */
   }
   .topbar .code{ font-family:'Baloo 2', monospace; letter-spacing:0.12em; font-size:1.05rem; color:var(--lantern-bright); }
   .topbar .sub{ font-size:0.8rem; color:var(--ink-dim); }
@@ -281,6 +282,25 @@
   .breakdown{ margin-top:10px; font-size:0.84rem; color:var(--ink-dim); }
   .breakdown .row{ display:flex; justify-content:space-between; padding:2px 0; }
 
+  /* PDF-style horizontal score strip: one column per color (dash when empty)
+     then the Row Total at the end, matching the printed score sheet. */
+  .score-strip{
+    display:flex; gap:4px; margin-top:14px; overflow-x:auto;
+    -webkit-overflow-scrolling:touch; padding-bottom:2px;
+  }
+  .score-strip .ss-col{
+    flex:1 1 0; min-width:38px; display:flex; flex-direction:column; align-items:center;
+    gap:4px; padding:7px 3px; border-radius:9px; background:rgba(0,0,0,0.16);
+    border:1px solid var(--panel-line);
+  }
+  .score-strip .ss-col.empty{ opacity:0.5; }
+  .score-strip .ss-dot{ width:11px; height:11px; border-radius:4px; border:1px solid rgba(0,0,0,0.3); }
+  .score-strip .ss-lab{ font-size:0.58rem; color:var(--ink-dim); text-align:center; line-height:1.1; letter-spacing:0.01em; }
+  .score-strip .ss-val{ font-family:'Baloo 2', monospace; font-size:1rem; color:var(--ink); }
+  .score-strip .ss-total{ background:rgba(246,197,103,0.16); border-color:rgba(246,197,103,0.4); }
+  .score-strip .ss-total .ss-lab{ color:var(--lantern-bright); font-weight:700; }
+  .score-strip .ss-total .ss-val{ color:var(--lantern-bright); font-weight:700; }
+
   table.board{ width:100%; border-collapse:collapse; margin-top:12px; font-size:0.85rem; }
   table.board th, table.board td{ padding:9px 5px; text-align:center; border-bottom:1px solid var(--panel-line); }
   table.board th{ color:var(--ink-dim); font-weight:600; font-size:0.72rem; }
@@ -301,17 +321,38 @@
     font-size:0.85rem; font-weight:600; box-shadow:0 6px 20px rgba(0,0,0,0.35); z-index:50; max-width:90%;
   }
 
-  .tabbar{
-    position:fixed; bottom:0; left:0; right:0; max-width:480px; margin:0 auto;
-    display:flex; background:var(--night-deep); border-top:1px solid var(--panel-line); z-index:40;
-    padding-bottom:env(safe-area-inset-bottom);
+  /* top-right pinned fly-out nav menu (replaces the old bottom tab bar) */
+  .menu-fab{
+    position:fixed; top:calc(10px + env(safe-area-inset-top)); right:14px; z-index:60;
+    width:44px; height:44px; border-radius:12px; border:1px solid var(--panel-line);
+    background:var(--panel); color:var(--lantern-bright); cursor:pointer;
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px;
+    font-size:1.2rem; box-shadow:0 4px 14px rgba(0,0,0,0.35);
   }
-  .tabbar button{
-    flex:1; background:none; border:none; padding:12px 4px 14px; color:var(--muted);
-    font-size:0.78rem; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:3px;
+  .menu-fab .fab-line{ width:18px; height:2px; border-radius:2px; background:var(--ink); display:block; }
+  .menu-fab.is-open{ background:var(--lantern); color:#241a06; }
+  .flyout-backdrop{
+    position:fixed; inset:0; z-index:55; background:rgba(15,11,26,0.45);
+    -webkit-backdrop-filter:blur(6px); backdrop-filter:blur(6px);
+    animation:flyfade 0.16s ease-out;
   }
-  .tabbar button.active{ color:var(--lantern-bright); }
-  .tabbar .ic{ font-size:1.15rem; }
+  @keyframes flyfade{ from{ opacity:0; } to{ opacity:1; } }
+  .flyout{
+    position:fixed; top:calc(62px + env(safe-area-inset-top)); right:14px; z-index:60;
+    min-width:200px; background:var(--panel); border:1px solid var(--panel-line);
+    border-radius:14px; padding:8px; box-shadow:0 14px 40px rgba(0,0,0,0.5);
+    display:flex; flex-direction:column; gap:2px; animation:flypop 0.16s ease-out;
+  }
+  @keyframes flypop{ from{ opacity:0; transform:translateY(-6px) scale(0.98); } to{ opacity:1; transform:none; } }
+  .flyout-item{
+    display:flex; align-items:center; gap:12px; width:100%; padding:12px 14px;
+    background:none; border:none; border-radius:10px; cursor:pointer;
+    color:var(--ink); font-size:0.95rem; font-weight:600; text-align:left;
+  }
+  .flyout-item:hover{ background:var(--panel-2); }
+  .flyout-item.active{ color:var(--lantern-bright); background:rgba(246,197,103,0.12); }
+  .flyout-item .ic{ font-size:1.15rem; width:22px; text-align:center; }
+  .flyout-sep{ height:1px; background:var(--panel-line); margin:4px 6px; }
 
   .banner{
     margin-top:12px; padding:10px 12px; border-radius:10px; font-size:0.84rem; line-height:1.5;
@@ -372,11 +413,10 @@
    * ============================================================ */
 
   /* short-landscape safety net, any width: a ~375-430px-tall viewport
-     (a phone turned sideways) can't afford a floating bottom tabbar or
-     tall hero padding without pushing content into a scroll. */
+     (a phone turned sideways) needs tighter hero padding so content
+     doesn't push into a scroll. */
   @media (orientation: landscape) and (max-height: 500px){
     #app{ padding-bottom: 0; }
-    .tabbar{ position: sticky; left: auto; right: auto; max-width: none; border-inline: 0; }
     .hero{ padding-top: 4px; }
     .hero h1{ font-size: 1.7rem; }
   }
@@ -403,12 +443,6 @@
     .topbar{ padding: 16px 32px; }
 
     /* tab bar joins the app pane instead of floating over the viewport */
-    .tabbar{
-      position: sticky;
-      left: auto; right: auto; margin: 0;
-      max-width: none;
-      border-inline: 0;
-    }
     .toast{ bottom: 88px; }
 
     .hero h1{ font-size: 2.2rem; }
@@ -542,6 +576,8 @@ const I18N = {
     'entry.hint': 'Blue: put sparkly-numeral dice in the glitter box (any there doubles all blue). Red: white numerals add, black subtract; the total is multiplied by how many red dice you rolled.',
     'color.yellow': 'Yellow', 'color.purple': 'Purple', 'color.blue': 'Blue', 'color.red': 'Red',
     'color.green': 'Green', 'color.clear': 'Clear', 'color.pink': 'Pink',
+    'sheet.yellow': 'Yellow', 'sheet.purple': 'Purple ×2', 'sheet.blue': 'Blue ✨×2', 'sheet.red': 'Red ×#',
+    'sheet.green': 'Green', 'sheet.white': 'White', 'sheet.pink': 'Pink', 'sheet.rowTotal': 'Row Total',
     'note.x2': '×2', 'note.xcount': '× count',
     'ph.values': 'e.g. 1 2 3', 'ph.plain': 'plain', 'ph.glitter': '✨ glitter',
     'ph.whitePlus': 'white +', 'ph.blackMinus': 'black −', 'ph.pityDie': 'pity pink', 'ph.egN': 'e.g. 4', 'ph.eg356': 'e.g. 3 5 6',
@@ -576,6 +612,7 @@ const I18N = {
     'meta.title': 'Panda Royale Scorekeeper',
     'meta.desc': 'Keep score for Panda Royale — one shared phone or everyone on their own device.',
     'you': 'you',
+    'menu.open': 'Menu', 'menu.close': 'Close menu',
     'pro.badge': 'PRO',
     'upgrade.title': 'Panda Royale Pro',
     'upgrade.blurb': 'A one-time unlock for online multiplayer and photo scanning — pay once, use forever, on any device.',
@@ -675,6 +712,8 @@ const I18N = {
     'entry.hint': 'Azul: pon los dados de números brillantes en la casilla glitter (si hay alguno, se duplica todo el azul). Rojo: los números blancos suman, los negros restan; el total se multiplica por la cantidad de dados rojos.',
     'color.yellow': 'Amarillo', 'color.purple': 'Morado', 'color.blue': 'Azul', 'color.red': 'Rojo',
     'color.green': 'Verde', 'color.clear': 'Transparente', 'color.pink': 'Rosa',
+    'sheet.yellow': 'Amarillo', 'sheet.purple': 'Morado ×2', 'sheet.blue': 'Azul ✨×2', 'sheet.red': 'Rojo ×#',
+    'sheet.green': 'Verde', 'sheet.white': 'Blanco', 'sheet.pink': 'Rosa', 'sheet.rowTotal': 'Total fila',
     'note.x2': '×2', 'note.xcount': '× cantidad',
     'ph.values': 'p. ej. 1 2 3', 'ph.plain': 'normal', 'ph.glitter': '✨ glitter',
     'ph.whitePlus': 'blanco +', 'ph.blackMinus': 'negro −', 'ph.pityDie': 'rosa de consuelo', 'ph.egN': 'p. ej. 4', 'ph.eg356': 'p. ej. 3 5 6',
@@ -709,6 +748,7 @@ const I18N = {
     'meta.title': 'Anotador de Panda Royale',
     'meta.desc': 'Lleva la cuenta de Panda Royale — un móvil compartido o cada quien en el suyo.',
     'you': 'tú',
+    'menu.open': 'Menú', 'menu.close': 'Cerrar menú',
     'pro.badge': 'PRO',
     'upgrade.title': 'Panda Royale Pro',
     'upgrade.blurb': 'Un pago único para desbloquear el multijugador en línea y el escaneo de fotos — pagas una vez y lo usas siempre, en cualquier dispositivo.',
@@ -808,6 +848,8 @@ const I18N = {
     'entry.hint': 'Blau: Würfel mit glitzernden Ziffern ins Glitter-Feld (schon einer verdoppelt alles Blau). Rot: weiße Ziffern addieren, schwarze abziehen; die Summe wird mit der Anzahl roter Würfel multipliziert.',
     'color.yellow': 'Gelb', 'color.purple': 'Lila', 'color.blue': 'Blau', 'color.red': 'Rot',
     'color.green': 'Grün', 'color.clear': 'Klar', 'color.pink': 'Pink',
+    'sheet.yellow': 'Gelb', 'sheet.purple': 'Lila ×2', 'sheet.blue': 'Blau ✨×2', 'sheet.red': 'Rot ×#',
+    'sheet.green': 'Grün', 'sheet.white': 'Weiß', 'sheet.pink': 'Pink', 'sheet.rowTotal': 'Zeilensumme',
     'note.x2': '×2', 'note.xcount': '× Anzahl',
     'ph.values': 'z. B. 1 2 3', 'ph.plain': 'normal', 'ph.glitter': '✨ Glitter',
     'ph.whitePlus': 'weiß +', 'ph.blackMinus': 'schwarz −', 'ph.pityDie': 'Trost-Pink', 'ph.egN': 'z. B. 4', 'ph.eg356': 'z. B. 3 5 6',
@@ -842,6 +884,7 @@ const I18N = {
     'meta.title': 'Panda Royale Punktezähler',
     'meta.desc': 'Punkte zählen für Panda Royale — ein gemeinsames Handy oder jeder auf seinem eigenen.',
     'you': 'du',
+    'menu.open': 'Menü', 'menu.close': 'Menü schließen',
     'pro.badge': 'PRO',
     'upgrade.title': 'Panda Royale Pro',
     'upgrade.blurb': 'Eine einmalige Freischaltung für Online-Mehrspieler und Fotoscan — einmal zahlen, für immer nutzen, auf jedem Gerät.',
@@ -941,6 +984,8 @@ const I18N = {
     'entry.hint': 'Bleu : mettez les dés à chiffres pailletés dans la case glitter (un seul double tout le bleu). Rouge : les chiffres blancs s’ajoutent, les noirs se soustraient ; le total est multiplié par le nombre de dés rouges.',
     'color.yellow': 'Jaune', 'color.purple': 'Violet', 'color.blue': 'Bleu', 'color.red': 'Rouge',
     'color.green': 'Vert', 'color.clear': 'Transparent', 'color.pink': 'Rose',
+    'sheet.yellow': 'Jaune', 'sheet.purple': 'Violet ×2', 'sheet.blue': 'Bleu ✨×2', 'sheet.red': 'Rouge ×#',
+    'sheet.green': 'Vert', 'sheet.white': 'Blanc', 'sheet.pink': 'Rose', 'sheet.rowTotal': 'Total ligne',
     'note.x2': '×2', 'note.xcount': '× nombre',
     'ph.values': 'p. ex. 1 2 3', 'ph.plain': 'normal', 'ph.glitter': '✨ glitter',
     'ph.whitePlus': 'blanc +', 'ph.blackMinus': 'noir −', 'ph.pityDie': 'rose de consolation', 'ph.egN': 'p. ex. 4', 'ph.eg356': 'p. ex. 3 5 6',
@@ -975,6 +1020,7 @@ const I18N = {
     'meta.title': 'Panda Royale — Marqueur de points',
     'meta.desc': 'Comptez les points de Panda Royale — un téléphone partagé ou chacun sur le sien.',
     'you': 'vous',
+    'menu.open': 'Menu', 'menu.close': 'Fermer le menu',
     'pro.badge': 'PRO',
     'upgrade.title': 'Panda Royale Pro',
     'upgrade.blurb': 'Un paiement unique pour débloquer le multijoueur en ligne et la lecture de photos — payez une fois, utilisez pour toujours, sur n’importe quel appareil.',
@@ -1074,6 +1120,8 @@ const I18N = {
     'entry.hint': 'Azul: coloque os dados de números brilhantes na caixa glitter (qualquer um dobra todo o azul). Vermelho: números brancos somam, pretos subtraem; o total é multiplicado pela quantidade de dados vermelhos.',
     'color.yellow': 'Amarelo', 'color.purple': 'Roxo', 'color.blue': 'Azul', 'color.red': 'Vermelho',
     'color.green': 'Verde', 'color.clear': 'Transparente', 'color.pink': 'Rosa',
+    'sheet.yellow': 'Amarelo', 'sheet.purple': 'Roxo ×2', 'sheet.blue': 'Azul ✨×2', 'sheet.red': 'Verm. ×#',
+    'sheet.green': 'Verde', 'sheet.white': 'Branco', 'sheet.pink': 'Rosa', 'sheet.rowTotal': 'Total linha',
     'note.x2': '×2', 'note.xcount': '× quantidade',
     'ph.values': 'ex. 1 2 3', 'ph.plain': 'normal', 'ph.glitter': '✨ glitter',
     'ph.whitePlus': 'branco +', 'ph.blackMinus': 'preto −', 'ph.pityDie': 'rosa de consolação', 'ph.egN': 'ex. 4', 'ph.eg356': 'ex. 3 5 6',
@@ -1108,6 +1156,7 @@ const I18N = {
     'meta.title': 'Marcador de Panda Royale',
     'meta.desc': 'Marque os pontos de Panda Royale — um celular compartilhado ou cada um no seu.',
     'you': 'você',
+    'menu.open': 'Menu', 'menu.close': 'Fechar menu',
     'pro.badge': 'PRO',
     'upgrade.title': 'Panda Royale Pro',
     'upgrade.blurb': 'Um pagamento único para desbloquear o multiplayer online e a leitura de fotos — pague uma vez, use para sempre, em qualquer aparelho.',
@@ -1357,6 +1406,7 @@ let state = {
   loggedIn: false,                                 // set from GET /api/billing?op=me on boot
   showRegisterForm: false,
   showLoginForm: false,
+  menuOpen: false,                                 // top-right fly-out nav menu
 };
 let pollTimer = null;
 let dragState = null; // in-flight local-mode player drag (see bind()'s pointer handlers)
@@ -1643,15 +1693,24 @@ function renderTopbar(){
     </div>`;
 }
 function renderTabbar(){
+  const open = state.menuOpen;
+  const item = (a, active, ic, label) => `
+    <button class="flyout-item ${active ? 'active' : ''}" data-a="${a}">
+      <span class="ic">${ic}</span><span>${esc(label)}</span>
+    </button>`;
   return `
-    <div class="tabbar">
-      <button class="${['lobby','entry'].includes(state.screen) ? 'active' : ''}" data-a="tab-play">
-        <span class="ic">🐼</span><span>${esc(t('tab.play'))}</span></button>
-      <button class="${state.screen === 'board' ? 'active' : ''}" data-a="tab-board">
-        <span class="ic">🏮</span><span>${esc(t('tab.board'))}</span></button>
-      <button class="${state.screen === 'credits' ? 'active' : ''}" data-a="tab-credits">
-        <span class="ic">🎲</span><span>${esc(t('tab.credits'))}</span></button>
-    </div>`;
+    <button class="menu-fab ${open ? 'is-open' : ''}" data-a="menu-toggle"
+            aria-label="${esc(open ? t('menu.close') : t('menu.open'))}" aria-expanded="${open ? 'true' : 'false'}">
+      ${open ? '✕' : `<span class="fab-line"></span><span class="fab-line"></span><span class="fab-line"></span>`}
+    </button>
+    ${open ? `
+      <div class="flyout-backdrop" data-a="menu-close"></div>
+      <nav class="flyout" role="menu">
+        ${item('tab-play', ['lobby','entry'].includes(state.screen), '🐼', t('tab.play'))}
+        ${item('tab-board', state.screen === 'board', '🏮', t('tab.board'))}
+        ${item('tab-credits', state.screen === 'credits', '🎲', t('tab.credits'))}
+      </nav>
+    ` : ''}`;
 }
 
 function renderHome(){
@@ -1811,7 +1870,6 @@ function renderEntry(){
   const dice = diceForRound(state.fields, state.entryRound);
   const scored = scoreRound(dice);
   const b = scored.breakdown, c = scored.counts;
-  const rows = breakdownRows(dice, scored);
   const visibleRows = isR1 ? ENTRY_ROWS.filter(r => r.color === 'yellow') : ENTRY_ROWS;
 
   const aiNeedsPro = state.flags.paywallEnabled && state.flags.aiPaywalled && !state.pro;
@@ -1847,7 +1905,7 @@ function renderEntry(){
             ${r.fields.map(f => `
               <input data-field="${f.key}" value="${esc(state.fields[f.key] || '')}"
                      placeholder="${esc(isR1 ? t('ph.egN') : t(f.phKey))}" class="${f.accent ? 'accent' : ''}"
-                     type="text" pattern="[0-9 ,]*" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />
+                     type="text" inputmode="numeric" pattern="[0-9 ,]*" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />
             `).join('')}
           </span>
         </div>`).join('')}
@@ -1857,7 +1915,7 @@ function renderEntry(){
     <div class="total-banner">
       <div class="n">${scored.total}</div>
       <div class="l">${esc(t('roundScore', { n: state.entryRound }))}</div>
-      ${rows.length ? `<div class="breakdown">${rows.map(([l, val]) => `<div class="row"><span>${esc(l)}</span><span>${val}</span></div>`).join('')}</div>` : ''}
+      ${scoreStripHtml(dice, scored)}
     </div>
 
     <button class="btn btn-primary" data-a="save-entry">${esc(t('saveRound', { n: state.entryRound }))}</button>
@@ -1867,17 +1925,42 @@ function renderEntry(){
   `;
 }
 
-function breakdownRows(dice, scored){
+// The eight scoreboard columns, in the exact order of the printed score
+// sheet: Yellow, Purple ×2, Blue (×2 glitter), Red × #red, Green, White
+// (engine 'clear'), Pink, then Row Total. ALWAYS returns all eight, even
+// when a color has no dice this round (shown as a dash) — matching the PDF,
+// which prints every column every round.
+function pdfColumns(dice, scored){
   const b = scored.breakdown, c = scored.counts;
+  const cell = (has, val) => ({ has: !!has, val });
   return [
-    c.yellow ? [t('color.yellow'), b.yellowSum] : null,
-    c.purple ? [t('bd.purple'), b.purpleSum] : null,
-    c.blue ? [dice.some(d => d.color === 'blue' && d.glitter) ? t('bd.blueGlitter') : t('color.blue'), b.blueScore] : null,
-    c.red ? [t('bd.red', { n: c.red }), b.redScore] : null,
-    c.green ? [t('color.green'), b.greenSum] : null,
-    c.clear ? [t('color.clear'), b.clearSum] : null,
-    c.pink ? [t('color.pink'), b.pinkSum] : null,
-  ].filter(Boolean);
+    { key:'yellow', color:'yellow', label: t('sheet.yellow'), ...cell(c.yellow, b.yellowSum) },
+    { key:'purple', color:'purple', label: t('sheet.purple'), ...cell(c.purple, b.purpleSum) },
+    { key:'blue',   color:'blue',   label: t('sheet.blue'),   ...cell(c.blue,   b.blueScore) },
+    { key:'red',    color:'red',    label: t('sheet.red'),    ...cell(c.red,    b.redScore) },
+    { key:'green',  color:'green',  label: t('sheet.green'),  ...cell(c.green,  b.greenSum) },
+    { key:'clear',  color:'clear',  label: t('sheet.white'),  ...cell(c.clear,  b.clearSum) },
+    { key:'pink',   color:'pink',   label: t('sheet.pink'),   ...cell(c.pink,   b.pinkSum) },
+  ];
+}
+
+// Render the PDF-style horizontal score strip: every color column (dash when
+// empty) followed by the Row Total at the end.
+function scoreStripHtml(dice, scored){
+  const cols = pdfColumns(dice, scored);
+  const cells = cols.map(col => `
+    <div class="ss-col${col.has ? '' : ' empty'}">
+      <span class="ss-dot" style="background:${COLOR_HEX[col.color]}"></span>
+      <span class="ss-lab">${esc(col.label)}</span>
+      <span class="ss-val">${col.has ? col.val : '—'}</span>
+    </div>`).join('');
+  return `<div class="score-strip">
+    ${cells}
+    <div class="ss-col ss-total">
+      <span class="ss-lab">${esc(t('sheet.rowTotal'))}</span>
+      <span class="ss-val">${scored.total}</span>
+    </div>
+  </div>`;
 }
 
 function renderBoard(){
@@ -2011,15 +2094,17 @@ function bind(){
     const id = el.dataset.id;
 
     if(a === 'lang'){ return; }
+    if(a === 'menu-toggle'){ setState({ menuOpen: !state.menuOpen }); return; }
+    if(a === 'menu-close'){ setState({ menuOpen: false }); return; }
     if(a === 'home-tab') setState({ homeTab: el.dataset.v });
     else if(a === 'create-online') createOnline(document.getElementById('nameInput').value);
     else if(a === 'join-online') joinOnline(document.getElementById('nameInput').value, document.getElementById('codeInput').value);
     else if(a === 'start-local') startLocal();
     else if(a === 'new-local'){ LS.del('pr.local'); startLocal(); }
     else if(a === 'leave') leaveGame();
-    else if(a === 'tab-play') setState({ screen:'lobby' });
-    else if(a === 'tab-board') setState({ screen:'board' });
-    else if(a === 'tab-credits') setState({ screen:'credits' });
+    else if(a === 'tab-play') setState({ screen:'lobby', menuOpen:false });
+    else if(a === 'tab-board') setState({ screen:'board', menuOpen:false });
+    else if(a === 'tab-credits') setState({ screen:'credits', menuOpen:false });
     else if(a === 'credits-back') setState({ screen: state.mode ? 'lobby' : 'home' });
     else if(a === 'go-credits') setState({ screen:'credits' });
     else if(a === 'upgrade-back') setState({ screen: state.upgradeFrom || 'home' });
@@ -2144,6 +2229,15 @@ function bind(){
   app.oninput = (e) => {
     const inp = e.target.closest('[data-field]');
     if(!inp) return;
+    // Numbers only: strip anything that isn't a digit, space, or comma
+    // (covers pasted text and soft-keyboard characters that slip past the
+    // numeric inputmode hint). Preserve caret position when nothing changed.
+    const cleaned = inp.value.replace(/[^0-9 ,]/g, '');
+    if(cleaned !== inp.value){
+      const pos = inp.selectionStart;
+      inp.value = cleaned;
+      try { inp.setSelectionRange(pos - 1, pos - 1); } catch {}
+    }
     state.fields = { ...state.fields, [inp.dataset.field]: inp.value };
     updateEntryTotals();
   };
@@ -2256,14 +2350,12 @@ function updateEntryTotals(){
   const scored = scoreRound(dice);
   const n = document.querySelector('.total-banner .n');
   if(n) n.textContent = scored.total;
-  const rows = breakdownRows(dice, scored);
-  const wrap = document.querySelector('.total-banner .breakdown');
-  const html = rows.map(([l, val]) => `<div class="row"><span>${esc(l)}</span><span>${val}</span></div>`).join('');
-  if(wrap) wrap.innerHTML = html;
-  else if(rows.length){
-    const banner = document.querySelector('.total-banner');
-    if(banner) banner.insertAdjacentHTML('beforeend', `<div class="breakdown">${html}</div>`);
-  }
+  const banner = document.querySelector('.total-banner');
+  if(!banner) return;
+  const stripHtml = scoreStripHtml(dice, scored);
+  const existing = banner.querySelector('.score-strip');
+  if(existing) existing.outerHTML = stripHtml;
+  else banner.insertAdjacentHTML('beforeend', stripHtml);
 }
 
 /* ------------------------------------------------------------------ *
