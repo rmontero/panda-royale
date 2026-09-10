@@ -65,17 +65,34 @@ export default async function handler(req, res) {
       const playerId = String(body.playerId || '').slice(0, 40);
       if (!playerId) return send(res, 400, { error: 'missing_player_id' });
 
-      // Entitlement is checked only at the door — starting or joining a new
-      // online game — never on score/unscore/leave/reset. That way a game
-      // already in progress keeps working even if a flag flips or a code is
-      // later revoked mid-session.
-      if (op === 'create' || op === 'join') {
+      // Online play needs at least one Pro member. The HOST pays: `create`
+      // requires the caller's own entitlement. Joiners ride on the host's
+      // membership — a `join` is allowed as long as the game already exists
+      // (its host was entitled at create time), so a whole table plays on one
+      // person's unlock. Never checked on score/unscore/leave/reset, so an
+      // in-progress game keeps working even if a flag flips mid-session.
+      if (op === 'create') {
         const flags = await getFlags();
         if (flags.paywallEnabled && flags.onlinePaywalled && !(await isEntitled(body.proCode))) {
           return send(res, 402, {
             error: 'payment_required',
             message: 'Separate-phones play needs a Pro unlock.',
           });
+        }
+      } else if (op === 'join') {
+        const flags = await getFlags();
+        if (flags.paywallEnabled && flags.onlinePaywalled) {
+          const jcode = cleanCode(body.code);
+          const exists = jcode ? await loadGame(jcode) : null;
+          // Game exists => host already paid; the joiner plays on that
+          // membership. Game missing => require the joiner's own Pro (mirrors
+          // the create gate; join then 404s anyway if the code is bad).
+          if (!exists && !(await isEntitled(body.proCode))) {
+            return send(res, 402, {
+              error: 'payment_required',
+              message: 'Separate-phones play needs a Pro unlock.',
+            });
+          }
         }
       }
 

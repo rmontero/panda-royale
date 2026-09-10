@@ -492,6 +492,37 @@
   .hof .row .pts{ font-family:'Baloo 2', monospace; color:var(--lantern-bright); flex-shrink:0; }
 
   .home-top{ display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:16px; }
+
+  /* invite QR + link (host, initial screen only) */
+  .share-block{ text-align:center; }
+  .qr-wrap{ margin:14px auto 8px; width:max-content; padding:10px; background:#fff; border-radius:12px; }
+  .qr-wrap .qr{ display:block; }
+  .share-hint{ margin-top:0; }
+
+  /* back-button intercept modal */
+  .backmenu-backdrop{
+    position:fixed; inset:0; z-index:80; background:rgba(15,11,26,0.55);
+    -webkit-backdrop-filter:blur(5px); backdrop-filter:blur(5px); animation:flyfade 0.16s ease-out;
+  }
+  .backmenu{
+    position:fixed; left:16px; right:16px; bottom:24px; z-index:81; max-width:420px; margin:0 auto;
+    background:var(--panel); border:1px solid var(--panel-line); border-radius:18px;
+    padding:20px; box-shadow:0 -10px 44px rgba(0,0,0,0.5); animation:sheetup 0.22s cubic-bezier(0.22,1,0.36,1);
+  }
+  .backmenu-title{ font-family:'Baloo 2'; font-size:1.15rem; color:var(--lantern-bright); }
+  .backmenu .back-leave{ color:var(--bad); border-color:rgba(224,122,114,0.4); }
+
+  /* scoreboard: badges, tap-to-expand dice detail, per-round dice pips */
+  table.board tr.brd-row{ cursor:pointer; }
+  table.board tr.brd-dice-row td{ background:var(--night-deep); padding:6px 8px; }
+  .brd-dice-detail{ display:flex; flex-wrap:wrap; gap:10px; align-items:center; }
+  .brd-dice-round{ display:flex; align-items:center; gap:3px; }
+  .brd-rnum{ font-size:0.68rem; color:var(--ink-dim); margin-right:2px; font-family:'Baloo 2', monospace; }
+  .brd-die{
+    display:inline-flex; align-items:center; justify-content:center; min-width:18px; height:18px; padding:0 3px;
+    border-radius:5px; font-size:0.7rem; font-weight:700; color:#241a06; border:1px solid rgba(0,0,0,0.25);
+    font-family:'Baloo 2', monospace;
+  }
   .lang-select{
     font-family:inherit; font-size:0.82rem; color:var(--ink-dim);
     background:var(--panel); border:1px solid var(--panel-line); border-radius:9px;
@@ -623,6 +654,8 @@
 <body>
 <div id="app"></div>
 
+<!-- vendored offline QR generator (MIT, Kazuhiko Arase) — exposes global `qrcode` -->
+<script src="/vendor/qrcode.js"></script>
 <script type="module">
 import { scoreRound, DICE_COLORS } from './lib/score.js';
 
@@ -750,6 +783,10 @@ const I18N = {
     'home.greet': "Playing as {name}.",
     'hof.empty': 'No finished games yet — the biggest single rounds will show up here.',
     'local.passTo': 'Next up', 'local.handTo': 'Hand the phone to {name}',
+    'share.scan': 'Scan to join, or copy the link below.',
+    'back.title': 'Leave the game?', 'back.body': "You're in a game — what would you like to do?",
+    'back.new': 'Start a new game (keep players)', 'back.leave': 'Leave game', 'back.end': 'End game', 'back.keep': 'Keep playing',
+    'board.noDice': 'No dice recorded.', 'board.tapRow': 'Tap a player to see the dice they entered each round.',
     'pro.badge': 'PRO',
     'upgrade.title': 'Panda Royale Pro',
     'upgrade.blurb': 'A one-time unlock for online multiplayer and photo scanning — pay once, use forever, on any device.',
@@ -900,6 +937,10 @@ const I18N = {
     'home.greet': 'Jugando como {name}.',
     'hof.empty': 'Aún no hay juegos terminados — las mejores rondas aparecerán aquí.',
     'local.passTo': 'Sigue', 'local.handTo': 'Pásale el teléfono a {name}',
+    'share.scan': 'Escanea para unirte, o copia el enlace de abajo.',
+    'back.title': '¿Salir del juego?', 'back.body': 'Estás en un juego — ¿qué quieres hacer?',
+    'back.new': 'Nueva partida (mantener jugadores)', 'back.leave': 'Salir del juego', 'back.end': 'Terminar juego', 'back.keep': 'Seguir jugando',
+    'board.noDice': 'Sin dados registrados.', 'board.tapRow': 'Toca a un jugador para ver los dados que ingresó cada ronda.',
     'pro.badge': 'PRO',
     'upgrade.title': 'Panda Royale Pro',
     'upgrade.blurb': 'Un pago único para desbloquear el multijugador en línea y el escaneo de fotos — pagas una vez y lo usas siempre, en cualquier dispositivo.',
@@ -1050,6 +1091,10 @@ const I18N = {
     'home.greet': 'Du spielst als {name}.',
     'hof.empty': 'Noch keine beendeten Spiele — die größten Einzelrunden erscheinen hier.',
     'local.passTo': 'Als Nächstes', 'local.handTo': 'Gib das Handy an {name}',
+    'share.scan': 'Zum Beitreten scannen oder den Link unten kopieren.',
+    'back.title': 'Spiel verlassen?', 'back.body': 'Du bist in einem Spiel — was möchtest du tun?',
+    'back.new': 'Neues Spiel (Spieler behalten)', 'back.leave': 'Spiel verlassen', 'back.end': 'Spiel beenden', 'back.keep': 'Weiterspielen',
+    'board.noDice': 'Keine Würfel erfasst.', 'board.tapRow': 'Tippe einen Spieler an, um die Würfel jeder Runde zu sehen.',
     'pro.badge': 'PRO',
     'upgrade.title': 'Panda Royale Pro',
     'upgrade.blurb': 'Eine einmalige Freischaltung für Online-Mehrspieler und Fotoscan — einmal zahlen, für immer nutzen, auf jedem Gerät.',
@@ -1200,6 +1245,10 @@ const I18N = {
     'home.greet': 'Vous jouez en tant que {name}.',
     'hof.empty': "Aucune partie terminée pour l'instant — les meilleures manches apparaîtront ici.",
     'local.passTo': 'Au tour de', 'local.handTo': 'Passez le téléphone à {name}',
+    'share.scan': 'Scannez pour rejoindre, ou copiez le lien ci-dessous.',
+    'back.title': 'Quitter la partie ?', 'back.body': 'Vous êtes dans une partie — que voulez-vous faire ?',
+    'back.new': 'Nouvelle partie (garder les joueurs)', 'back.leave': 'Quitter la partie', 'back.end': 'Terminer la partie', 'back.keep': 'Continuer',
+    'board.noDice': 'Aucun dé enregistré.', 'board.tapRow': 'Touchez un joueur pour voir les dés saisis à chaque manche.',
     'pro.badge': 'PRO',
     'upgrade.title': 'Panda Royale Pro',
     'upgrade.blurb': 'Un paiement unique pour débloquer le multijoueur en ligne et la lecture de photos — payez une fois, utilisez pour toujours, sur n’importe quel appareil.',
@@ -1350,6 +1399,10 @@ const I18N = {
     'home.greet': 'Jogando como {name}.',
     'hof.empty': 'Nenhum jogo terminado ainda — as melhores rodadas aparecerão aqui.',
     'local.passTo': 'Próximo', 'local.handTo': 'Passe o celular para {name}',
+    'share.scan': 'Escaneie para entrar, ou copie o link abaixo.',
+    'back.title': 'Sair do jogo?', 'back.body': 'Você está em um jogo — o que deseja fazer?',
+    'back.new': 'Novo jogo (manter jogadores)', 'back.leave': 'Sair do jogo', 'back.end': 'Encerrar jogo', 'back.keep': 'Continuar jogando',
+    'board.noDice': 'Nenhum dado registrado.', 'board.tapRow': 'Toque em um jogador para ver os dados inseridos em cada rodada.',
     'pro.badge': 'PRO',
     'upgrade.title': 'Panda Royale Pro',
     'upgrade.blurb': 'Um pagamento único para desbloquear o multiplayer online e a leitura de fotos — pague uma vez, use para sempre, em qualquer aparelho.',
@@ -1413,6 +1466,16 @@ function setLang(l){
   document.documentElement.lang = l;
   applyMeta(l);
   setState({ lang: l });
+  savePrefsRemote({ lang: l });
+}
+// Persist prefs (lang/theme) to the server when the user is logged in; a no-op
+// (browser-only) otherwise. Fire-and-forget.
+function savePrefsRemote(patch){
+  if(!state.loggedIn) return;
+  fetch('/api/billing', {
+    method:'POST', headers:{ 'content-type':'application/json' },
+    body: JSON.stringify({ op:'prefs', prefs: patch }),
+  }).catch(() => {});
 }
 // Translate the document <title> and description for human visitors. The static
 // tags in the HTML stay English so non-JS crawlers and link scrapers see them.
@@ -1575,7 +1638,16 @@ let state = {
   theme: 'dark',              // 'dark' | 'light' — set from LS/OS in boot()
   mode: null,                 // 'online' | 'local'
   homeTab: 'online',          // 'online' | 'local'
-  me: LS.get('pr.me', null) || { id: genId(), name:'' },
+  me: (() => {
+    // Durable device id: the seat is keyed on this, so a player who abandons
+    // and returns (refresh, closed tab, days later) rejoins the SAME seat with
+    // scores preserved — even if the name record was cleared. Stored once,
+    // never regenerated.
+    let deviceId = LS.get('pr.deviceId', null);
+    if(!deviceId){ deviceId = genId(); LS.set('pr.deviceId', deviceId); }
+    const saved = LS.get('pr.me', null);
+    return { id: deviceId, name: (saved && saved.name) || '' };
+  })(),
 
   code: null,
   game: null,                 // server state {code,hostId,players,scores,...}
@@ -1603,6 +1675,9 @@ let state = {
   showRegisterForm: false,
   showLoginForm: false,
   menuOpen: false,                                 // top-right fly-out nav menu
+  backMenuOpen: false,                             // back-button intercept menu
+  pendingJoinCode: null,                           // invite code awaiting a name
+  boardOpenPid: null,                              // scoreboard row expanded to show dice
 };
 let pollTimer = null;
 let dragState = null; // in-flight local-mode player drag (see bind()'s pointer handlers)
@@ -1669,6 +1744,7 @@ function toggleTheme(){
   state.theme = next;
   LS.set('pr.theme', next);
   applyTheme(next);
+  savePrefsRemote({ theme: next });
   render();
 }
 
@@ -1886,6 +1962,32 @@ function stopPoll(){ if(pollTimer){ clearInterval(pollTimer); pollTimer = null; 
  * ------------------------------------------------------------------ */
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
 
+// Render a scannable QR code as inline SVG (offline, from the vendored lib).
+// Returns '' if the lib somehow didn't load, so the copyable link still shows.
+function qrSvg(text, px){
+  try {
+    const gen = (typeof window !== 'undefined' && window.qrcode) || (typeof qrcode !== 'undefined' ? qrcode : null);
+    if(!gen) return '';
+    const qr = gen(0, 'M');          // type 0 = auto-size, medium error correction
+    qr.addData(String(text));
+    qr.make();
+    const n = qr.getModuleCount();
+    const quiet = 2;                  // quiet-zone modules on each side
+    const dim = n + quiet * 2;
+    let rects = '';
+    for(let r = 0; r < n; r++){
+      for(let c = 0; c < n; c++){
+        if(qr.isDark(r, c)) rects += `<rect x="${c + quiet}" y="${r + quiet}" width="1" height="1"/>`;
+      }
+    }
+    const size = px || 180;
+    return `<svg class="qr" width="${size}" height="${size}" viewBox="0 0 ${dim} ${dim}" role="img" aria-label="QR code" shape-rendering="crispEdges">
+      <rect width="${dim}" height="${dim}" fill="#ffffff"/>
+      <g fill="#000000">${rects}</g>
+    </svg>`;
+  } catch { return ''; }
+}
+
 function render(){
   const app = document.getElementById('app');
   let body = '';
@@ -1905,6 +2007,7 @@ function render(){
     <div class="screen">${body}</div>
     ${state.toast ? `<div class="toast">${esc(state.toast)}</div>` : ''}
     ${renderTabbar()}
+    ${state.backMenuOpen ? renderBackMenu() : ''}
   `;
   bind();
   syncPolling();
@@ -2051,6 +2154,21 @@ function renderHome(){
   `;
 }
 
+// Back-button intercept menu — prevents accidentally dropping out of a game.
+function renderBackMenu(){
+  const v = view();
+  const isHost = v && (v.isLocal || v.hostId === state.me.id);
+  return `
+    <div class="backmenu-backdrop" data-a="back-cancel"></div>
+    <div class="backmenu" role="dialog" aria-label="${esc(t('back.title'))}">
+      <div class="backmenu-title">${esc(t('back.title'))}</div>
+      <p class="small-note" style="margin-top:2px;">${esc(t('back.body'))}</p>
+      ${isHost ? `<button class="btn btn-secondary" data-a="back-new">${esc(t('back.new'))}</button>` : ''}
+      <button class="btn btn-ghost back-leave" data-a="back-leave">${esc(state.mode === 'local' ? t('back.end') : t('back.leave'))}</button>
+      <button class="btn btn-primary" data-a="back-cancel">${esc(t('back.keep'))}</button>
+    </div>`;
+}
+
 // Hall of Fame as its own screen (moved out of home, reachable from the menu).
 function renderHof(){
   return `
@@ -2145,7 +2263,13 @@ function renderLobby(){
         <div class="label">${esc(t('shareCode'))}</div>
         <div class="code-big">${esc(v.code)}</div>
       </div>
-      ${v.hostId === me ? `<button class="btn btn-secondary" data-a="copy-link">${esc(t('copyLink'))}</button>` : ''}
+      ${v.hostId === me ? `
+        <div class="share-block">
+          <div class="qr-wrap">${qrSvg(`${location.origin}/?code=${v.code}`)}</div>
+          <p class="small-note share-hint">${esc(t('share.scan'))}</p>
+          <button class="btn btn-secondary" data-a="copy-link">${esc(t('copyLink'))}</button>
+        </div>
+      ` : ''}
     ` : ''}
 
     <div class="section-title">${esc(t('round'))}</div>
@@ -2419,15 +2543,48 @@ function renderBoard(){
   if(!v || !v.players.length){
     return `<div class="empty-state"><div class="icon">🏮</div>${esc(v && v.isLocal ? t('board.emptyLocal') : t('board.emptyOnline'))}</div>`;
   }
-  const totals = totalsFor(v);
-  const top = totals.length ? totals[0].total : 0;
   const now = state.entryRound;
   const localFinished = v.isLocal && v.players.every(p => v.scores[ROUNDS] && v.scores[ROUNDS][p.id]);
-  const gameOver = (localFinished || (!v.isLocal && state.game && state.game.finished)) && totals.length && top > 0;
+
+  // Aggregate totals (for the Total column + who's actually winning).
+  const agg = totalsFor(v);
+  const topAgg = agg.length ? agg[0].total : 0;
+  const aggTotal = Object.fromEntries(agg.map(p => [p.id, p.total]));
+  const gameOver = (localFinished || (!v.isLocal && state.game && state.game.finished)) && agg.length && topAgg > 0;
+
+  // Last completed round = the highest round every-or-any player has scored;
+  // use the most recent round that has at least one entry.
+  let lastRound = 0;
+  for(let r = ROUNDS; r >= 1; r--){ if(v.scores[r] && Object.keys(v.scores[r]).length){ lastRound = r; break; } }
+  const lastScore = (pid) => (lastRound && v.scores[lastRound] && v.scores[lastRound][pid]) ? v.scores[lastRound][pid].total : null;
+
+  // Sort rows by LAST ROUND's position (desc); players with no last-round
+  // entry sink to the bottom, then break ties by aggregate.
+  const rows = [...v.players].sort((a, b) => {
+    const sa = lastScore(a.id), sb = lastScore(b.id);
+    if(sa == null && sb == null) return (aggTotal[b.id] || 0) - (aggTotal[a.id] || 0);
+    if(sa == null) return 1;
+    if(sb == null) return -1;
+    if(sb !== sa) return sb - sa;
+    return (aggTotal[b.id] || 0) - (aggTotal[a.id] || 0);
+  });
+
+  // 🐼 to the top scorer of the last round (ties share it); 🎀 pity bows to
+  // the bottom N by last-round score, N = pinkDiceFor(playerCount).
+  const scoredLast = rows.filter(p => lastScore(p.id) != null);
+  const topLast = scoredLast.length ? Math.max(...scoredLast.map(p => lastScore(p.id))) : null;
+  const pityN = pinkDiceFor(v.players.length);
+  const pityIds = new Set(scoredLast.slice(Math.max(0, scoredLast.length - pityN)).map(p => p.id));
+
+  const diceForCell = (pid, rn) => {
+    const e = v.scores[rn] && v.scores[rn][pid];
+    if(!e || !e.dice || !e.dice.length) return '';
+    return e.dice.map(d => `<span class="brd-die" title="${esc(d.color)} ${d.value}" style="background:${COLOR_HEX[d.color] || '#888'}">${d.value}</span>`).join('');
+  };
 
   return `
     <h2 style="font-size:1.2rem;">${esc(t('tab.board'))}</h2>
-    ${gameOver ? `<div class="banner info">${esc(t('board.winner', { name: totals[0].name, n: top }))}</div>` : ''}
+    ${gameOver ? `<div class="banner info">${esc(t('board.winner', { name: agg[0].name, n: topAgg }))}</div>` : ''}
     ${gameOver && v.isLocal ? `<button class="btn btn-primary" data-a="new-match">${esc(t('local.newMatch'))}</button>` : ''}
     <div style="overflow-x:auto; -webkit-overflow-scrolling:touch;">
       <table class="board">
@@ -2439,20 +2596,37 @@ function renderBoard(){
           </tr>
         </thead>
         <tbody>
-          ${totals.map(p => `
-            <tr class="${p.total === top && top !== 0 ? 'leader' : ''}">
-              <td class="name-cell">${esc(p.name)}</td>
+          ${rows.map(p => {
+            const isTop = topLast != null && lastScore(p.id) === topLast;
+            const isPity = pityIds.has(p.id);
+            const expanded = state.boardOpenPid === p.id;
+            return `
+            <tr class="${aggTotal[p.id] === topAgg && topAgg !== 0 ? 'leader' : ''} brd-row" data-a="board-row" data-pid="${p.id}">
+              <td class="name-cell">${isTop ? '🐼 ' : ''}${isPity ? '🎀 ' : ''}${esc(p.name)}</td>
               ${Array.from({ length: ROUNDS }, (_, i) => {
                 const e = v.scores[i + 1] && v.scores[i + 1][p.id];
                 return `<td class="${i + 1 === now ? 'now' : ''}">${e ? e.total : '—'}</td>`;
               }).join('')}
-              <td class="total-cell">${p.total}</td>
-            </tr>`).join('')}
+              <td class="total-cell">${aggTotal[p.id] || 0}</td>
+            </tr>
+            ${expanded ? `
+              <tr class="brd-dice-row">
+                <td colspan="${ROUNDS + 2}">
+                  <div class="brd-dice-detail">
+                    ${Array.from({ length: ROUNDS }, (_, i) => {
+                      const pips = diceForCell(p.id, i + 1);
+                      return pips ? `<div class="brd-dice-round"><span class="brd-rnum">R${i + 1}</span>${pips}</div>` : '';
+                    }).join('') || `<span class="er-empty">${esc(t('board.noDice'))}</span>`}
+                  </div>
+                </td>
+              </tr>` : ''}`;
+          }).join('')}
         </tbody>
       </table>
     </div>
+    <p class="small-note">${esc(t('board.tapRow'))}</p>
     ${v.isLocal ? '' : `<p class="small-note">${esc(t('board.updates'))}</p>`}
-    <button class="btn btn-ghost" data-a="${v.isLocal ? 'tab-play' : 'refresh'}">${esc(v.isLocal ? t('board.backPlayers') : t('board.refreshNow'))}</button>
+    <button class="btn btn-ghost" data-a="tab-play">${esc(t('board.backPlayers'))}</button>
   `;
 }
 
@@ -2546,6 +2720,9 @@ function bind(){
 
     if(a === 'lang'){ return; }
     if(a === 'menu-toggle'){ setState({ menuOpen: !state.menuOpen }); return; }
+    if(a === 'back-cancel'){ setState({ backMenuOpen: false }); return; }
+    if(a === 'back-new'){ setState({ backMenuOpen: false }); hostNewGame(); return; }
+    if(a === 'back-leave'){ setState({ backMenuOpen: false }); leaveGame(); return; }
     if(a === 'menu-close'){ setState({ menuOpen: false }); return; }
     if(a === 'menu-theme'){ toggleTheme(); setState({ menuOpen: false }); return; }
     if(a === 'menu-hof'){ setState({ screen:'hof', menuOpen:false }); return; }
@@ -2672,6 +2849,7 @@ function bind(){
     }
     else if(a === 'sheet-toggle') setState({ sheetExpanded: !state.sheetExpanded });
     else if(a === 'sheet-close') setState({ sheetExpanded: false });
+    else if(a === 'board-row'){ const pid = el.dataset.pid; setState({ boardOpenPid: state.boardOpenPid === pid ? null : pid }); }
     else if(a === 'copy-link'){
       const link = `${location.origin}/?code=${view().code}`;
       try { await navigator.clipboard.writeText(link); toast(t('t.linkCopied')); }
@@ -2919,7 +3097,15 @@ async function boot(){
       state.pro = { code: d.code, email: d.email || null };
       LS.set('pr.pro', state.pro);
       state.loggedIn = true;
-      render();
+      // logged in => their saved preferences live on the server; apply them
+      fetch('/api/billing?op=prefs').then(r => r.json()).then(pd => {
+        const prefs = pd && pd.prefs;
+        if(prefs && typeof prefs === 'object'){
+          if(prefs.theme && prefs.theme !== state.theme){ state.theme = prefs.theme; LS.set('pr.theme', prefs.theme); applyTheme(prefs.theme); }
+          if(prefs.lang && prefs.lang !== state.lang && I18N[prefs.lang]){ state.lang = prefs.lang; LS.set('pr.lang', prefs.lang); document.documentElement.lang = prefs.lang; applyMeta(prefs.lang); }
+        }
+        render();
+      }).catch(() => render());
     }
   }).catch(() => {});
 
@@ -2957,6 +3143,17 @@ async function boot(){
     } catch { LS.del('pr.session'); }
   }
   render();
+
+  // Back-button guard: while in a game, intercept the browser Back gesture and
+  // offer Leave / New game instead of silently dropping the player out.
+  try { history.pushState({ prGuard: true }, ''); } catch {}
+  window.addEventListener('popstate', () => {
+    if(state.mode && !state.backMenuOpen){
+      // re-arm the trap so a subsequent Back is caught too, then prompt
+      try { history.pushState({ prGuard: true }, ''); } catch {}
+      setState({ backMenuOpen: true });
+    }
+  });
 }
 boot();
 </script>

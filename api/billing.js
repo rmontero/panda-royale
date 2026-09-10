@@ -27,6 +27,8 @@ import {
   createSession,
   getSessionAccount,
   deleteSession,
+  getPrefs,
+  setPrefs,
 } from './_lib/entitlements.js';
 
 function send(res, status, body) {
@@ -228,11 +230,41 @@ async function opMe(req, res) {
   }
 }
 
+// Per-account preferences (lang/theme) for logged-in users. Anonymous callers
+// get an empty object (they persist prefs in the browser instead).
+async function opGetPrefs(req, res) {
+  try {
+    const token = parseCookies(req)[SESSION_COOKIE];
+    const account = token ? await getSessionAccount(token) : null;
+    if (!account) return send(res, 200, { loggedIn: false, prefs: {} });
+    const prefs = (await getPrefs(account.email)) || {};
+    return send(res, 200, { loggedIn: true, prefs });
+  } catch (err) {
+    console.error('billing prefs get error', err);
+    return send(res, 200, { loggedIn: false, prefs: {} });
+  }
+}
+
+async function opSetPrefs(req, res) {
+  try {
+    const token = parseCookies(req)[SESSION_COOKIE];
+    const account = token ? await getSessionAccount(token) : null;
+    if (!account) return send(res, 200, { ok: false, loggedIn: false });
+    const body = readBody(req);
+    const prefs = await setPrefs(account.email, body.prefs || {});
+    return send(res, 200, { ok: true, prefs });
+  } catch (err) {
+    console.error('billing prefs set error', err);
+    return send(res, 500, { error: 'server_error' });
+  }
+}
+
 export default async function handler(req, res) {
   if (req.method === 'GET') {
     const op = String(req.query.op || 'session');
     if (op === 'session') return opSession(req, res);
     if (op === 'me') return opMe(req, res);
+    if (op === 'prefs') return opGetPrefs(req, res);
     return send(res, 400, { error: 'unknown_op' });
   }
   if (req.method === 'POST') {
@@ -242,6 +274,7 @@ export default async function handler(req, res) {
     if (op === 'register') return opRegister(req, res);
     if (op === 'login') return opLogin(req, res);
     if (op === 'logout') return opLogout(req, res);
+    if (op === 'prefs') return opSetPrefs(req, res);
     return send(res, 400, { error: 'unknown_op' });
   }
   res.setHeader('Allow', 'GET, POST');

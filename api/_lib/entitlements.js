@@ -195,3 +195,30 @@ export async function deleteSession(token) {
   if (!redis || !token) return;
   await redis.del(sessionKey(token));
 }
+
+/* ------------------------------------------------------------------ *
+ * Per-account preferences (language, theme), for logged-in users.
+ * Stored at prefs:<email>. Anonymous users keep prefs in the browser only.
+ * ------------------------------------------------------------------ */
+const prefsKey = (email) => `prefs:${String(email || '').toLowerCase().trim()}`;
+const ALLOWED_PREFS = ['lang', 'theme'];
+
+export async function getPrefs(email) {
+  const redis = getRedis();
+  if (!redis || !email) return null;
+  const rec = await redis.get(prefsKey(email));
+  return rec && typeof rec === 'object' ? rec : {};
+}
+
+export async function setPrefs(email, patch) {
+  const redis = getRedis();
+  if (!redis || !email || !patch || typeof patch !== 'object') return null;
+  const clean = {};
+  for (const k of ALLOWED_PREFS) {
+    if (typeof patch[k] === 'string') clean[k] = patch[k].slice(0, 20);
+  }
+  const current = (await getPrefs(email)) || {};
+  const next = { ...current, ...clean };
+  await redis.set(prefsKey(email), next);
+  return next;
+}
