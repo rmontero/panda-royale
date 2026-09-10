@@ -2963,9 +2963,12 @@ function bind(){
     state.fields = { ...state.fields, [inp.dataset.field]: inp.value };
     updateEntryTotals();
   };
-  app.onfocusout = (e) => {
-    const inp = e.target.closest('[data-field]');
-    if(!inp) return;
+  // Per-input validation + tidy: drop out-of-range values (toast which), then
+  // normalize the field to a clean space-separated list. Returns nothing; used
+  // both on real blur (mouse click-away) AND explicitly before keyboard nav,
+  // because navigating re-renders the accordion and eats the focusout event.
+  const validateField = (inp) => {
+    if(!inp || !inp.dataset || !inp.dataset.field) return;
     const key = inp.dataset.field;
     const max = COLOR_MAX_VALUE[FIELD_COLOR[key]] || 99;
     const parsed = parseValues(inp.value);
@@ -2975,12 +2978,28 @@ function bind(){
       toast(t('t.badValue', { n: rejected.join(', '), color: t('color.' + FIELD_COLOR[key]), max }));
     }
     const tidy = valid.join(' ');
-    if(tidy !== inp.value){ inp.value = tidy; state.fields[key] = tidy; }
+    if(tidy !== inp.value){ inp.value = tidy; }
+    state.fields = { ...state.fields, [key]: valid.join(' ') };
     updateEntryTotals();
+  };
+  app.onfocusout = (e) => {
+    const inp = e.target.closest('[data-field]');
+    if(inp) validateField(inp);
   };
   app.onfocusin = (e) => {
     const inp = e.target.closest('[data-field]');
-    if(inp) inp.select();
+    if(inp){ inp.select(); return; }
+    // Focusing Save validates the WHOLE round early (before the click), so the
+    // player is warned about a wrong dice count without having to press it.
+    // Only nag once at least one value is entered — an untouched round is not
+    // an error yet, just unfinished.
+    const save = e.target.closest('[data-a="save-entry"]');
+    if(save){
+      const anyEntered = Object.values(state.fields).some(v => (v || '').trim());
+      if(!anyEntered) return;
+      const problem = validateEntryCount(state.fields, state.entryRound);
+      if(problem) toast(t(problem.key, problem.vars), 3600);
+    }
   };
 
   // Keyboard navigation across the one-open-at-a-time color accordion.
@@ -2998,10 +3017,15 @@ function bind(){
     // Enter never goes backward.
     if(e.key === 'Enter' && e.shiftKey) return;
 
+    // Validate the field we're leaving BEFORE we move — navigating re-renders
+    // the accordion and would otherwise swallow the focusout blur event.
+    validateField(inp);
+
     const isR1 = state.entryRound === 1;
     const rows = isR1 ? ENTRY_ROWS.filter(r => r.color === 'yellow') : ENTRY_ROWS;
+    // Re-query after validateField (a rejection toast triggers a re-render).
     const ins = [...document.querySelectorAll('.dexpand .acc-ins [data-field]')];
-    const idx = ins.indexOf(inp);
+    const idx = ins.findIndex(el => el.dataset.field === inp.dataset.field);
     const curIdx = rows.findIndex(r => r.color === state.entryOpenColor);
 
     // Move to an adjacent color: open it, then focus its first (forward) or
@@ -3019,7 +3043,8 @@ function bind(){
     if(back){
       // Previous input within this color, else previous color's last input.
       if(idx > 0){ e.preventDefault(); ins[idx - 1].focus(); return; }
-      // At the first input of the first color: let focus escape naturally.
+      // At the first input of the first color: let focus escape naturally
+      // (do NOT preventDefault) so Tab order can leave the dice section.
       if(curIdx <= 0) return;
       e.preventDefault();
       gotoColor(curIdx - 1, 'last');

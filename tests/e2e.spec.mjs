@@ -129,6 +129,34 @@ test.describe('Pass and Play', () => {
     }
     expect(landed).toBe(true);
   });
+
+  test('validation: out-of-range value dropped on blur; Save focus validates the round', async ({ page }) => {
+    await page.getByRole('button', { name: /Pass and Play/i }).click();
+    await page.locator('#addPlayer').fill('Ada');
+    await page.getByRole('button', { name: /^Add$/ }).click();
+    await page.locator('[data-a="round-next"]').click(); // round 2 (every color enterable)
+    await page.getByRole('button', { name: /Enter dice/i }).first().click();
+
+    // BLUR (via Tab): yellow max is 8 — entering 99 is out of range. Tabbing
+    // off the field validates it: toasts and drops the bad value.
+    const yellow = page.locator('.dexpand .acc-ins input').first();
+    await yellow.click();
+    await yellow.fill('99');
+    await page.keyboard.press('Tab'); // leaves yellow → blur validation runs
+    await expect(page.locator('.toast')).toBeVisible();
+    // come back to yellow: the out-of-range value was tidied away
+    await page.keyboard.press('Shift+Tab');
+    await expect(page.locator('.dexpand .acc-ins input').first()).toHaveValue('');
+
+    // SAVE FOCUS validates the whole round: enter one valid value then focus
+    // Save. Round 2 needs more dice than one, so the early warning fires.
+    await yellow.click();
+    await yellow.fill('4');
+    await page.getByRole('button', { name: /Save round/i }).focus();
+    await expect(page.locator('.toast')).toBeVisible();
+    // still on entry — the early warning saved nothing
+    await expect(page.locator('.round-row')).toBeVisible();
+  });
 });
 
 /* ------------------------------------------------------------------ *
