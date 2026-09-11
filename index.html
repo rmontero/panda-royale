@@ -629,6 +629,11 @@
 
 <!-- vendored offline QR generator (MIT, Kazuhiko Arase) — exposes global `qrcode` -->
 <script src="/vendor/qrcode.js"></script>
+<!-- Vercel Web Analytics (static-site integration — no build step here, so the
+     script tag is used instead of the @vercel/analytics inject()/React helpers).
+     Vercel serves /_vercel/insights/script.js automatically on deploy. -->
+<script>window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };</script>
+<script defer src="/_vercel/insights/script.js"></script>
 <script type="module">
 import { scoreRound, DICE_COLORS } from './lib/score.js';
 import { COLOR_MAX_VALUE, MAX_PLAYERS, validateRoundDice } from './lib/rules.js';
