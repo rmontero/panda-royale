@@ -613,8 +613,32 @@
     #app[data-screen="board"] table.board th.name-cell{ max-width: none; }
   }
 
-  /* desktop: the shell stops scaling with the viewport — one fixed
-     width shared by every screen, same rationale as the tablet block */
+  /* WIDE ENTRY (must match the JS `entryWide` breakpoint exactly, 900px): the
+     entry screen shows EVERY color's inputs expanded at once in a grid instead
+     of the mobile one-color-open accordion. DOM order = color order, so Tab
+     flows naturally through every field. JS renders all panels at this width;
+     these rules lay them out and hide the now-redundant accordion dice row. */
+  @media (min-width: 900px){
+    #app[data-screen="entry"] .dice-row{ display: none; }
+    #app[data-screen="entry"]{ max-width: min(96vw, 1400px); }
+    .dexpand-grid{
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 14px;
+      margin-top: 4px;
+    }
+    .dexpand-grid .dexpand{
+      margin: 0;
+      border: 1px solid var(--panel-line);
+      border-radius: var(--radius);
+      padding: 14px;
+      background: var(--panel);
+    }
+    .dexpand-grid .dexpand .acc-ins input{ min-width: 0; }
+  }
+
+  /* desktop: text screens keep a fixed, comfortable shell (the entry screen's
+     own full width is set in the 900px block above). */
   @media (min-width: 1040px){
     .screen{ padding: 34px 40px 26px; }
     .topbar{ padding: 18px 40px; }
@@ -1641,6 +1665,12 @@ let state = {
   theme: 'dark',              // 'dark' | 'light' — set from LS/OS in boot()
   mode: null,                 // 'online' | 'local'
   homeTab: 'online',          // 'online' | 'local'
+  // Wide viewport (desktop / landscape laptop): the entry screen shows EVERY
+  // color's inputs expanded at once in a grid, instead of the mobile
+  // one-color-open accordion. Set on boot + kept in sync by a matchMedia
+  // listener. The DOM stays in color order either way, so Tab order is preserved.
+  entryWide: (typeof window !== 'undefined' && window.matchMedia
+    ? window.matchMedia('(min-width: 900px)').matches : false),
   me: (() => {
     // Durable device id: the seat is keyed on this, so a player who abandons
     // and returns (refresh, closed tab, days later) rejoins the SAME seat with
@@ -2370,26 +2400,38 @@ function renderEntry(){
   // The expanded panel for the currently-selected color: its input(s) plus a
   // plain-language description of how that color is scored (replaces the old
   // stranded Blue/Red legend, which now shows only when that color is open).
-  const openRow = visibleRows.find(r => r.color === openColor);
-  const openMath = openRow ? colorMath(openRow.color, state.fields) : '';
-  const expandPanel = openRow ? `
-    <div class="dexpand">
+  // One color's expanded panel: header dot + label, its input(s), the live
+  // per-color math, and the scoring/range description. Shared by the mobile
+  // accordion (one open at a time) and the wide-viewport grid (all open).
+  const panelHtml = (r) => {
+    const math = colorMath(r.color, state.fields);
+    return `
+    <div class="dexpand" data-color="${r.color}">
       <div class="dexpand-head">
-        <span class="dot" style="background:${COLOR_HEX[openRow.color]}"></span>
-        <span class="acc-lab">${esc(t('color.' + openRow.color))}</span>
+        <span class="dot" style="background:${COLOR_HEX[r.color]}"></span>
+        <span class="acc-lab">${esc(t('color.' + r.color))}</span>
       </div>
       <div class="acc-ins">
-        ${openRow.fields.map(f => `
+        ${r.fields.map(f => `
           <label class="acc-field">
-            ${openRow.fields.length > 1 ? `<span class="acc-flab">${esc(t(f.phKey))}</span>` : ''}
+            ${r.fields.length > 1 ? `<span class="acc-flab">${esc(t(f.phKey))}</span>` : ''}
             <input data-field="${f.key}" value="${esc(state.fields[f.key] || '')}"
                    placeholder="${esc(isR1 ? t('ph.egN') : t(f.phKey))}" class="${f.accent ? 'accent' : ''}"
                    type="text" inputmode="numeric" pattern="[0-9 ,]*" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />
           </label>`).join('')}
       </div>
-      <div class="acc-math">${openMath ? esc(openMath) : ''}</div>
-      <p class="dcalc">${esc(t('calc.' + openRow.color))} <span class="dcalc-range">${esc(t('entry.range', { max: COLOR_MAX_VALUE[openRow.color] }))}</span></p>
-    </div>` : '';
+      <div class="acc-math">${math ? esc(math) : ''}</div>
+      <p class="dcalc">${esc(t('calc.' + r.color))} <span class="dcalc-range">${esc(t('entry.range', { max: COLOR_MAX_VALUE[r.color] }))}</span></p>
+    </div>`;
+  };
+
+  // Wide viewport: every color's panel is rendered at once in a grid (all
+  // fields expanded), DOM in color order so Tab flows naturally. Narrow:
+  // just the currently-open color's panel below the dice row (accordion).
+  const openRow = visibleRows.find(r => r.color === openColor);
+  const expandPanel = state.entryWide
+    ? `<div class="dexpand-grid">${visibleRows.map(panelHtml).join('')}</div>`
+    : (openRow ? panelHtml(openRow) : '');
 
   return `
     <h2 style="font-size:1.2rem;">${esc(p ? t('entry.titleWho', { n: state.entryRound, name: p.name }) : t('entry.title', { n: state.entryRound }))}</h2>
@@ -2955,6 +2997,23 @@ function bind(){
     // Enter never goes backward.
     if(e.key === 'Enter' && e.shiftKey) return;
 
+    // Wide (all-expanded) layout: every color's inputs are in the DOM in color
+    // order, so native Tab/Shift+Tab already walk them correctly — just run the
+    // leaving-field validation and let the browser move focus. Enter advances
+    // to the next field (never submits mid-form).
+    if(state.entryWide){
+      validateField(inp);
+      if(e.key === 'Enter'){
+        e.preventDefault();
+        const all = [...document.querySelectorAll('.dexpand .acc-ins [data-field]')];
+        const i = all.findIndex(el => el.dataset.field === inp.dataset.field);
+        const nextEl = all[i + 1];
+        if(nextEl) nextEl.focus();
+        else document.querySelector('[data-a="save-entry"]')?.focus();
+      }
+      return; // Tab falls through to native tab order
+    }
+
     // Validate the field we're leaving BEFORE we move — navigating re-renders
     // the accordion and would otherwise swallow the focusout blur event.
     validateField(inp);
@@ -3107,6 +3166,15 @@ async function boot(){
   const savedTheme = LS.get('pr.theme', null);
   state.theme = savedTheme || (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
   applyTheme(state.theme);
+
+  // Keep entryWide in sync when the viewport crosses the wide breakpoint, so
+  // the entry screen switches between the accordion and the all-expanded grid.
+  if(window.matchMedia){
+    const mq = window.matchMedia('(min-width: 900px)');
+    const onChange = () => { if(state.entryWide !== mq.matches) setState({ entryWide: mq.matches }); };
+    if(mq.addEventListener) mq.addEventListener('change', onChange);
+    else if(mq.addListener) mq.addListener(onChange);
+  }
 
   // probe AI availability quietly
   fetch('/api/analyze', { method:'GET' }).then(r => { if(r.status === 503) aiAvailable = false; }).catch(() => {});
