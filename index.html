@@ -429,6 +429,33 @@
     font-size:0.85rem; font-weight:600; box-shadow:0 6px 20px rgba(0,0,0,0.35); z-index:50; max-width:90%;
   }
 
+  /* in-app modal dialog — replaces native alert()/confirm()/prompt() so
+     prompts and confirmations match the app's theme and styling everywhere. */
+  .modal-backdrop{
+    position:fixed; inset:0; z-index:90; background:rgba(15,11,26,0.55);
+    display:flex; align-items:center; justify-content:center; padding:20px;
+    animation:modalfade 0.16s ease-out;
+  }
+  @keyframes modalfade{ from{ opacity:0; } to{ opacity:1; } }
+  .modal{
+    width:100%; max-width:380px; background:var(--panel); color:var(--ink);
+    border:1px solid var(--panel-line); border-radius:var(--radius);
+    box-shadow:0 20px 60px rgba(0,0,0,0.5); padding:22px 20px 18px;
+    animation:modalpop 0.2s cubic-bezier(0.22,1,0.36,1);
+  }
+  @keyframes modalpop{ from{ transform:translateY(8px) scale(0.98); opacity:0; } to{ transform:none; opacity:1; } }
+  .modal-title{ font-family:'Baloo 2'; font-size:1.15rem; font-weight:700; margin-bottom:6px; }
+  .modal-msg{ color:var(--ink-dim); font-size:0.92rem; line-height:1.5; margin-bottom:14px; }
+  .modal input{
+    width:100%; padding:12px 12px; border-radius:11px; margin-bottom:16px;
+    border:1px solid var(--panel-line); background:var(--night); color:var(--ink);
+    font-size:1rem; font-family:'Baloo 2', monospace;
+  }
+  .modal input:focus{ outline:2px solid var(--lantern); outline-offset:1px; }
+  .modal-actions{ display:flex; gap:10px; justify-content:flex-end; }
+  .modal-actions .btn{ width:auto; padding:11px 18px; margin:0; }
+  .modal .btn-danger{ background:var(--bad); color:#fff; }
+
   /* top-right pinned fly-out nav menu (replaces the old bottom tab bar) */
   .menu-fab{
     position:fixed; top:calc(10px + env(safe-area-inset-top)); right:14px; z-index:60;
@@ -763,7 +790,7 @@ const I18N = {
     't.scoresCleared': 'Scores cleared',
     't.badImage': "Couldn't read that image",
     't.photoErr': "Couldn't read the photo — type the values instead.",
-    'confirm.wipe': 'Wipe every round score for all players?',
+    'confirm.wipe': 'Wipe every round score for all players?', 'confirm.wipeYes': 'Wipe scores', 'modal.cancel': 'Cancel', 'modal.ok': 'OK', 'modal.save': 'Save',
     'banner.storage': 'Shared storage is not connected yet. Pass-and-play on one phone still works.',
     'lang.label': 'Language',
     'meta.title': 'Panda Royale Scorekeeper',
@@ -915,7 +942,7 @@ const I18N = {
     't.scoresCleared': 'Puntos reiniciados',
     't.badImage': 'No se pudo leer esa imagen',
     't.photoErr': 'No se pudo leer la foto — escribe los valores a mano.',
-    'confirm.wipe': '¿Borrar los puntos de todas las rondas de todos los jugadores?',
+    'confirm.wipe': '¿Borrar los puntos de todas las rondas de todos los jugadores?', 'confirm.wipeYes': 'Borrar puntos', 'modal.cancel': 'Cancelar', 'modal.ok': 'Aceptar', 'modal.save': 'Guardar',
     'banner.storage': 'El almacenamiento compartido aún no está conectado. El modo de un móvil compartido sigue funcionando.',
     'lang.label': 'Idioma',
     'meta.title': 'Anotador de Panda Royale',
@@ -1067,7 +1094,7 @@ const I18N = {
     't.scoresCleared': 'Punkte zurückgesetzt',
     't.badImage': 'Bild konnte nicht gelesen werden',
     't.photoErr': 'Foto konnte nicht gelesen werden — tippe die Werte ein.',
-    'confirm.wipe': 'Alle Rundenpunkte aller Spieler löschen?',
+    'confirm.wipe': 'Alle Rundenpunkte aller Spieler löschen?', 'confirm.wipeYes': 'Punkte löschen', 'modal.cancel': 'Abbrechen', 'modal.ok': 'OK', 'modal.save': 'Speichern',
     'banner.storage': 'Der gemeinsame Speicher ist noch nicht verbunden. Der Modus mit einem gemeinsamen Handy funktioniert weiterhin.',
     'lang.label': 'Sprache',
     'meta.title': 'Panda Royale Punktezähler',
@@ -1219,7 +1246,7 @@ const I18N = {
     't.scoresCleared': 'Scores réinitialisés',
     't.badImage': 'Impossible de lire cette image',
     't.photoErr': 'Impossible de lire la photo — saisissez les valeurs.',
-    'confirm.wipe': 'Effacer tous les scores de toutes les manches pour tous les joueurs ?',
+    'confirm.wipe': 'Effacer tous les scores de toutes les manches pour tous les joueurs ?', 'confirm.wipeYes': 'Effacer les scores', 'modal.cancel': 'Annuler', 'modal.ok': 'OK', 'modal.save': 'Enregistrer',
     'banner.storage': 'Le stockage partagé n’est pas encore connecté. Le mode téléphone partagé fonctionne toujours.',
     'lang.label': 'Langue',
     'meta.title': 'Panda Royale — Marqueur de points',
@@ -1371,7 +1398,7 @@ const I18N = {
     't.scoresCleared': 'Pontos zerados',
     't.badImage': 'Não deu para ler essa imagem',
     't.photoErr': 'Não deu para ler a foto — digite os valores.',
-    'confirm.wipe': 'Apagar os pontos de todas as rodadas de todos os jogadores?',
+    'confirm.wipe': 'Apagar os pontos de todas as rodadas de todos os jogadores?', 'confirm.wipeYes': 'Apagar pontos', 'modal.cancel': 'Cancelar', 'modal.ok': 'OK', 'modal.save': 'Salvar',
     'banner.storage': 'O armazenamento compartilhado ainda não está conectado. O modo de um celular compartilhado continua funcionando.',
     'lang.label': 'Idioma',
     'meta.title': 'Marcador de Panda Royale',
@@ -1721,6 +1748,60 @@ function toast(msg, ms){
   clearTimeout(toast._t);
   toast._t = setTimeout(() => { if(state.toast === msg) setState({ toast:null }); }, ms || 2400);
 }
+
+// ---- In-app modal (replaces native alert/confirm/prompt) --------------------
+// state.modal = { kind:'prompt'|'confirm', title, message?, value?, placeholder?,
+//   confirmLabel, danger?, resolve }. The single active promise resolves with the
+//   entered string (prompt) / true (confirm) on confirm, or null / false on cancel.
+let _modalResolve = null;
+
+function renderModal(){
+  const m = state.modal;
+  if(!m) return '';
+  const isPrompt = m.kind === 'prompt';
+  return `
+    <div class="modal-backdrop" data-a="modal-cancel">
+      <div class="modal" role="dialog" aria-modal="true" aria-label="${esc(m.title)}">
+        <div class="modal-title">${esc(m.title)}</div>
+        ${m.message ? `<div class="modal-msg">${esc(m.message)}</div>` : ''}
+        ${isPrompt ? `<input id="modalInput" type="text" value="${esc(m.value || '')}"
+             placeholder="${esc(m.placeholder || '')}" maxlength="24"
+             autocomplete="off" autocorrect="off" autocapitalize="words" spellcheck="false" />` : ''}
+        <div class="modal-actions">
+          <button class="btn btn-ghost" data-a="modal-cancel">${esc(t('modal.cancel'))}</button>
+          <button class="btn ${m.danger ? 'btn-danger' : 'btn-primary'}" data-a="modal-confirm">${esc(m.confirmLabel)}</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+function closeModal(result){
+  const resolve = _modalResolve;
+  _modalResolve = null;
+  setState({ modal: null });
+  if(resolve) resolve(result);
+}
+
+// Promise-based prompt: resolves to the trimmed string, or null if cancelled.
+function modalPrompt({ title, value = '', placeholder = '', confirmLabel }){
+  return new Promise((resolve) => {
+    _modalResolve = (r) => resolve(r);
+    setState({ modal: { kind:'prompt', title, value, placeholder,
+      confirmLabel: confirmLabel || t('modal.save') } });
+    const inp = document.getElementById('modalInput');
+    if(inp){ inp.focus(); inp.select(); }
+  });
+}
+
+// Promise-based confirm: resolves to true (confirmed) or false (cancelled).
+function modalConfirm({ title, message, confirmLabel, danger = false }){
+  return new Promise((resolve) => {
+    _modalResolve = (r) => resolve(!!r);
+    setState({ modal: { kind:'confirm', title, message,
+      confirmLabel: confirmLabel || t('modal.ok'), danger } });
+  });
+}
+
 function saveMe(name){
   state.me = { id: state.me.id, name: (name ?? state.me.name).trim() };
   LS.set('pr.me', state.me);
@@ -1741,17 +1822,18 @@ function readNameInput(){
 function promptEditName(){
   setState({ menuOpen: false });
   if(state.mode === 'local'){ setState({ screen:'lobby' }); toast(t('menu.editPlayersHint')); return; }
-  const next = window.prompt(t('menu.editName'), state.me.name || '');
-  if(next == null) return;
-  const name = next.trim().slice(0, 24);
-  if(!name) return;
-  saveMe(name);
-  if(state.mode === 'online' && state.code){
-    api('join', { code: state.code, playerId: state.me.id, name }).then(game => setState({ game })).catch(() => {});
-  } else {
-    render();
-  }
-  toast(t('menu.nameSaved'));
+  modalPrompt({ title: t('menu.editName'), value: state.me.name || '' }).then((next) => {
+    if(next == null) return;
+    const name = next.trim().slice(0, 24);
+    if(!name) return;
+    saveMe(name);
+    if(state.mode === 'online' && state.code){
+      api('join', { code: state.code, playerId: state.me.id, name }).then(game => setState({ game })).catch(() => {});
+    } else {
+      render();
+    }
+    toast(t('menu.nameSaved'));
+  });
 }
 
 // Host starts a fresh game while preserving the current players (online:
@@ -2047,6 +2129,7 @@ function render(){
     ${state.toast ? `<div class="toast">${esc(state.toast)}</div>` : ''}
     <div id="menuMount">${renderTabbar()}</div>
     ${state.backMenuOpen ? renderBackMenu() : ''}
+    ${state.modal ? renderModal() : ''}
   `;
   bind();
   syncPolling();
@@ -2778,6 +2861,23 @@ function bind(){
     if(a === 'lang'){ return; }
     if(a === 'menu-toggle'){ updateMenu({ menuOpen: !state.menuOpen }); return; }
     if(a === 'back-cancel'){ setState({ backMenuOpen: false }); return; }
+    if(a === 'modal-cancel'){
+      // el matched via closest(); when it's the backdrop itself, only cancel if
+      // the click actually landed on the backdrop (not bubbled from inside the
+      // modal box, which has no data-a of its own).
+      if(el.classList.contains('modal-backdrop') && e.target !== el) return;
+      closeModal(state.modal && state.modal.kind === 'prompt' ? null : false);
+      return;
+    }
+    if(a === 'modal-confirm'){
+      if(state.modal && state.modal.kind === 'prompt'){
+        const v = (document.getElementById('modalInput')?.value || '').trim().slice(0, 24);
+        closeModal(v);
+      } else {
+        closeModal(true);
+      }
+      return;
+    }
     if(a === 'back-new'){ setState({ backMenuOpen: false }); hostNewGame(); return; }
     if(a === 'back-leave'){ setState({ backMenuOpen: false }); leaveGame(); return; }
     if(a === 'menu-close'){ updateMenu({ menuOpen: false }); return; }
@@ -2897,7 +2997,8 @@ function bind(){
       catch { toast(link); }
     }
     else if(a === 'reset-scores'){
-      if(!confirm(t('confirm.wipe'))) return;
+      const ok = await modalConfirm({ title: t('confirm.wipe'), confirmLabel: t('confirm.wipeYes'), danger: true });
+      if(!ok) return;
       try { const game = await api('reset', { code: state.code, playerId: state.me.id }); setState({ game }); toast(t('t.scoresCleared')); }
       catch(err){ handleApiError(err); }
     }
@@ -2919,9 +3020,10 @@ function bind(){
     const v = view();
     if(v && v.isLocal){
       const p = v.players.find(x => x.id === pid);
-      const next = window.prompt(t('menu.editName'), p ? p.name : '');
-      if(next == null) return;
-      renameLocalPlayer(pid, next);
+      modalPrompt({ title: t('menu.editName'), value: p ? p.name : '' }).then((next) => {
+        if(next == null) return;
+        renameLocalPlayer(pid, next);
+      });
     } else if(pid === state.me.id){
       promptEditName();
     }
@@ -2990,6 +3092,20 @@ function bind(){
   // color, forward lands on Save; before the first color, Shift+Tab is left
   // to the browser so focus escapes the dice section naturally.
   app.onkeydown = (e) => {
+    // Modal is top-most: Enter confirms, Escape cancels.
+    if(state.modal){
+      if(e.key === 'Enter'){
+        e.preventDefault();
+        if(state.modal.kind === 'prompt'){
+          const v = (document.getElementById('modalInput')?.value || '').trim().slice(0, 24);
+          closeModal(v);
+        } else closeModal(true);
+      } else if(e.key === 'Escape'){
+        e.preventDefault();
+        closeModal(state.modal.kind === 'prompt' ? null : false);
+      }
+      return;
+    }
     if(e.key !== 'Enter' && e.key !== 'Tab') return;
     const inp = e.target.closest('.dexpand [data-field]');
     if(!inp) return;
