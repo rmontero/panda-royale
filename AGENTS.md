@@ -85,7 +85,8 @@ Clients poll `GET /api/game?code=ABCD` every 3s.
 
 - 5 locales in the `I18N` table: **en, es, de, fr, pt**. Every key must exist in all
   five — no English leaks, no missing keys. Adding a string = 5 edits.
-- Parity check: extract each locale's key set and assert equal counts before committing.
+- Parity is guarded by `tests/i18n.test.mjs` (runs under `npm test`): it fails if the
+  locales' key sets diverge, if the locale list changes, or if any value is empty.
 
 ## 7. Test & verify
 
@@ -116,10 +117,14 @@ Clients poll `GET /api/game?code=ABCD` every 3s.
 
 ## 10. Known drift / TODO
 
-- The Gemini model default in `api/analyze.js` (`GEMINI_MODEL || 'gemini-3.6-flash'`)
-  is a non-existent slug — set a real model via `GEMINI_MODEL` before relying on
-  photo scan (it ships disabled via `aiEnabled=false` anyway).
-- Larger refactors deferred (recommended, not yet done): extract a shared
-  `api/_lib/http.js` (`send`/`readBody`) to de-duplicate across endpoints; unify the
-  Node `(req,res)` vs Web `(request)` handler split; fold the repeated `/api/billing`
-  fetch boilerplate and the lantern-strip / last-round-badge helpers in `index.html`.
+- **Done (Sep 2026):** the Gemini model default in `api/analyze.js` is now
+  `gemini-2.0-flash` (was a non-existent slug); `send`/`readBody` extracted to
+  `api/_lib/http.js` and shared by game/billing/analyze; the repeated `/api/billing`
+  fetch boilerplate is folded into `billingPost()` and the lantern strip into
+  `lanternStrip()` in `index.html`; i18n parity is now CI-guarded (§6).
+- **Deferred (recommended, not done):** unify the Node `(req,res)` vs Web `(request)`
+  handler split — the webhook/QStash routes still hand-build `new Response(...)` for
+  raw-body signature verification, so they can't share `http.js`'s `send`. Also the
+  lobby vs board last-round-badge (🐼/🎀) logic is still duplicated and computes the
+  pity holder slightly differently — folding it is a behavior decision (which player
+  gets 🎀), not a mechanical refactor, so it was left alone.

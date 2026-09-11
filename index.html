@@ -1436,14 +1436,23 @@ function setLang(l){
   setState({ lang: l });
   savePrefsRemote({ lang: l });
 }
+// POST an op to /api/billing and return { r, data } (data best-effort parsed).
+// One shell for the many op-dispatched billing calls (checkout/redeem/register/
+// login/logout/prefs) — each caller keeps its own response handling.
+async function billingPost(op, extra){
+  const r = await fetch('/api/billing', {
+    method:'POST', headers:{ 'content-type':'application/json' },
+    body: JSON.stringify({ op, ...extra }),
+  });
+  const data = await r.json().catch(() => ({}));
+  return { r, data };
+}
+
 // Persist prefs (lang/theme) to the server when the user is logged in; a no-op
 // (browser-only) otherwise. Fire-and-forget.
 function savePrefsRemote(patch){
   if(!state.loggedIn) return;
-  fetch('/api/billing', {
-    method:'POST', headers:{ 'content-type':'application/json' },
-    body: JSON.stringify({ op:'prefs', prefs: patch }),
-  }).catch(() => {});
+  billingPost('prefs', { prefs: patch }).catch(() => {});
 }
 // Translate the document <title> and description for human visitors. The static
 // tags in the HTML stay English so non-JS crawlers and link scrapers see them.
@@ -1458,6 +1467,11 @@ const COLOR_HEX = {
   yellow:'var(--c-yellow)', purple:'var(--c-purple)', blue:'var(--c-blue)',
   red:'var(--c-red)', green:'var(--c-green)', clear:'var(--c-clear)', pink:'var(--c-pink)',
 };
+
+// A row of tiny colored pips (one per die color) — the app's visual motif,
+// used in the topbar brand mark, credits, and the upgrade screen.
+const lanternStrip = () =>
+  Object.values(COLOR_HEX).map(c => `<span style="background:${c}"></span>`).join('');
 
 // Every color is always on screen. Just type the face values, space or comma separated.
 const ENTRY_ROWS = [
@@ -2027,7 +2041,7 @@ function langSelect(){
 
 function renderTopbar(){
   const v = view();
-  const lanterns = `<span class="brand-lanterns">${Object.values(COLOR_HEX).map(c => `<span style="background:${c}"></span>`).join('')}</span>`;
+  const lanterns = `<span class="brand-lanterns">${lanternStrip()}</span>`;
   const brand = `<div class="brand">${lanterns}<span class="brand-name">Panda Royale</span></div>`;
 
   // Right side: context that belongs next to the brand.
@@ -2635,7 +2649,7 @@ function renderCredits(){
   return `
     <div class="credits">
       <div class="lanterns" style="margin-bottom:18px;">
-        ${Object.values(COLOR_HEX).map(c => `<span style="background:${c}"></span>`).join('')}
+        ${lanternStrip()}
       </div>
       <h2 style="font-size:1.3rem;">${esc(t('credits.tab'))}</h2>
 
@@ -2660,7 +2674,7 @@ function renderUpgrade(){
   return `
     <div class="upgrade">
       <div class="lanterns" style="margin-bottom:14px;">
-        ${Object.values(COLOR_HEX).map(c => `<span style="background:${c}"></span>`).join('')}
+        ${lanternStrip()}
       </div>
       <h2 style="font-size:1.3rem;">${esc(t('upgrade.title'))}</h2>
       <p class="small-note" style="margin-top:6px;">${esc(t(reasonKey))}</p>
@@ -2746,11 +2760,7 @@ function bind(){
     else if(a === 'checkout'){
       const email = (document.getElementById('upgradeEmail')?.value || '').trim();
       try {
-        const r = await fetch('/api/billing', {
-          method:'POST', headers:{ 'content-type':'application/json' },
-          body: JSON.stringify({ op: 'checkout', email: email || undefined }),
-        });
-        const data = await r.json().catch(() => ({}));
+        const { r, data } = await billingPost('checkout', { email: email || undefined });
         if(r.status === 503){ toast(t('upgrade.billingOff')); return; }
         if(!r.ok || !data.url){ toast(t('t.wrong')); return; }
         location.href = data.url;
@@ -2761,11 +2771,7 @@ function bind(){
       const code = (inp?.value || '').trim().toUpperCase();
       if(!code) return;
       try {
-        const r = await fetch('/api/billing', {
-          method:'POST', headers:{ 'content-type':'application/json' },
-          body: JSON.stringify({ op: 'redeem', code }),
-        });
-        const data = await r.json().catch(() => ({}));
+        const { r, data } = await billingPost('redeem', { code });
         if(r.ok && data.ok){
           state.pro = { code, email: data.email || null };
           LS.set('pr.pro', state.pro);
@@ -2788,11 +2794,7 @@ function bind(){
       const password = document.getElementById('registerPassword')?.value || '';
       if(password.length < 8){ toast(t('auth.passwordShort')); return; }
       try {
-        const r = await fetch('/api/billing', {
-          method:'POST', headers:{ 'content-type':'application/json' },
-          body: JSON.stringify({ op:'register', email, code: state.pro?.code, password }),
-        });
-        const data = await r.json().catch(() => ({}));
+        const { r, data } = await billingPost('register', { email, code: state.pro?.code, password });
         if(r.ok && data.ok){
           state.pro = { code: data.code, email: data.email };
           LS.set('pr.pro', state.pro);
@@ -2809,11 +2811,7 @@ function bind(){
       const email = (document.getElementById('loginEmail')?.value || '').trim();
       const password = document.getElementById('loginPassword')?.value || '';
       try {
-        const r = await fetch('/api/billing', {
-          method:'POST', headers:{ 'content-type':'application/json' },
-          body: JSON.stringify({ op:'login', email, password }),
-        });
-        const data = await r.json().catch(() => ({}));
+        const { r, data } = await billingPost('login', { email, password });
         if(r.ok && data.ok){
           state.pro = { code: data.code, email: data.email };
           LS.set('pr.pro', state.pro);
@@ -2825,7 +2823,7 @@ function bind(){
       } catch { toast(t('t.wrong')); }
     }
     else if(a === 'logout-account'){
-      try { await fetch('/api/billing', { method:'POST', headers:{ 'content-type':'application/json' }, body: JSON.stringify({ op:'logout' }) }); }
+      try { await billingPost('logout', {}); }
       catch {}
       setState({ loggedIn: false });
       toast(t('auth.loggedOut'));

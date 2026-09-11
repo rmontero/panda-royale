@@ -31,24 +31,7 @@ import {
   setPrefs,
 } from './_lib/entitlements.js';
 import { appBaseUrl } from './_lib/upstash.js';
-
-function send(res, status, body) {
-  res.status(status).setHeader('content-type', 'application/json');
-  res.setHeader('cache-control', 'no-store');
-  res.end(JSON.stringify(body));
-}
-
-function readBody(req) {
-  if (!req.body) return {};
-  if (typeof req.body === 'string') {
-    try {
-      return JSON.parse(req.body || '{}');
-    } catch {
-      return {};
-    }
-  }
-  return req.body;
-}
+import { send, readBody } from './_lib/http.js';
 
 const SESSION_COOKIE = 'pr_session';
 const SESSION_MAX_AGE = 60 * 60 * 24 * 90; // 90 days, matches createSession's Redis TTL
